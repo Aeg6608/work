@@ -15,7 +15,7 @@ const MOCK_SCENARIOS = [
     visit: { id: 'visit-501', dateLabel: 'Thu, May 22, 2025 · 10:00 AM', workerName: 'Mike Torres', status: 'done', statusLabel: 'Done' },
     property: { clientName: 'Sarah Smith', addressLine: '123 Oak Street, Austin, TX 78701' },
     address: { verification: 'verified', lat: 30.2672, lng: -97.7431 },
-    proof: { activeSnapshot: true, startedAtLabel: '10:24 AM', gps: { available: true, lat: 30.26745, lng: -97.74335 }, distance_m: 35, quality: 'ok' },
+    proof: { activeSnapshot: true, startedAtLabel: '10:24 AM', workedDurationLabel: '26 min', gps: { available: true, lat: 30.26745, lng: -97.74335 }, distance_m: 35, quality: 'ok' },
     photos: { count: 3, items: [{ id: 'p1', label: 'Pool', color: '#94a3b8' }, { id: 'p2', label: 'Gate', color: '#64748b' }, { id: 'p3', label: 'Equipment', color: '#475569' }] },
     activity: [
       { time: '10:50 AM', text: 'Mike completed visit' },
@@ -33,7 +33,7 @@ const MOCK_SCENARIOS = [
     visit: { id: 'visit-502', dateLabel: 'Thu, May 22, 2025 · 2:00 PM', workerName: 'Jake Rivera', status: 'done', statusLabel: 'Done' },
     property: { clientName: 'Sarah Smith', addressLine: '123 Oak Street, Austin, TX 78701' },
     address: { verification: 'verified', lat: 30.2672, lng: -97.7431 },
-    proof: { activeSnapshot: true, startedAtLabel: '2:08 PM', gps: { available: true, lat: 30.2505, lng: -97.7492 }, distance_m: 2100, quality: 'far' },
+    proof: { activeSnapshot: true, startedAtLabel: '2:08 PM', workedDurationLabel: '2 h 15 min', gps: { available: true, lat: 30.2505, lng: -97.7492 }, distance_m: 2100, quality: 'far' },
     photos: { count: 1, items: [{ id: 'p1', label: '?', color: '#f59e0b' }] },
     activity: [
       { time: '2:55 PM', text: 'Jake completed visit' },
@@ -51,7 +51,7 @@ const MOCK_SCENARIOS = [
     visit: { id: 'visit-503', dateLabel: 'Thu, May 22, 2025 · 8:00 AM', workerName: 'Mike Torres', status: 'in_progress', statusLabel: 'In progress' },
     property: { clientName: 'Tom Garcia', addressLine: '456 Elm Avenue, Austin, TX 78702' },
     address: { verification: 'verified', lat: 30.2620, lng: -97.7200 },
-    proof: { activeSnapshot: true, startedAtLabel: '8:02 AM', gps: { available: false, lat: null, lng: null }, distance_m: null, quality: 'unavailable' },
+    proof: { activeSnapshot: true, startedAtLabel: '8:02 AM', workedDurationLabel: '', gps: { available: false, lat: null, lng: null }, distance_m: null, quality: 'unavailable' },
     photos: { count: 0, items: [] },
     activity: [{ time: '8:02 AM', text: 'Mike started visit · Location unavailable' }],
     teamNotes: [{ author: 'You', time: 'May 20', text: 'Corner lot — park on Elm.' }],
@@ -66,7 +66,7 @@ const MOCK_SCENARIOS = [
     visit: { id: 'visit-504', dateLabel: 'Thu, May 22, 2025 · 11:30 AM', workerName: 'Ana Lopez', status: 'done', statusLabel: 'Done' },
     property: { clientName: 'New Build LLC', addressLine: 'Lot 7, Phase 2, Unlisted Rd' },
     address: { verification: 'failed', lat: null, lng: null },
-    proof: { activeSnapshot: true, startedAtLabel: '11:35 AM', gps: { available: true, lat: 30.2850, lng: -97.7100 }, distance_m: null, quality: 'ok' },
+    proof: { activeSnapshot: true, startedAtLabel: '11:35 AM', workedDurationLabel: '45 min', gps: { available: true, lat: 30.2850, lng: -97.7100 }, distance_m: null, quality: 'ok' },
     photos: { count: 2, items: [{ id: 'p1', label: 'Site', color: '#94a3b8' }, { id: 'p2', label: 'Truck', color: '#64748b' }] },
     activity: [
       { time: '12:10 PM', text: 'Ana completed visit' },
@@ -84,7 +84,7 @@ const MOCK_SCENARIOS = [
     visit: { id: 'visit-505', dateLabel: 'Thu, May 22, 2025 · 3:00 PM', workerName: 'Mike Torres', status: 'done', statusLabel: 'Done' },
     property: { clientName: 'Sarah Smith', addressLine: '123 Oak Street, Austin, TX 78701' },
     address: { verification: 'verified', lat: 30.2672, lng: -97.7431 },
-    proof: { activeSnapshot: true, startedAtLabel: '3:05 PM', gps: { available: true, lat: 30.2675, lng: -97.7430 }, distance_m: 42, quality: 'ok' },
+    proof: { activeSnapshot: true, startedAtLabel: '3:05 PM', workedDurationLabel: '32 min', gps: { available: true, lat: 30.2675, lng: -97.7430 }, distance_m: 42, quality: 'ok' },
     photos: { count: 0, items: [] },
     activity: [
       { time: '3:48 PM', text: 'Mike completed visit' },
@@ -102,7 +102,7 @@ const MOCK_SCENARIOS = [
     visit: { id: 'visit-506', dateLabel: 'Thu, May 22, 2025 · 10:00 AM', workerName: 'Mike Torres', status: 'done', statusLabel: 'Done' },
     property: { clientName: 'Sarah Smith', addressLine: '123 Oak Street, Austin, TX 78701' },
     address: { verification: 'verified', lat: 30.2672, lng: -97.7431 },
-    proof: { activeSnapshot: true, startedAtLabel: '10:24 AM', gps: { available: true, lat: 30.26745, lng: -97.74335 }, distance_m: 35, quality: 'ok' },
+    proof: { activeSnapshot: true, startedAtLabel: '10:24 AM', workedDurationLabel: '26 min', gps: { available: true, lat: 30.26745, lng: -97.74335 }, distance_m: 35, quality: 'ok' },
     photos: { count: 2, items: [{ id: 'p1', label: 'Pool', color: '#94a3b8' }, { id: 'p2', label: 'Gate', color: '#64748b' }] },
     activity: [],
     teamNotes: [{ author: 'You', time: 'May 21', text: 'Side gate code: 4521.' }],
@@ -117,7 +117,7 @@ const MOCK_SCENARIOS = [
     visit: { id: 'visit-507', dateLabel: 'Thu, May 22, 2025 · 10:00 AM', workerName: 'Mike Torres', status: 'in_progress', statusLabel: 'In progress' },
     property: { clientName: 'Sarah Smith', addressLine: '123 Oak Street, Austin, TX 78701' },
     address: { verification: 'verified', lat: 30.2672, lng: -97.7431 },
-    proof: { activeSnapshot: true, startedAtLabel: '10:24 AM', gps: { available: true, lat: 30.26745, lng: -97.74335 }, distance_m: 35, quality: 'ok' },
+    proof: { activeSnapshot: true, startedAtLabel: '10:24 AM', workedDurationLabel: '', gps: { available: true, lat: 30.26745, lng: -97.74335 }, distance_m: 35, quality: 'ok' },
     photos: { count: 1, items: [{ id: 'p1', label: 'Gate', color: '#94a3b8' }] },
     activity: [{ time: '10:24 AM', text: 'Mike started visit · Location captured', mapLink: { lat: 30.26745, lng: -97.74335, label: 'View on map ↗' } }],
     teamNotes: [],
@@ -262,10 +262,19 @@ function renderFullProof(proof, address, visit) {
   // Title
   append(frag, el('h3', { class: 'visit-proof__title', id: 'visit-proof-title', text: 'Visit proof' }));
 
-  // Started
+  // Time rows (mock duration — §2.6 TZ)
+  const timeWrap = el('div', { class: 'visit-proof__time' });
   const started = el('p', { class: 'visit-proof__started' });
   started.innerHTML = `Started: <strong>${proof.startedAtLabel}</strong>`;
-  append(frag, started);
+  append(timeWrap, started);
+
+  if (visit.status === 'done' && proof.workedDurationLabel) {
+    const dur = el('p', { class: 'visit-proof__duration' });
+    dur.innerHTML = `Worked: <strong>${proof.workedDurationLabel}</strong>`;
+    append(timeWrap, dur);
+    append(timeWrap, el('p', { class: 'visit-proof__completed', text: 'Completed ✓' }));
+  }
+  append(frag, timeWrap);
 
   const hasVerifiedAddress = address.verification === 'verified' && address.lat != null && address.lng != null;
   const hasUnverifiedAddress = ['unverified', 'failed', 'missing'].includes(address.verification);
