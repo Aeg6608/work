@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tofu — Visit Proof</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Design tokens (from Figma 10944:39908) ──────────────── */
+    :root {
+      --font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+      /* Surfaces */
+      --surface-primary:   #ffffff;
+      --surface-secondary: #f1ede4;   /* sidebar active bg + border-right */
+      --surface-positive:  #e5f2ed;   /* Completed chip bg */
+      --surface-page:      #ffffff;
+
+      /* Content */
+      --content-primary:   #1f2226;
+      --content-secondary: rgba(31, 34, 38, 0.65);
+      --content-on-dark:   #ffffff;
+
+      /* Actions */
+      --action-primary:    #1f2226;
+      --action-outline:    rgba(31, 34, 38, 0.2);
+
+      /* Borders */
+      --border-tertiary:   rgba(31, 34, 38, 0.1);
+
+      /* Radius */
+      --radius:            8px;
+      --radius-small:      2px;
+
+      /* Layout */
+      --sidebar-width:          240px;
+      --container-max-width:    1020px;
+      --container-padding:      60px;
+      --notes-column-width:     360px;
+      --content-gap:            24px;
+      --card-padding:           24px;
+
+      /* Icon stroke */
+      --icon-stroke: 1.5px;
+
+      /* Proof-specific (not in base Figma, from TZ) */
+      --color-warning: #d97706;
+      --color-ok:      #059669;
+      --color-link:    #2563eb;
+      --color-locked-bg:     #f9fafb;
+      --color-locked-border: #d1d5db;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family);
+      font-size: 14px;
+      color: var(--content-primary);
+      background: var(--surface-page);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ─── Side Navigation ────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-width);
+      flex-shrink: 0;
+      background: var(--surface-primary);
+      border-right: 1px solid var(--surface-secondary);
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 12px;
+      position: fixed;
+      top: 0; bottom: 0; left: 0;
+      z-index: 20;
+      overflow-y: auto;
+    }
+
+    /* Account block */
+    .account {
+      padding: 36px 24px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .account__userpic {
+      width: 36px; height: 36px;
+      background: var(--action-primary);
+      border-radius: var(--radius-small);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--content-on-dark);
+      flex-shrink: 0;
+      letter-spacing: -0.1px;
+    }
+
+    .account__name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--content-primary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .account__chevron { opacity: 0.4; }
+
+    /* Nav links */
+    .nav { display: flex; flex-direction: column; flex: 1; }
+
+    .navlink {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 24px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--content-primary);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 120ms;
+    }
+
+    .navlink:hover { background: var(--surface-secondary); }
+
+    .navlink.active {
+      background: var(--surface-secondary);
+      font-weight: 600;
+    }
+
+    .navlink svg { width: 24px; height: 24px; flex-shrink: 0; }
+
+    .nav-footer {
+      border-top: 1px solid var(--border-tertiary);
+      margin-top: auto;
+    }
+
+    /* ─── Main ───────────────────────────────────────────────── */
+    .main {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-y: auto;
+    }
+
+    .container {
+      max-width: var(--container-max-width);
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 var(--container-padding) var(--container-padding);
+    }
+
+    /* ─── Nav Bar ────────────────────────────────────────────── */
+    .nav-bar {
+      padding-top: 36px;
+      padding-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0;
+      padding: 8px 12px;
+      border: 1px solid var(--action-outline);
+      border-radius: var(--radius);
+      background: transparent;
+      font: 500 14px/1 var(--font-family);
+      color: var(--content-primary);
+      cursor: pointer;
+      transition: background 120ms;
+      white-space: nowrap;
+    }
+
+    .btn-outline:hover { background: var(--surface-secondary); }
+
+    .btn-outline .btn-label { padding: 0 8px; height: 20px; display: flex; align-items: center; }
+    .btn-outline svg { width: 20px; height: 20px; }
+
+    .toolbar__spacer { flex: 1; }
+
+    .title-block {
+      padding-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .page-title {
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--content-primary);
+      letter-spacing: -0.32px;
+      line-height: 1.2;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--content-secondary);
+      line-height: 1.4;
+    }
+
+    /* ─── Content area ───────────────────────────────────────── */
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: var(--content-gap);
+    }
+
+    .actions-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Status chip */
+    .chip-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font: 500 16px/1 var(--font-family);
+      color: var(--content-primary);
+      cursor: pointer;
+    }
+
+    .chip-status--done       { background: var(--surface-positive); }
+    .chip-status--in-progress {
+      background: #e8f0fe;
+      color: #1a56db;
+    }
+
+    .chip-status--scheduled {
+      background: #f3f4f6;
+      color: var(--content-secondary);
+    }
+
+    .chip-status svg { width: 24px; height: 24px; }
+
+    /* Two-column layout */
+    .two-col {
+      display: flex;
+      gap: var(--content-gap);
+      align-items: flex-start;
+    }
+
+    .col-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--content-gap);
+      min-width: 0;
+    }
+
+    .col-right {
+      width: var(--notes-column-width);
+      flex-shrink: 0;
+    }
+
+    /* ─── Job card (shared shell) ────────────────────────────── */
+    .job-card {
+      background: var(--surface-primary);
+      border: 1px solid var(--border-tertiary);
+      border-radius: var(--radius);
+      padding: var(--card-padding);
+    }
+
+    /* ─── Worker card ────────────────────────────────────────── */
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      min-height: 36px;
+    }
+
+    .card-header__title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .card-label {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--content-primary);
+    }
+
+    .card-value {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--content-primary);
+    }
+
+    /* ─── Visit + Proof + Photos card ───────────────────────── */
+    .card-content {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Visit metadata row */
+    .visit-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .visit-meta__item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: var(--content-secondary);
+    }
+
+    .visit-meta__item svg { width: 16px; height: 16px; }
+
+    .visit-meta__item--worker { color: var(--content-primary); font-weight: 500; }
+
+    /* Section divider */
+    .divider {
+      height: 1px;
+      background: var(--border-tertiary);
+      margin: 0 calc(-1 * var(--card-padding));
+    }
+
+    /* ─── Visit proof block ──────────────────────────────────── */
+    .visit-proof {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .visit-proof__title {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--content-primary);
+    }
+
+    .visit-proof__started {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--content-secondary);
+      line-height: 1.4;
+    }
+
+    .visit-proof__started strong {
+      font-weight: 500;
+      color: var(--content-primary);
+    }
+
+    /* Primary CTA */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 16px;
+      background: var(--action-primary);
+      color: var(--content-on-dark);
+      border: none;
+      border-radius: var(--radius);
+      font: 500 14px/1 var(--font-family);
+      max-width: 280px;
+      width: fit-content;
+      text-decoration: none;
+      cursor: pointer;
+      transition: opacity 120ms;
+    }
+
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary svg { width: 14px; height: 14px; }
+
+    /* Secondary link */
+    .visit-proof__link-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--content-primary);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      cursor: pointer;
+    }
+
+    .visit-proof__link-secondary:hover { opacity: 0.7; }
+    .visit-proof__link-secondary svg { width: 13px; height: 13px; }
+
+    .visit-proof__muted {
+      font-size: 14px;
+      color: var(--content-secondary);
+      font-style: italic;
+    }
+
+    .visit-proof__distance {
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    .visit-proof__distance--ok  { color: var(--color-ok); }
+    .visit-proof__distance--far { color: var(--color-warning); font-weight: 500; }
+
+    .visit-proof__hint {
+      font-size: 12px;
+      color: var(--content-secondary);
+    }
+
+    /* Locked card */
+    .visit-proof--locked .visit-proof__locked-body-wrap {
+      background: var(--color-locked-bg);
+      border: 1px dashed var(--color-locked-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .visit-proof__lock-icon { font-size: 18px; line-height: 1; }
+
+    .visit-proof__locked-headline {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--content-primary);
+    }
+
+    .visit-proof__locked-desc {
+      font-size: 14px;
+      color: var(--content-secondary);
+      line-height: 1.5;
+    }
+
+    /* ─── Photos section ─────────────────────────────────────── */
+    .photos-header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .photos-header__title { flex: 1; }
+
+    .photo-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .photo-thumb {
+      width: 128px;
+      height: 128px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.9);
+      flex-shrink: 0;
+    }
+
+    .photos-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 32px;
+      border: 1px dashed var(--border-tertiary);
+      border-radius: var(--radius);
+      color: var(--content-secondary);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .photos-empty svg { width: 32px; height: 32px; opacity: 0.4; }
+
+    /* ─── Team notes ─────────────────────────────────────────── */
+    .notes-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-bottom: 16px;
+    }
+
+    .notes-header__row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .notes-subtitle {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--content-secondary);
+    }
+
+    .notes-list { display: flex; flex-direction: column; }
+
+    .note-item {
+      padding: 24px 0;
+      border-top: 1px solid var(--border-tertiary);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .note-item:last-child { border-bottom: 1px solid var(--border-tertiary); }
+
+    .note-body {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--content-primary);
+    }
+
+    .note-body strong { font-weight: 600; }
+
+    .note-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--content-secondary);
+      padding-top: 4px;
+    }
+
+    .note-meta__sep { opacity: 0.5; }
+
+    .note-meta__tag {
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 2px;
+    }
+
+    .notes-empty {
+      padding: 24px 0;
+      border-top: 1px solid var(--border-tertiary);
+      font-size: 14px;
+      color: var(--content-secondary);
+    }
+
+    /* ─── Paywall modal ──────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(31, 34, 38, 0.4);
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface-primary);
+      border-radius: 12px;
+      padding: 32px;
+      width: 520px;
+      max-width: calc(100vw - 48px);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      position: relative;
+    }
+
+    .modal__close {
+      position: absolute;
+      top: 16px; right: 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--content-secondary);
+      padding: 4px;
+      border-radius: 4px;
+    }
+
+    .modal__close:hover { background: var(--surface-secondary); }
+    .modal__close svg { width: 20px; height: 20px; display: block; }
+
+    .modal__heading {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--content-primary);
+      letter-spacing: -0.2px;
+    }
+
+    .modal__subheading {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--content-secondary);
+      margin-top: 4px;
+    }
+
+    .modal__toggle {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1px solid var(--action-outline);
+      border-radius: var(--radius);
+      width: fit-content;
+    }
+
+    .toggle-btn {
+      padding: 8px 16px;
+      font: 500 14px/1 var(--font-family);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--content-secondary);
+      border-radius: calc(var(--radius) - 1px);
+      transition: background 120ms, color 120ms;
+    }
+
+    .toggle-btn.active {
+      background: var(--action-primary);
+      color: var(--content-on-dark);
+    }
+
+    .modal__plans {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .plan-card {
+      border: 1px solid var(--border-tertiary);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .plan-card--highlighted {
+      border-color: var(--action-primary);
+      border-width: 2px;
+    }
+
+    .plan-card__name {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--content-secondary);
+    }
+
+    .plan-card__price {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--content-primary);
+      line-height: 1;
+    }
+
+    .plan-card__price span {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--content-secondary);
+    }
+
+    .plan-card__desc {
+      font-size: 13px;
+      color: var(--content-secondary);
+      line-height: 1.4;
+    }
+
+    .modal__cta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-primary--full {
+      width: 100%;
+      max-width: none;
+      padding: 14px 20px;
+      font-size: 16px;
+    }
+
+    /* ─── Dev panel ──────────────────────────────────────────── */
+    .dev-panel {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: #1e293b;
+      color: #f1f5f9;
+      border-radius: 10px;
+      padding: 12px 16px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+      font-family: var(--font-family);
+      font-size: 13px;
+    }
+
+    .dev-panel__label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    .dev-panel select {
+      background: #334155;
+      color: #f1f5f9;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font: 13px/1 var(--font-family);
+      cursor: pointer;
+      outline: none;
+      min-width: 240px;
+    }
+
+    .dev-panel select:focus { border-color: #94a3b8; }
+
+    /* ─── Activity ───────────────────────────────────────────── */
+    .activity { display: flex; flex-direction: column; gap: 12px; }
+
+    .activity__title {
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--content-primary);
+    }
+
+    .activity__list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .activity__item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      position: relative;
+    }
+
+    /* Connector line between items */
+    .activity__item:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 11px;
+      top: 28px;
+      bottom: -10px;
+      width: 1px;
+      background: var(--border-tertiary);
+    }
+
+    .activity__icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--surface-secondary);
+      border: 1px solid var(--border-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--content-primary);
+    }
+
+    .activity__item--has-map .activity__icon {
+      background: #e8f0fe;
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+    }
+
+    .activity__body {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding-top: 3px;
+      flex: 1;
+    }
+
+    .activity__time {
+      font-size: 12px;
+      color: var(--content-secondary);
+      font-weight: 400;
+    }
+
+    .activity__text {
+      font-size: 14px;
+      color: var(--content-primary);
+      line-height: 1.5;
+    }
+
+    .activity__map-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      color: var(--color-link, #2563eb);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      margin-left: 6px;
+    }
+
+    .activity__map-link:hover { text-decoration: underline; }
+
+    /* Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
+
+    a:focus-visible, button:focus-visible, select:focus-visible {
+      outline: 2px solid var(--action-primary);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── Side Navigation ─────────────────────────────────────── -->
+<aside class="sidebar" aria-label="Main navigation">
+
+  <div class="account">
+    <div class="account__userpic" aria-hidden="true">B</div>
+    <div class="account__name">
+      Brick Builder
+      <svg class="account__chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M5 7.5l5 5 5-5"/></svg>
+    </div>
+  </div>
+
+  <nav class="nav" aria-label="Primary">
+    <a class="navlink" href="#" aria-label="My Tofu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      My Tofu
+    </a>
+    <a class="navlink active" href="#" aria-label="Jobs" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      Jobs
+    </a>
+    <a class="navlink" href="#" aria-label="Invoices">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Invoices
+    </a>
+    <a class="navlink" href="#" aria-label="Estimates">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Estimates
+    </a>
+    <a class="navlink" href="#" aria-label="Clients">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clients
+    </a>
+    <a class="navlink" href="#" aria-label="Price book">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+      Price book
+    </a>
+    <a class="navlink" href="#" aria-label="Workers">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+      Workers
+    </a>
+
+    <div class="nav-footer">
+      <a class="navlink" href="#" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a>
+      <a class="navlink" href="#" aria-label="Support">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Support
+      </a>
+    </div>
+  </nav>
+</aside>
+
+<!-- ─── Main ──────────────────────────────────────────────────── -->
+<main class="main">
+  <div class="container">
+
+    <!-- Nav Bar -->
+    <header class="nav-bar">
+      <div class="toolbar">
+        <button class="btn-outline" type="button" aria-label="Back to job">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M15 10H5M10 5l-5 5 5 5"/></svg>
+          <span class="btn-label" id="bc-job">Job #1 for Emily Johnson</span>
+        </button>
+        <div class="toolbar__spacer"></div>
+        <button class="btn-outline" type="button">
+          <span class="btn-label">Edit</span>
+        </button>
+      </div>
+      <div class="title-block">
+        <h1 class="page-title" id="page-title">Oct 28 at 10:00 AM</h1>
+        <p class="page-subtitle" id="page-subtitle">Visit #1</p>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Actions row: status chip -->
+      <div class="actions-row">
+        <div id="status-chip-container"></div>
+      </div>
+
+      <!-- Two-column -->
+      <div class="two-col">
+
+        <!-- LEFT COLUMN -->
+        <div class="col-left">
+
+          <!-- Worker card -->
+          <article class="job-card" aria-label="Worker">
+            <div class="card-header">
+              <div class="card-header__title-block">
+                <span class="card-label">Worker</span>
+                <span class="card-value" id="worker-name">Alejandro Santiago Martínez de la Cruz</span>
+              </div>
+              <button class="btn-outline" type="button"><span class="btn-label">Edit</span></button>
+            </div>
+          </article>
+
+          <!-- Visit + Proof + Photos card -->
+          <article class="job-card">
+            <div class="card-content">
+
+              <!-- Visit metadata -->
+              <div class="visit-meta" aria-label="Visit details">
+                <div class="visit-meta__item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <span id="visit-date"></span>
+                </div>
+                <div class="visit-meta__item visit-meta__item--worker">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+                  <span id="visit-worker"></span>
+                </div>
+              </div>
+
+              <!-- Visit proof section (conditionally rendered) -->
+              <div class="divider" id="proof-divider" role="separator"></div>
+              <section class="visit-proof" id="proof-section" aria-labelledby="visit-proof-title">
+                <!-- rendered by JS -->
+              </section>
+
+              <!-- Photos section -->
+              <div class="divider" role="separator"></div>
+              <section aria-label="Photos">
+                <div class="photos-header">
+                  <span class="card-label photos-header__title">Photos</span>
+                  <button class="btn-outline" type="button"><span class="btn-label">Add photos</span></button>
+                </div>
+                <div id="photos-container" style="margin-top:16px"></div>
+              </section>
+
+              <!-- Activity section (conditionally rendered) -->
+              <div class="divider" id="activity-divider" role="separator"></div>
+              <div id="activity-container"></div>
+
+            </div>
+          </article>
+
+        </div><!-- /col-left -->
+
+        <!-- RIGHT COLUMN: Team notes -->
+        <aside class="col-right">
+          <article class="job-card" aria-label="Team notes">
+            <div class="notes-header">
+              <div class="notes-header__row">
+                <span class="card-label" style="flex:1">Team notes</span>
+                <button class="btn-outline" type="button"><span class="btn-label">Add</span></button>
+              </div>
+              <span class="notes-subtitle">Visible to workers</span>
+            </div>
+            <div id="notes-container"></div>
+          </article>
+        </aside>
+
+      </div><!-- /two-col -->
+    </div><!-- /content -->
+  </div><!-- /container -->
+</main>
+
+<!-- ─── Paywall modal ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="paywall-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <button class="modal__close" type="button" id="modal-close" aria-label="Close">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M15 5L5 15M5 5l10 10"/></svg>
+    </button>
+    <div>
+      <h2 class="modal__heading" id="modal-title">Bring your team in</h2>
+      <p class="modal__subheading">Add workers and assign visits</p>
+    </div>
+    <div class="modal__toggle">
+      <button class="toggle-btn active" type="button" id="toggle-monthly">Monthly</button>
+      <button class="toggle-btn" type="button" id="toggle-yearly">Yearly</button>
+    </div>
+    <div class="modal__plans">
+      <div class="plan-card plan-card--highlighted">
+        <div class="plan-card__name">Team</div>
+        <div class="plan-card__price" id="plan-team-price">$49<span>/mo</span></div>
+        <div class="plan-card__desc">Up to 10 workers. GPS visit audit included.</div>
+      </div>
+      <div class="plan-card">
+        <div class="plan-card__name">Business</div>
+        <div class="plan-card__price" id="plan-biz-price">$99<span>/mo</span></div>
+        <div class="plan-card__desc">Unlimited workers. Advanced reports.</div>
+      </div>
+    </div>
+    <div class="modal__cta">
+      <button class="btn-primary btn-primary--full" type="button" id="modal-upgrade-btn">
+        Switch to Team
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Dev panel ─────────────────────────────────────────────── -->
+<div class="dev-panel" role="region" aria-label="Prototype scenario switcher">
+  <span class="dev-panel__label">Scenario</span>
+  <select id="scenario-select" aria-label="Switch scenario"></select>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
