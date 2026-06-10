@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Worker Location · Prototype</title>
+<title>Tech Location · Prototype</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -143,14 +143,14 @@ button{font-family:inherit;cursor:pointer}
 .btn-outline:hover{background:var(--hf)}
 .btn-sm{padding:7px 12px;font-size:14px}
 
-/* ── Worker chip ── */
-.worker-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--bs);border-radius:var(--rr);padding:4px 12px;font-size:14px;font-weight:500;cursor:pointer;transition:all .1s}
-.worker-chip:hover{background:var(--hf)}
-.worker-chip .chip-icon{width:18px;height:18px;opacity:.5}
-.worker-chip.has-worker{background:var(--ss);border-color:transparent}
-.worker-chip.has-worker .chip-avatar{width:20px;height:20px;border-radius:50%;background:var(--ap);color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center}
-.worker-chip .chip-remove{width:16px;height:16px;opacity:.4;cursor:pointer;flex-shrink:0;margin-left:2px}
-.worker-chip .chip-remove:hover{opacity:.8}
+/* ── Tech chip ── */
+.tech-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--bs);border-radius:var(--rr);padding:4px 12px;font-size:14px;font-weight:500;cursor:pointer;transition:all .1s}
+.tech-chip:hover{background:var(--hf)}
+.tech-chip .chip-icon{width:18px;height:18px;opacity:.5}
+.tech-chip.has-tech{background:var(--ss);border-color:transparent}
+.tech-chip.has-tech .chip-avatar{width:20px;height:20px;border-radius:50%;background:var(--ap);color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.tech-chip .chip-remove{width:16px;height:16px;opacity:.4;cursor:pointer;flex-shrink:0;margin-left:2px}
+.tech-chip .chip-remove:hover{opacity:.8}
 
 /* ── Modal ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(31,34,38,.2);z-index:200;display:flex;align-items:center;justify-content:center;padding:60px}
@@ -171,21 +171,21 @@ button{font-family:inherit;cursor:pointer}
 .modal-assign{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
 .modal-actions{display:flex;gap:12px}
 
-/* ── Workers empty state ── */
-.workers-empty{border:1px dashed var(--bs);border-radius:var(--rxl);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:60px;text-align:center;min-height:380px}
+/* ── Techs empty state ── */
+.techs-empty{border:1px dashed var(--bs);border-radius:var(--rxl);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:60px;text-align:center;min-height:380px}
 .empty-illustration{width:192px;height:192px}
 .empty-text{font-size:18px;color:var(--cp);max-width:360px;line-height:1.5}
 .empty-value{font-size:14px;color:var(--cs);max-width:340px;line-height:1.5;margin-top:-16px}
 
-/* ── Visit overview — worker card ── */
+/* ── Visit overview — tech card ── */
 .visit-card-dashed{border:1px dashed var(--bs);border-radius:var(--rxl);padding:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 .vc-info{display:flex;flex-direction:column;gap:3px}
 .vc-label{font-size:16px;font-weight:600}
 .vc-hint{font-size:14px;color:var(--ct)}
-.vc-worker-row{display:flex;align-items:center;gap:10px}
+.vc-tech-row{display:flex;align-items:center;gap:10px}
 .vc-avatar{width:32px;height:32px;border-radius:50%;background:var(--ap);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.vc-worker-name{font-size:14px;font-weight:500}
-.vc-worker-meta{font-size:13px;color:var(--cs)}
+.vc-tech-name{font-size:14px;font-weight:500}
+.vc-tech-meta{font-size:13px;color:var(--cs)}
 
 /* ── Photo card ── */
 .photo-card{border:1px dashed var(--bs);border-radius:var(--rxl);padding:24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
@@ -198,13 +198,13 @@ button{font-family:inherit;cursor:pointer}
 .photo-loc{position:absolute;bottom:6px;left:6px;right:6px;background:rgba(31,34,38,.72);color:#fff;font-size:10px;font-weight:500;border-radius:3px;padding:3px 6px;line-height:1.3;cursor:pointer}
 .photo-loc:hover{background:rgba(31,34,38,.88)}
 
-/* ── Worker list dropdown (modal) ── */
-.worker-list{display:flex;flex-direction:column;gap:2px;margin-top:4px;border:1px solid var(--bt);border-radius:var(--r);overflow:hidden}
-.worker-option{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;font-size:14px;transition:background .1s}
-.worker-option:hover{background:var(--hf)}
-.worker-option .w-avatar{width:28px;height:28px;border-radius:50%;background:var(--ap);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.worker-option .w-name{font-weight:500}
-.worker-option .w-status{font-size:12px;color:var(--cs);margin-left:auto}
+/* ── Tech list dropdown (modal) ── */
+.tech-list{display:flex;flex-direction:column;gap:2px;margin-top:4px;border:1px solid var(--bt);border-radius:var(--r);overflow:hidden}
+.tech-option{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;font-size:14px;transition:background .1s}
+.tech-option:hover{background:var(--hf)}
+.tech-option .w-avatar{width:28px;height:28px;border-radius:50%;background:var(--ap);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tech-option .w-name{font-weight:500}
+.tech-option .w-status{font-size:12px;color:var(--cs);margin-left:auto}
 
 /* ── SVG icons inline ── */
 svg{display:block}
@@ -218,8 +218,8 @@ svg{display:block}
 
 <!-- ── Journey bar ── -->
 <div class="jbar">
-  <a onclick="goTo('workers-empty')" id="jstep-workers">
-    <span class="jnum">1</span> Workers (empty)
+  <a onclick="goTo('techs-empty')" id="jstep-techs">
+    <span class="jnum">1</span> Team (empty)
   </a>
   <span class="jarr">›</span>
   <a onclick="goTo('job-page')" id="jstep-job">
@@ -232,14 +232,14 @@ svg{display:block}
 </div>
 
 <!-- ═══════════════════════════════════════════
-     SCREEN 1: Workers empty state
+     SCREEN 1: Techs empty state
 ═══════════════════════════════════════════ -->
-<div class="screen active" id="screen-workers-empty">
+<div class="screen active" id="screen-techs-empty">
   <!-- Side nav -->
   <div class="sidenav">
     <div class="nav-top">
       <div class="nav-userpic">B</div>
-      <div class="nav-biz">Brick Builder
+      <div class="nav-biz">Tofu for Tech
         <svg viewBox="0 0 14 14" fill="none"><path d="M4 5.5L7 8.5L10 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
@@ -265,7 +265,7 @@ svg{display:block}
     </div>
     <div class="navlink active">
       <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="11" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 17c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      Workers
+      Team
     </div>
     <div class="nav-bottom">
       <div class="navlink"><svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5M10 7v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Settings</div>
@@ -276,22 +276,15 @@ svg{display:block}
   <!-- Main -->
   <div class="maincol">
     <div class="wrap">
-      <div class="navbar">
-        <div class="page-title">Workers</div>
-      </div>
+      <!-- Empty state — no page title -->
+      <div class="techs-empty">
+        <div style="width:192px;height:192px;background:var(--ss);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:56px">👷</div>
 
-      <!-- Empty state -->
-      <div class="workers-empty">
-        <!-- Illustration: two people with calendar (from Figma) -->
-        <img class="empty-illustration" src="https://www.figma.com/api/mcp/asset/007e82ee-bcd7-4566-92fd-93d9cebf469b" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div style="display:none;width:192px;height:192px;background:var(--ss);border-radius:16px;align-items:center;justify-content:center;font-size:48px">👷</div>
-
-        <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
-          <div class="empty-text">Invite a worker to unlock GPS tracking</div>
-          <div class="empty-value">When your worker uses Worker Up, Tofu shows where they started and finished each visit — and adds the location to every photo they take. One tap to prove the work was done.</div>
+        <div style="display:flex;flex-direction:column;gap:10px;align-items:center;max-width:400px;text-align:center">
+          <div style="font-size:14px;color:var(--ct);line-height:1.6">You'll see where your techs start and finish each visit — and every photo they take will include the location. No more guessing who was where.</div>
         </div>
 
-        <button class="btn-primary" onclick="goTo('job-page')">Invite worker</button>
+        <button class="btn-primary" onclick="goTo('job-page')">Invite tech</button>
       </div>
     </div>
   </div>
@@ -306,7 +299,7 @@ svg{display:block}
   <div class="sidenav">
     <div class="nav-top">
       <div class="nav-userpic">B</div>
-      <div class="nav-biz">Brick Builder
+      <div class="nav-biz">Tofu for Tech
         <svg viewBox="0 0 14 14" fill="none"><path d="M4 5.5L7 8.5L10 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
@@ -314,9 +307,9 @@ svg{display:block}
       <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><path d="M4 5h12M4 10h8M4 15h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       Jobs
     </div>
-    <div class="navlink" onclick="goTo('workers-empty')">
+    <div class="navlink" onclick="goTo('techs-empty')">
       <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="11" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 17c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      Workers
+      Team
     </div>
     <div class="nav-bottom">
       <div class="navlink"><svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/></svg>Settings</div>
@@ -492,7 +485,7 @@ svg{display:block}
   <div class="sidenav">
     <div class="nav-top">
       <div class="nav-userpic">B</div>
-      <div class="nav-biz">Brick Builder
+      <div class="nav-biz">Tofu for Tech
         <svg viewBox="0 0 14 14" fill="none"><path d="M4 5.5L7 8.5L10 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
@@ -500,9 +493,9 @@ svg{display:block}
       <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><path d="M4 5h12M4 10h8M4 15h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       Jobs
     </div>
-    <div class="navlink" onclick="goTo('workers-empty')">
+    <div class="navlink" onclick="goTo('techs-empty')">
       <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="11" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 17c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      Workers
+      Team
     </div>
     <div class="nav-bottom">
       <div class="navlink"><svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/></svg>Settings</div>
@@ -537,50 +530,64 @@ svg{display:block}
         <button class="btn-outline" style="padding:10px 20px;font-size:16px">Start visit</button>
       </div>
 
-      <!-- Worker card -->
-      <div class="visit-card-dashed" id="worker-card" style="margin-bottom:16px">
-        <div class="vc-info" id="worker-no-assign">
-          <div class="vc-label">Worker</div>
-          <div class="vc-hint">No worker assigned</div>
-        </div>
-        <div class="vc-info" id="worker-assigned" style="display:none">
-          <div class="vc-label" style="margin-bottom:8px">Worker</div>
-          <div class="vc-worker-row">
-            <div class="vc-avatar">JM</div>
-            <div>
-              <div class="vc-worker-name">James Miller</div>
-              <div class="vc-worker-meta">Worker Up · GPS active</div>
+      <!-- Tech card -->
+      <div style="margin-bottom:16px;position:relative">
+        <div class="visit-card-dashed" id="tech-card">
+          <div class="vc-info" id="tech-no-assign">
+            <div class="vc-label">Tech</div>
+            <div class="vc-hint">Assign a tech to track where the visit was done and get location-tagged job photos</div>
+          </div>
+          <div class="vc-info" id="tech-assigned" style="display:none">
+            <div class="vc-label" style="margin-bottom:8px">Tech</div>
+            <div class="vc-tech-row">
+              <div class="vc-avatar" id="vc-avatar-initials">JM</div>
+              <div>
+                <div class="vc-tech-name" id="vc-tech-name-text">James Miller</div>
+                <div class="vc-tech-meta" id="vc-tech-meta-text">GPS active</div>
+              </div>
             </div>
           </div>
+          <button class="btn-outline btn-sm" id="add-tech-btn" onclick="toggleVisitTechPicker()">Add tech</button>
         </div>
-        <button class="btn-outline btn-sm" onclick="goTo('job-page')">Add worker</button>
+        <!-- Inline tech picker -->
+        <div id="visit-tech-picker" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--bt);border-radius:var(--r);box-shadow:0 8px 16px -4px rgba(31,34,38,.15);width:280px;overflow:hidden;z-index:50">
+          <div class="tech-option" onclick="assignVisitTech('James Miller','JM','GPS active',true)">
+            <div class="w-avatar">JM</div>
+            <span class="w-name">James Miller</span>
+            <span class="w-status">Available</span>
+          </div>
+          <div class="tech-option" onclick="assignVisitTech('Sarah Chen','SC','GPS active',true)">
+            <div class="w-avatar" style="background:#4e9b7d">SC</div>
+            <span class="w-name">Sarah Chen</span>
+            <span class="w-status">Available</span>
+          </div>
+          <div class="tech-option" onclick="assignVisitTech('Mike Torres','MT','No GPS',false)">
+            <div class="w-avatar" style="background:#6b5fa6">MT</div>
+            <span class="w-name">Mike Torres</span>
+            <span class="w-status" style="color:var(--cn)">On another job</span>
+          </div>
+        </div>
       </div>
 
-      <!-- Photos card -->
-      <div class="photo-card" id="photos-card-empty" style="margin-bottom:16px">
-        <div class="photo-info">
-          <div class="photo-label">Photos</div>
-          <div class="photo-hint">Use photos as proof of work</div>
-        </div>
-        <button class="btn-outline btn-sm">Add photos</button>
-      </div>
-
-      <!-- Photos card with location (shown after worker assigned) -->
-      <div style="display:none;margin-bottom:16px" id="photos-card-filled">
+      <!-- Photos card — always shown after visit created, location depends on tech -->
+      <div style="margin-bottom:16px" id="photos-section">
         <div style="border:1px dashed var(--bs);border-radius:var(--rxl);padding:24px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
             <div class="photo-label">Photos</div>
             <button class="btn-outline btn-sm">Add photos</button>
           </div>
           <div class="photo-grid">
-            <div class="photo-thumb">
+            <!-- Photo 1: always has location if tech with GPS -->
+            <div class="photo-thumb" id="photo1">
               <div style="width:100%;height:100%;background:linear-gradient(135deg,#d4e8d6,#a8d0ab)"></div>
-              <div class="photo-loc" onclick="alert('10848 Wagner St, Culver City, CA')">📍 10848 Wagner St, Culver City</div>
+              <div class="photo-loc" id="photo1-loc" style="display:none" onclick="alert('10848 Wagner St, Culver City, CA')">📍 10848 Wagner St</div>
             </div>
-            <div class="photo-thumb">
+            <!-- Photo 2: has location -->
+            <div class="photo-thumb" id="photo2">
               <div style="width:100%;height:100%;background:linear-gradient(135deg,#d4dce8,#a8b8d0)"></div>
-              <div class="photo-loc" onclick="alert('10848 Wagner St, Culver City, CA')">📍 10848 Wagner St, Culver City</div>
+              <div class="photo-loc" id="photo2-loc" style="display:none" onclick="alert('10848 Wagner St, Culver City, CA')">📍 10848 Wagner St</div>
             </div>
+            <!-- Photo 3: no location (taken indoors / no GPS) -->
             <div class="photo-thumb">
               <div style="width:100%;height:100%;background:linear-gradient(135deg,#e8dcd4,#d0bba8)"></div>
             </div>
@@ -619,27 +626,28 @@ svg{display:block}
       </div>
     </div>
 
-    <!-- Add worker -->
-    <div class="modal-assign" id="modal-worker-area">
-      <div class="worker-chip" id="chip-add" onclick="showWorkerList()">
+    <!-- Add tech -->
+    <div class="modal-assign" id="modal-tech-area">
+      <div class="tech-chip" id="chip-add" onclick="showTechList()">
         <svg class="chip-icon" viewBox="0 0 18 18" fill="none" width="18" height="18"><path d="M9 4v10M4 9h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Add worker
+        Add tech
       </div>
     </div>
+    <div id="tech-hint" style="font-size:13px;color:var(--ct);margin:-16px 0 20px;line-height:1.5">Assign a tech to track where the visit was done and get location-tagged job photos</div>
 
-    <!-- Worker picker (hidden by default) -->
-    <div class="worker-list" id="worker-picker" style="display:none;margin-bottom:24px">
-      <div class="worker-option" onclick="selectWorker('James Miller', 'JM')">
+    <!-- Tech picker (hidden by default) -->
+    <div class="tech-list" id="tech-picker" style="display:none;margin-bottom:24px">
+      <div class="tech-option" onclick="selectTech('James Miller','JM',true)">
         <div class="w-avatar">JM</div>
         <span class="w-name">James Miller</span>
         <span class="w-status">Available</span>
       </div>
-      <div class="worker-option" onclick="selectWorker('Sarah Chen', 'SC')">
+      <div class="tech-option" onclick="selectTech('Sarah Chen','SC',true)">
         <div class="w-avatar" style="background:#4e9b7d">SC</div>
         <span class="w-name">Sarah Chen</span>
         <span class="w-status">Available</span>
       </div>
-      <div class="worker-option" onclick="selectWorker('Mike Torres', 'MT')">
+      <div class="tech-option" onclick="selectTech('Mike Torres','MT',false)">
         <div class="w-avatar" style="background:#6b5fa6">MT</div>
         <span class="w-name">Mike Torres</span>
         <span class="w-status" style="color:var(--cn)">On another job</span>
@@ -655,13 +663,13 @@ svg{display:block}
 
 
 <script>
-var selectedWorker = null;
+var selectedTech = null;
 
 function goTo(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
   // update journey bar
-  var steps = ['workers-empty','job-page','visit-overview'];
+  var steps = ['techs-empty','job-page','visit-overview'];
   var idx = steps.indexOf(id);
   steps.forEach(function(s, i) {
     var el = document.getElementById('jstep-' + s);
@@ -676,68 +684,98 @@ function goTo(id) {
 function openModal() {
   document.getElementById('modal-schedule').classList.remove('hidden');
   // reset
-  selectedWorker = null;
+  selectedTech = null;
   document.getElementById('chip-add').style.display = 'inline-flex';
-  document.getElementById('chip-add').innerHTML = '<svg class="chip-icon" viewBox="0 0 18 18" fill="none" width="18" height="18"><path d="M9 4v10M4 9h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add worker';
-  document.getElementById('worker-picker').style.display = 'none';
+  document.getElementById('chip-add').innerHTML = '<svg class="chip-icon" viewBox="0 0 18 18" fill="none" width="18" height="18"><path d="M9 4v10M4 9h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add tech';
+  document.getElementById('tech-picker').style.display = 'none';
+  var hint = document.getElementById('tech-hint');
+  if (hint) hint.style.display = 'block';
 }
 
 function closeModal() {
   document.getElementById('modal-schedule').classList.add('hidden');
-  document.getElementById('worker-picker').style.display = 'none';
+  document.getElementById('tech-picker').style.display = 'none';
 }
 
-function showWorkerList() {
-  var picker = document.getElementById('worker-picker');
+function showTechList() {
+  var picker = document.getElementById('tech-picker');
   picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
   if (picker.style.display === 'flex') {
     picker.style.flexDirection = 'column';
   }
 }
 
-function selectWorker(name, initials) {
-  selectedWorker = {name: name, initials: initials};
-  document.getElementById('worker-picker').style.display = 'none';
+function selectTech(name, initials, hasGps) {
+  selectedTech = {name: name, initials: initials, hasGps: hasGps !== false};
+  var hint = document.getElementById('tech-hint');
+  if (hint) hint.style.display = 'none';
+  document.getElementById('tech-picker').style.display = 'none';
   var chip = document.getElementById('chip-add');
-  chip.className = 'worker-chip has-worker';
+  chip.className = 'tech-chip has-tech';
   chip.innerHTML =
     '<div class="chip-avatar">' + initials + '</div>' +
     '<span>' + name + '</span>' +
-    '<svg class="chip-remove" onclick="removeWorker(event)" viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+    '<svg class="chip-remove" onclick="removeTech(event)" viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
   chip.onclick = null;
 }
 
-function removeWorker(e) {
+function removeTech(e) {
   e.stopPropagation();
-  selectedWorker = null;
+  selectedTech = null;
   var chip = document.getElementById('chip-add');
-  chip.className = 'worker-chip';
-  chip.innerHTML = '<svg class="chip-icon" viewBox="0 0 18 18" fill="none" width="18" height="18"><path d="M9 4v10M4 9h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add worker';
-  chip.onclick = showWorkerList;
+  chip.className = 'tech-chip';
+  chip.innerHTML = '<svg class="chip-icon" viewBox="0 0 18 18" fill="none" width="18" height="18"><path d="M9 4v10M4 9h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add tech';
+  chip.onclick = showTechList;
 }
 
 function scheduleVisit() {
   closeModal();
-  // Go to visit overview
   goTo('visit-overview');
-  // If worker was selected, show assigned state
-  if (selectedWorker) {
-    document.getElementById('worker-no-assign').style.display = 'none';
-    document.getElementById('worker-assigned').style.display = 'flex';
-    var avatarEl = document.querySelector('#worker-assigned .vc-avatar');
-    var nameEl = document.querySelector('#worker-assigned .vc-worker-name');
-    avatarEl.textContent = selectedWorker.initials;
-    nameEl.textContent = selectedWorker.name;
-    // show photos with location
-    document.getElementById('photos-card-empty').style.display = 'none';
-    document.getElementById('photos-card-filled').style.display = 'block';
-  } else {
-    document.getElementById('worker-no-assign').style.display = 'flex';
-    document.getElementById('worker-assigned').style.display = 'none';
-    document.getElementById('photos-card-empty').style.display = 'flex';
-    document.getElementById('photos-card-filled').style.display = 'none';
+  // reset visit overview tech state
+  document.getElementById('tech-no-assign').style.display = 'flex';
+  document.getElementById('tech-assigned').style.display = 'none';
+  document.getElementById('add-tech-btn').style.display = 'inline-flex';
+  // photos always shown, locations only if tech with GPS selected
+  var hasGps = selectedTech && selectedTech.hasGps;
+  setPhotoLocations(hasGps);
+  if (selectedTech) {
+    showVisitTech(selectedTech.name, selectedTech.initials, selectedTech.hasGps ? 'GPS active' : 'No GPS');
   }
 }
+
+function setPhotoLocations(show) {
+  document.getElementById('photo1-loc').style.display = show ? 'block' : 'none';
+  document.getElementById('photo2-loc').style.display = show ? 'block' : 'none';
+}
+
+function showVisitTech(name, initials, meta) {
+  document.getElementById('tech-no-assign').style.display = 'none';
+  document.getElementById('tech-assigned').style.display = 'flex';
+  document.getElementById('vc-avatar-initials').textContent = initials;
+  document.getElementById('vc-tech-name-text').textContent = name;
+  document.getElementById('vc-tech-meta-text').textContent = meta;
+  document.getElementById('add-tech-btn').style.display = 'none';
+}
+
+function toggleVisitTechPicker() {
+  var picker = document.getElementById('visit-tech-picker');
+  picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+}
+
+function assignVisitTech(name, initials, meta, hasGps) {
+  document.getElementById('visit-tech-picker').style.display = 'none';
+  showVisitTech(name, initials, meta);
+  setPhotoLocations(hasGps);
+}
+
+// close visit tech picker on outside click
+document.addEventListener('click', function(e) {
+  var picker = document.getElementById('visit-tech-picker');
+  var btn = document.getElementById('add-tech-btn');
+  if (picker && !picker.contains(e.target) && e.target !== btn) {
+    picker.style.display = 'none';
+  }
+});
 
 // close modal on overlay click
 document.getElementById('modal-schedule').addEventListener('click', function(e) {
@@ -745,7 +783,7 @@ document.getElementById('modal-schedule').addEventListener('click', function(e) 
 });
 
 // init journey bar
-goTo('workers-empty');
+goTo('techs-empty');
 </script>
 </body>
 </html>
