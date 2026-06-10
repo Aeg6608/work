@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Worker Location · Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cp:   #1f2226;
+  --cs:   rgba(31,34,38,.65);
+  --ct:   rgba(31,34,38,.45);
+  --cod:  #ffffff;
+  --cn:   #ff4a4d;
+  --sp:   #ffffff;
+  --ss:   #f1ede4;
+  --sneg: #f6e9ea;
+  --spos: #e5f2ed;
+  --ap:   #1f2226;
+  --as:   #f1ede4;
+  --ao:   rgba(31,34,38,.20);
+  --bt:   rgba(31,34,38,.10);
+  --bs:   rgba(31,34,38,.30);
+  --hf:   #f8f6f2;
+  --aq:   #4e9b7d;
+  --r2:4px;--r:8px;--rxl:12px;--rr:100px;
+  --nav:240px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--sp);color:var(--cp);font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+
+/* ── Journey bar ── */
+.jbar{position:fixed;top:0;left:0;right:0;z-index:300;height:40px;background:var(--cp);display:flex;align-items:center}
+.jbar a{display:flex;align-items:center;gap:6px;height:100%;padding:0 16px;color:rgba(255,255,255,.45);text-decoration:none;font-size:12px;border-right:1px solid rgba(255,255,255,.08);transition:color .15s;white-space:nowrap;cursor:pointer}
+.jbar a:hover{color:rgba(255,255,255,.8)}
+.jbar a.active{color:#fff;font-weight:500}
+.jbar a.done{color:rgba(255,255,255,.55)}
+.jnum{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
+.jbar a.active .jnum{background:#fff;color:var(--cp)}
+.jbar a.done .jnum{background:var(--aq);color:#fff}
+.jarr{color:rgba(255,255,255,.2);font-size:10px;padding:0 2px}
+
+/* ── Screen ── */
+.screen{display:none;padding-top:40px;min-height:100vh;background:var(--sp)}
+.screen.active{display:flex}
+
+/* ── Side nav ── */
+.sidenav{width:var(--nav);min-width:var(--nav);border-right:1px solid var(--ss);display:flex;flex-direction:column;height:calc(100vh - 40px);position:sticky;top:40px;overflow-y:auto;flex-shrink:0;padding-bottom:16px}
+.nav-top{padding:28px 24px 20px;display:flex;flex-direction:column;gap:10px}
+.nav-userpic{width:36px;height:36px;background:var(--ap);border-radius:2px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:600}
+.nav-biz{font-size:16px;font-weight:600;display:flex;align-items:center;gap:4px;color:var(--cp)}
+.nav-biz svg{width:14px;height:14px;opacity:.4}
+.navlink{display:flex;align-items:center;gap:16px;padding:14px 24px;font-size:14px;color:var(--cp);cursor:pointer;transition:background .1s}
+.navlink:hover{background:var(--hf)}
+.navlink.active{background:var(--ss);font-weight:600}
+.navlink svg{width:20px;height:20px;flex-shrink:0;opacity:.55}
+.navlink.active svg{opacity:1}
+.nav-bottom{margin-top:auto}
+
+/* ── Main col ── */
+.maincol{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;overflow-y:auto;height:calc(100vh - 40px)}
+.wrap{width:100%;max-width:840px;padding:0 60px 60px}
+
+/* ── Nav bar (breadcrumb + title) ── */
+.navbar{padding:36px 0 24px;display:flex;flex-direction:column;gap:8px}
+.toolbar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.btn-back{display:flex;align-items:center;gap:6px;border:1px solid var(--ao);border-radius:var(--r);padding:8px 12px;font-size:14px;font-weight:500;color:var(--cp);background:transparent;cursor:pointer}
+.btn-back svg{width:16px;height:16px}
+.btn-icon{width:36px;height:36px;border:1px solid var(--ao);border-radius:var(--r);display:flex;align-items:center;justify-content:center;background:transparent;cursor:pointer}
+.btn-icon svg{width:16px;height:16px;opacity:.6}
+.spacer{flex:1}
+.page-title{font-size:32px;font-weight:600;letter-spacing:-.3px;line-height:1.2;display:flex;align-items:center;gap:12px}
+.page-title .edit-btn{opacity:0;cursor:pointer;transition:opacity .15s}
+.page-title:hover .edit-btn{opacity:.4}
+.page-subtitle{font-size:14px;color:var(--cs)}
+.badge{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:var(--rr);font-size:12px;white-space:nowrap}
+.b-neg{background:var(--sneg);color:var(--cn)}
+.b-pos{background:var(--spos);color:#1a6b4a;font-weight:500}
+.b-beige{background:var(--ss);color:var(--cp);font-weight:500}
+
+/* ── Two-col layout for job page ── */
+.job-layout{display:flex;gap:24px;width:100%}
+.job-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:16px}
+.job-sidebar{width:280px;flex-shrink:0}
+
+/* ── Cards ── */
+.card{border:1px solid var(--bt);border-radius:var(--rxl);overflow:hidden}
+.card-dashed{border:1px dashed var(--bs);border-radius:var(--rxl);overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px}
+.card-title{font-size:16px;font-weight:600}
+.card-body{padding:0 24px 20px;display:flex;flex-direction:column;gap:4px}
+.card-hint{font-size:14px;color:var(--ct)}
+.card-val{font-size:14px;color:var(--cp)}
+.card-row{display:flex;align-items:center;gap:8px;padding:14px 24px;font-size:14px}
+.card-row+.card-row{border-top:1px solid var(--bt)}
+
+/* ── Property card ── */
+.prop-address{font-size:15px;padding:0 24px 16px}
+.prop-contacts{display:flex;gap:16px;padding:0 24px 20px;font-size:13px;color:var(--cs)}
+
+/* ── Visit row ── */
+.visit-row{display:flex;align-items:center;gap:12px;padding:16px 24px;cursor:pointer;transition:background .1s}
+.visit-row:hover{background:var(--hf)}
+.visit-row+.visit-row{border-top:1px solid var(--bt)}
+.visit-date{font-size:15px;font-weight:500;flex:1}
+.visit-meta{font-size:13px;color:var(--cs)}
+
+/* ── Estimate mini ── */
+.estimate-mini{display:flex;align-items:center;gap:12px;padding:0 24px 20px}
+.estimate-thumb{width:40px;height:48px;background:var(--ss);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--cs);flex-shrink:0}
+.estimate-info{display:flex;flex-direction:column;gap:2px}
+.estimate-amount{font-size:16px;font-weight:600}
+.estimate-num{font-size:13px;color:var(--cs)}
+
+/* ── Timeline sidebar ── */
+.timeline{background:var(--ss);border-radius:var(--rxl);padding:28px 24px;display:flex;flex-direction:column;gap:0}
+.tl-section{display:flex;flex-direction:column}
+.tl-item{display:flex;gap:16px;position:relative}
+.tl-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--bs);background:var(--sp);flex-shrink:0;margin-top:3px;z-index:1}
+.tl-dot.filled{background:var(--cp);border-color:var(--cp)}
+.tl-line{position:absolute;left:4px;top:10px;bottom:-20px;width:1.5px;background:var(--bs)}
+.tl-line.dashed{background:repeating-linear-gradient(to bottom,var(--bs) 0,var(--bs) 4px,transparent 4px,transparent 8px)}
+.tl-label{font-size:14px;font-weight:600;padding-bottom:16px}
+.tl-action{margin-top:8px;margin-bottom:16px}
+.tl-section-gap{height:20px}
+.tl-divider{height:1px;background:var(--bt);margin:24px 0}
+.tl-activity-title{font-size:14px;font-weight:600;margin-bottom:16px}
+.tl-activity-row{display:flex;align-items:flex-start;gap:10px;padding:4px 0}
+.tl-check{width:20px;height:20px;border-radius:50%;background:var(--spos);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.tl-check svg{width:10px;height:10px}
+.tl-act-text{font-size:13px;color:var(--cs);line-height:1.5}
+.tl-act-time{font-size:12px;color:var(--ct);margin-bottom:2px}
+
+/* ── Buttons ── */
+.btn-primary{background:var(--ap);color:#fff;border:none;border-radius:var(--r);padding:10px 20px;font-size:16px;font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:7px;cursor:pointer}
+.btn-primary:hover{opacity:.9}
+.btn-secondary{background:var(--as);color:var(--cp);border:none;border-radius:var(--r);padding:10px 20px;font-size:16px;font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:7px;cursor:pointer}
+.btn-secondary:hover{opacity:.9}
+.btn-outline{background:transparent;border:1px solid var(--ao);border-radius:var(--r);padding:8px 14px;font-size:14px;font-weight:500;color:var(--cp)}
+.btn-outline:hover{background:var(--hf)}
+.btn-sm{padding:7px 12px;font-size:14px}
+
+/* ── Worker chip ── */
+.worker-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--bs);border-radius:var(--rr);padding:4px 12px;font-size:14px;font-weight:500;cursor:pointer;transition:all .1s}
+.worker-chip:hover{background:var(--hf)}
+.worker-chip .chip-icon{width:18px;height:18px;opacity:.5}
+.worker-chip.has-worker{background:var(--ss);border-color:transparent}
+.worker-chip.has-worker .chip-avatar{width:20px;height:20px;border-radius:50%;background:var(--ap);color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.worker-chip .chip-remove{width:16px;height:16px;opacity:.4;cursor:pointer;flex-shrink:0;margin-left:2px}
+.worker-chip .chip-remove:hover{opacity:.8}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(31,34,38,.2);z-index:200;display:flex;align-items:center;justify-content:center;padding:60px}
+.modal-overlay.hidden{display:none}
+.modal{background:#fff;border-radius:var(--rxl);padding:36px;width:432px;position:relative;box-shadow:0 8px 32px rgba(31,34,38,.15)}
+.modal-close{position:absolute;right:16px;top:16px;width:36px;height:36px;border:1px solid var(--bt);border-radius:var(--rr);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.modal-close svg{width:16px;height:16px;opacity:.6}
+.modal-title{font-size:28px;font-weight:600;letter-spacing:-.2px;margin-bottom:28px}
+.modal-section{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.modal-label{font-size:16px;font-weight:600}
+.field{border:1px solid var(--bs);border-radius:4px;height:48px;display:flex;align-items:center;padding:0 12px;gap:8px;font-size:16px}
+.field svg{width:20px;height:20px;opacity:.5}
+.field.placeholder{color:var(--ct)}
+.field-row{display:flex;gap:12px}
+.field-row .field-group{display:flex;flex-direction:column;gap:8px}
+.field-row .field-group.w180{width:180px}
+.field-row .field-group.w168{width:168px}
+.modal-assign{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+.modal-actions{display:flex;gap:12px}
+
+/* ── Workers empty state ── */
+.workers-empty{border:1px dashed var(--bs);border-radius:var(--rxl);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:60px;text-align:center;min-height:380px}
+.empty-illustration{width:192px;height:192px}
+.empty-text{font-size:18px;color:var(--cp);max-width:360px;line-height:1.5}
+.empty-value{font-size:14px;color:var(--cs);max-width:340px;line-height:1.5;margin-top:-16px}
+
+/* ── Visit overview — worker card ── */
+.visit-card-dashed{border:1px dashed var(--bs);border-radius:var(--rxl);padding:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.vc-info{display:flex;flex-direction:column;gap:3px}
+.vc-label{font-size:16px;font-weight:600}
+.vc-hint{font-size:14px;color:var(--ct)}
+.vc-worker-row{display:flex;align-items:center;gap:10px}
+.vc-avatar{width:32px;height:32px;border-radius:50%;background:var(--ap);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vc-worker-name{font-size:14px;font-weight:500}
+.vc-worker-meta{font-size:13px;color:var(--cs)}
+
+/* ── Photo card ── */
+.photo-card{border:1px dashed var(--bs);border-radius:var(--rxl);padding:24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.photo-info{display:flex;flex-direction:column;gap:3px}
+.photo-label{font-size:16px;font-weight:600}
+.photo-hint{font-size:14px;color:var(--ct)}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.photo-thumb{aspect-ratio:1;border-radius:6px;background:var(--ss);overflow:hidden;position:relative;cursor:pointer}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-loc{position:absolute;bottom:6px;left:6px;right:6px;background:rgba(31,34,38,.72);color:#fff;font-size:10px;font-weight:500;border-radius:3px;padding:3px 6px;line-height:1.3;cursor:pointer}
+.photo-loc:hover{background:rgba(31,34,38,.88)}
+
+/* ── Worker list dropdown (modal) ── */
+.worker-list{display:flex;flex-direction:column;gap:2px;margin-top:4px;border:1px solid var(--bt);border-radius:var(--r);overflow:hidden}
+.worker-option{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;font-size:14px;transition:background .1s}
+.worker-option:hover{background:var(--hf)}
+.worker-option .w-avatar{width:28px;height:28px;border-radius:50%;background:var(--ap);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.worker-option .w-name{font-weight:500}
+.worker-option .w-status{font-size:12px;color:var(--cs);margin-left:auto}
+
+/* ── SVG icons inline ── */
+svg{display:block}
+
+/* ── Actions row (visit overview) ── */
+.actions-row{display:flex;gap:12px;margin-bottom:16px}
+
+</style>
+</head>
+<body>
+
+<!-- ── Journey bar ── -->
+<div class="jbar">
+  <a onclick="goTo('workers-empty')" id="jstep-workers">
+    <span class="jnum">1</span> Workers (empty)
+  </a>
+  <span class="jarr">›</span>
+  <a onclick="goTo('job-page')" id="jstep-job">
+    <span class="jnum">2</span> Job page
+  </a>
+  <span class="jarr">›</span>
+  <a onclick="goTo('visit-overview')" id="jstep-visit">
+    <span class="jnum">3</span> Visit overview
+  </a>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 1: Workers empty state
+═══════════════════════════════════════════ -->
+<div class="screen active" id="screen-workers-empty">
+  <!-- Side nav -->
+  <div class="sidenav">
+    <div class="nav-top">
+      <div class="nav-userpic">B</div>
+      <div class="nav-biz">Brick Builder
+        <svg viewBox="0 0 14 14" fill="none"><path d="M4 5.5L7 8.5L10 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div class="navlink" onclick="goTo('job-page')">
+      <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 2v4M13 2v4M3 8h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      My Tofu
+    </div>
+    <div class="navlink" onclick="goTo('job-page')">
+      <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><path d="M4 5h12M4 10h8M4 15h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Jobs
+    </div>
+    <div class="navlink" onclick="goTo('job-page')">
+      <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Invoices
+    </div>
+    <div class="navlink" onclick="goTo('job-page')">
+      <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 7h6M7 10h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Estimates
+    </div>
+    <div class="navlink" onclick="goTo('job-page')">
+      <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Clients
+    </div>
+    <div class="navlink active">
+      <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="11" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 17c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Workers
+    </div>
+    <div class="nav-bottom">
+      <div class="navlink"><svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5M10 7v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Settings</div>
+      <div class="navlink"><svg viewBox="0 0 20 20" fill="none" width="20" height="20"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2z" stroke="currentColor" stroke-width="1.5"/><path d="M10 12v1M10 7v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Support</div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="maincol">
+    <div class="wrap">
+      <div class="navbar">
+        <div class="page-title">Workers</div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="workers-empty">
+        <!-- Illustration: two people with calendar (from Figma) -->
+        <img class="empty-illustration" src="https://www.figma.com/api/mcp/asset/007e82ee-bcd7-4566-92fd-93d9cebf469b" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div style="display:none;width:192px;height:192px;background:var(--ss);border-radius:16px;align-items:center;justify-content:center;font-size:48px">👷</div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+          <div class="empty-text">Invite a worker to unlock GPS tracking</div>
+          <div class="empty-value">When your worker uses Worker Up, Tofu shows where they started and finished each visit — and adds the location to every photo they take. One tap to prove the work was done.</div>
+        </div>
+
+        <button class="btn-primary" onclick="goTo('job-page')">Invite worker</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 2: Job page
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-job-page">
+  <!-- Side nav -->
+  <div class="sidenav">
+    <div class="nav-top">
+      <div class="nav-userpic">B</div>
+      <div class="nav-biz">Brick Builder
+        <svg viewBox="0 0 14 14" fill="none"><path d="M4 5.5L7 8.5L10 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div class="navlink active">
+      <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><path d="M4 5h12M4 10h8M4 15h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Jobs
+    </div>
+    <div class="navlink" onclick="goTo('workers-empty')">
+      <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="11" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 17c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Workers
+    </div>
+    <div class="nav-bottom">
+      <div class="navlink"><svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/></svg>Settings</div>
+      <div class="navlink"><svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/></svg>Support</div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="maincol">
+    <div class="wrap">
+      <div class="navbar">
+        <div class="toolbar-row">
+          <button class="btn-back">
+            <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Back
+          </button>
+          <div class="spacer"></div>
+          <button class="btn-icon">
+            <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><circle cx="8" cy="3" r="1" fill="currentColor"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="8" cy="13" r="1" fill="currentColor"/></svg>
+          </button>
+        </div>
+        <div class="page-title">
+          Emily Johnson
+          <svg class="edit-btn" viewBox="0 0 20 20" fill="none" width="18" height="18"><path d="M13 3l4 4L6 18H2v-4L13 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="page-subtitle">Job #1, Today</div>
+      </div>
+
+      <div class="job-layout">
+        <!-- Left column -->
+        <div class="job-main">
+          <!-- Property card -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">Property</span>
+              <button class="btn-outline btn-sm">Edit</button>
+            </div>
+            <div class="prop-address">10848 Wagner St, Culver City, CA 90230</div>
+            <div class="prop-contacts">
+              <span>(310) 216-1600</span>
+              <span>emily.johnson@gmail.com</span>
+            </div>
+          </div>
+
+          <!-- Visits card -->
+          <div class="card-dashed">
+            <div class="card-head">
+              <span class="card-title">Visits</span>
+              <button class="btn-outline btn-sm" onclick="openModal()">Add visit</button>
+            </div>
+            <div class="card-body">
+              <span class="card-hint">Schedule a visit to get started</span>
+            </div>
+          </div>
+
+          <!-- Estimate card -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">Estimate <span class="badge b-beige" style="font-size:12px;margin-left:4px">Draft</span></span>
+              <button class="btn-outline btn-sm">View & send</button>
+            </div>
+            <div class="estimate-mini">
+              <div class="estimate-thumb">ESTIMATE</div>
+              <div class="estimate-info">
+                <div class="estimate-amount">$1,200.00</div>
+                <div class="estimate-num">#003</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Products card -->
+          <div class="card">
+            <div class="card-head">
+              <span class="card-title">Products &amp; Services</span>
+              <button class="btn-outline btn-sm">Add item</button>
+            </div>
+            <div class="card-body" style="padding-bottom:20px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:4px 0">
+                <div>
+                  <div style="font-size:14px;font-weight:500">Mold remediation × 1</div>
+                  <div style="font-size:12px;color:var(--ct);margin-top:2px;max-width:400px">750 sqft of Platinum Pro 129 artificial grass installed. Area to be cleared of existing grass and disposed of.</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0;margin-left:16px">
+                  <div style="font-size:14px;font-weight:600">$4,612.25</div>
+                  <div style="font-size:12px;color:var(--cs)">5% off</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right sidebar: timeline -->
+        <div class="job-sidebar">
+          <div class="timeline">
+            <!-- Created -->
+            <div class="tl-section">
+              <div class="tl-item">
+                <div style="position:relative">
+                  <div class="tl-dot filled"></div>
+                  <div class="tl-line"></div>
+                </div>
+                <div class="tl-label">Created</div>
+              </div>
+            </div>
+            <!-- Scheduled -->
+            <div class="tl-section" style="margin-top:16px">
+              <div class="tl-item">
+                <div style="position:relative">
+                  <div class="tl-dot"></div>
+                  <div class="tl-line dashed"></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div class="tl-label" style="color:var(--cs)">Scheduled</div>
+                  <div class="tl-action">
+                    <button class="btn-primary" style="font-size:14px;padding:8px 16px" onclick="openModal()">Add visit</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="height:24px"></div>
+            <!-- In progress -->
+            <div class="tl-section">
+              <div class="tl-item">
+                <div style="position:relative">
+                  <div class="tl-dot"></div>
+                  <div class="tl-line dashed"></div>
+                </div>
+                <div class="tl-label" style="color:var(--cs)">In progress</div>
+              </div>
+            </div>
+            <div style="height:24px"></div>
+            <!-- Completed -->
+            <div class="tl-section">
+              <div class="tl-item">
+                <div style="position:relative">
+                  <div class="tl-dot"></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div class="tl-label" style="color:var(--cs)">Completed</div>
+                  <div class="tl-action">
+                    <button class="btn-outline btn-sm" style="font-size:13px">Mark completed</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tl-divider"></div>
+
+            <!-- Activity -->
+            <div class="tl-activity-title">Activity</div>
+            <div class="tl-activity-row">
+              <div class="tl-check">
+                <svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#1a6b4a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div>
+                <div class="tl-act-time">Today at 8:00 AM</div>
+                <div class="tl-act-text">You created the job</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 3: Visit overview
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-visit-overview">
+  <!-- Side nav -->
+  <div class="sidenav">
+    <div class="nav-top">
+      <div class="nav-userpic">B</div>
+      <div class="nav-biz">Brick Builder
+        <svg viewBox="0 0 14 14" fill="none"><path d="M4 5.5L7 8.5L10 5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div class="navlink active">
+      <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><path d="M4 5h12M4 10h8M4 15h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Jobs
+    </div>
+    <div class="navlink" onclick="goTo('workers-empty')">
+      <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="7" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="14" cy="11" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M2 17c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Workers
+    </div>
+    <div class="nav-bottom">
+      <div class="navlink"><svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/></svg>Settings</div>
+      <div class="navlink"><svg viewBox="0 0 20 20" fill="none" width="20" height="20"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.5"/></svg>Support</div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="maincol">
+    <div class="wrap">
+      <div class="navbar">
+        <div class="toolbar-row">
+          <button class="btn-back" onclick="goTo('job-page')">
+            <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M10 3L5 8L10 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Job #1 for Emily Johnson
+          </button>
+          <div class="spacer"></div>
+          <button class="btn-outline btn-sm">Edit</button>
+        </div>
+        <div class="page-title">
+          Oct 28 at 10:00 AM
+          <span class="badge b-neg" style="font-size:12px">Overdue</span>
+        </div>
+        <div class="page-subtitle">Visit #1</div>
+      </div>
+
+      <!-- Actions row -->
+      <div class="actions-row">
+        <button class="btn-secondary">Scheduled
+          <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn-outline" style="padding:10px 20px;font-size:16px">Start visit</button>
+      </div>
+
+      <!-- Worker card -->
+      <div class="visit-card-dashed" id="worker-card" style="margin-bottom:16px">
+        <div class="vc-info" id="worker-no-assign">
+          <div class="vc-label">Worker</div>
+          <div class="vc-hint">No worker assigned</div>
+        </div>
+        <div class="vc-info" id="worker-assigned" style="display:none">
+          <div class="vc-label" style="margin-bottom:8px">Worker</div>
+          <div class="vc-worker-row">
+            <div class="vc-avatar">JM</div>
+            <div>
+              <div class="vc-worker-name">James Miller</div>
+              <div class="vc-worker-meta">Worker Up · GPS active</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-outline btn-sm" onclick="goTo('job-page')">Add worker</button>
+      </div>
+
+      <!-- Photos card -->
+      <div class="photo-card" id="photos-card-empty" style="margin-bottom:16px">
+        <div class="photo-info">
+          <div class="photo-label">Photos</div>
+          <div class="photo-hint">Use photos as proof of work</div>
+        </div>
+        <button class="btn-outline btn-sm">Add photos</button>
+      </div>
+
+      <!-- Photos card with location (shown after worker assigned) -->
+      <div style="display:none;margin-bottom:16px" id="photos-card-filled">
+        <div style="border:1px dashed var(--bs);border-radius:var(--rxl);padding:24px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div class="photo-label">Photos</div>
+            <button class="btn-outline btn-sm">Add photos</button>
+          </div>
+          <div class="photo-grid">
+            <div class="photo-thumb">
+              <div style="width:100%;height:100%;background:linear-gradient(135deg,#d4e8d6,#a8d0ab)"></div>
+              <div class="photo-loc" onclick="alert('10848 Wagner St, Culver City, CA')">📍 10848 Wagner St, Culver City</div>
+            </div>
+            <div class="photo-thumb">
+              <div style="width:100%;height:100%;background:linear-gradient(135deg,#d4dce8,#a8b8d0)"></div>
+              <div class="photo-loc" onclick="alert('10848 Wagner St, Culver City, CA')">📍 10848 Wagner St, Culver City</div>
+            </div>
+            <div class="photo-thumb">
+              <div style="width:100%;height:100%;background:linear-gradient(135deg,#e8dcd4,#d0bba8)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     MODAL: Schedule visit
+═══════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-schedule">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">
+      <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+
+    <div class="modal-title">Schedule visit</div>
+
+    <!-- Date + Time -->
+    <div class="field-row modal-section">
+      <div class="field-group w180">
+        <div class="modal-label">Date</div>
+        <div class="field">
+          <svg viewBox="0 0 20 20" fill="none" width="20" height="20"><rect x="3" y="4" width="14" height="13" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 8h14M7 2v4M13 2v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Today
+        </div>
+      </div>
+      <div class="field-group w168">
+        <div class="modal-label">Time</div>
+        <div class="field placeholder">2:30pm or 14:00</div>
+      </div>
+    </div>
+
+    <!-- Add worker -->
+    <div class="modal-assign" id="modal-worker-area">
+      <div class="worker-chip" id="chip-add" onclick="showWorkerList()">
+        <svg class="chip-icon" viewBox="0 0 18 18" fill="none" width="18" height="18"><path d="M9 4v10M4 9h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Add worker
+      </div>
+    </div>
+
+    <!-- Worker picker (hidden by default) -->
+    <div class="worker-list" id="worker-picker" style="display:none;margin-bottom:24px">
+      <div class="worker-option" onclick="selectWorker('James Miller', 'JM')">
+        <div class="w-avatar">JM</div>
+        <span class="w-name">James Miller</span>
+        <span class="w-status">Available</span>
+      </div>
+      <div class="worker-option" onclick="selectWorker('Sarah Chen', 'SC')">
+        <div class="w-avatar" style="background:#4e9b7d">SC</div>
+        <span class="w-name">Sarah Chen</span>
+        <span class="w-status">Available</span>
+      </div>
+      <div class="worker-option" onclick="selectWorker('Mike Torres', 'MT')">
+        <div class="w-avatar" style="background:#6b5fa6">MT</div>
+        <span class="w-name">Mike Torres</span>
+        <span class="w-status" style="color:var(--cn)">On another job</span>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="scheduleVisit()">Schedule</button>
+      <button class="btn-outline" style="padding:10px 20px;font-size:16px" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+var selectedWorker = null;
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  // update journey bar
+  var steps = ['workers-empty','job-page','visit-overview'];
+  var idx = steps.indexOf(id);
+  steps.forEach(function(s, i) {
+    var el = document.getElementById('jstep-' + s);
+    if (!el) return;
+    el.classList.remove('active','done');
+    if (i < idx) el.classList.add('done');
+    else if (i === idx) el.classList.add('active');
+  });
+  window.scrollTo(0,0);
+}
+
+function openModal() {
+  document.getElementById('modal-schedule').classList.remove('hidden');
+  // reset
+  selectedWorker = null;
+  document.getElementById('chip-add').style.display = 'inline-flex';
+  document.getElementById('chip-add').innerHTML = '<svg class="chip-icon" viewBox="0 0 18 18" fill="none" width="18" height="18"><path d="M9 4v10M4 9h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add worker';
+  document.getElementById('worker-picker').style.display = 'none';
+}
+
+function closeModal() {
+  document.getElementById('modal-schedule').classList.add('hidden');
+  document.getElementById('worker-picker').style.display = 'none';
+}
+
+function showWorkerList() {
+  var picker = document.getElementById('worker-picker');
+  picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
+  if (picker.style.display === 'flex') {
+    picker.style.flexDirection = 'column';
+  }
+}
+
+function selectWorker(name, initials) {
+  selectedWorker = {name: name, initials: initials};
+  document.getElementById('worker-picker').style.display = 'none';
+  var chip = document.getElementById('chip-add');
+  chip.className = 'worker-chip has-worker';
+  chip.innerHTML =
+    '<div class="chip-avatar">' + initials + '</div>' +
+    '<span>' + name + '</span>' +
+    '<svg class="chip-remove" onclick="removeWorker(event)" viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  chip.onclick = null;
+}
+
+function removeWorker(e) {
+  e.stopPropagation();
+  selectedWorker = null;
+  var chip = document.getElementById('chip-add');
+  chip.className = 'worker-chip';
+  chip.innerHTML = '<svg class="chip-icon" viewBox="0 0 18 18" fill="none" width="18" height="18"><path d="M9 4v10M4 9h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Add worker';
+  chip.onclick = showWorkerList;
+}
+
+function scheduleVisit() {
+  closeModal();
+  // Go to visit overview
+  goTo('visit-overview');
+  // If worker was selected, show assigned state
+  if (selectedWorker) {
+    document.getElementById('worker-no-assign').style.display = 'none';
+    document.getElementById('worker-assigned').style.display = 'flex';
+    var avatarEl = document.querySelector('#worker-assigned .vc-avatar');
+    var nameEl = document.querySelector('#worker-assigned .vc-worker-name');
+    avatarEl.textContent = selectedWorker.initials;
+    nameEl.textContent = selectedWorker.name;
+    // show photos with location
+    document.getElementById('photos-card-empty').style.display = 'none';
+    document.getElementById('photos-card-filled').style.display = 'block';
+  } else {
+    document.getElementById('worker-no-assign').style.display = 'flex';
+    document.getElementById('worker-assigned').style.display = 'none';
+    document.getElementById('photos-card-empty').style.display = 'flex';
+    document.getElementById('photos-card-filled').style.display = 'none';
+  }
+}
+
+// close modal on overlay click
+document.getElementById('modal-schedule').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// init journey bar
+goTo('workers-empty');
+</script>
+</body>
+</html>
