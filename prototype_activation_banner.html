@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Reminders · Activation Banner · Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --cp:   #1f2226;
+  --cs:   rgba(31,34,38,.6);
+  --cod:  #ffffff;
+  --cn:   #ff4a4d;
+  --sp:   #ffffff;
+  --ss:   #f1ede4;
+  --si:   #e8eff5;
+  --spos: #e5f2ed;
+  --sneg: #f6e9ea;
+  --ap:   #1f2226;
+  --ao:   rgba(31,34,38,.20);
+  --bt:   rgba(31,34,38,.10);
+  --bs:   rgba(31,34,38,.30);
+  --hf:   #f8f6f2;
+  --aq:   #4e9b7d;
+  --r2:4px;--r:8px;--rxl:12px;--rr:100px;
+  --nav:240px;--pad:56px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--sp);color:var(--cp);font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer}
+.lnum{font-feature-settings:'lnum'1,'tnum'1}
+
+/* ── Journey bar ── */
+.jbar{position:fixed;top:0;left:0;right:0;z-index:200;height:40px;background:var(--cp);display:flex;align-items:center}
+.jbar a{display:flex;align-items:center;gap:6px;height:100%;padding:0 16px;color:rgba(255,255,255,.45);text-decoration:none;font-size:12px;border-right:1px solid rgba(255,255,255,.08);transition:color .15s;white-space:nowrap}
+.jbar a:hover{color:rgba(255,255,255,.8)}
+.jbar a.active{color:#fff;font-weight:500}
+.jbar a.done{color:rgba(255,255,255,.55)}
+.jnum{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
+.jbar a.active .jnum{background:#fff;color:var(--cp)}
+.jbar a.done .jnum{background:var(--aq);color:#fff}
+.jarr{color:rgba(255,255,255,.2);font-size:10px;padding:0 2px;flex-shrink:0}
+.jsep{flex:1}
+
+/* variant switcher in jbar */
+.jvar{display:flex;align-items:center;gap:4px;padding:0 16px;border-left:1px solid rgba(255,255,255,.08)}
+.jvar-lbl{font-size:11px;color:rgba(255,255,255,.4);margin-right:2px}
+.jvar-btn{font-size:11px;font-weight:500;padding:3px 10px;border-radius:var(--rr);border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;transition:all .15s}
+.jvar-btn.active{background:#fff;color:var(--cp);border-color:#fff}
+
+/* ── Screen ── */
+.screen{display:none;padding-top:40px;min-height:100vh}
+.screen.active{display:flex}
+.screen.paywall-screen.active{display:flex;align-items:center;justify-content:center}
+
+/* ── Side nav ── */
+.sidenav{width:var(--nav);min-width:var(--nav);border-right:1px solid var(--ss);display:flex;flex-direction:column;height:calc(100vh - 40px);position:sticky;top:40px;overflow-y:auto;flex-shrink:0;padding-bottom:16px}
+.nav-top{padding:28px 24px 20px;display:flex;flex-direction:column;gap:10px}
+.nav-userpic{width:34px;height:34px;background:var(--ap);border-radius:2px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:600}
+.nav-biz{font-size:15px;font-weight:600;display:flex;align-items:center;gap:4px}
+.nav-biz svg{width:14px;height:14px;opacity:.4}
+.navlink{display:flex;align-items:center;gap:13px;padding:12px 24px;font-size:14px;color:var(--cp);transition:background .1s;cursor:pointer}
+.navlink:hover{background:var(--hf)}
+.navlink.active{background:var(--ss);font-weight:500}
+.navlink svg{width:18px;height:18px;flex-shrink:0;opacity:.6}
+.navlink.active svg{opacity:1}
+.nav-bottom{margin-top:auto}
+
+/* ── Main col ── */
+.maincol{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;overflow-y:auto;height:calc(100vh - 40px)}
+.wrap{width:100%;max-width:960px;padding:0 var(--pad) 60px}
+
+/* ── Page header ── */
+.phead{padding:44px 0 24px}
+.ptitle{font-size:30px;font-weight:600;letter-spacing:-.3px;line-height:1.2}
+
+/* ── Activation banner ── */
+.act-banner{
+  display:flex;align-items:center;gap:16px;
+  background:var(--ss);
+  border-radius:var(--rxl);
+  padding:16px 48px 16px 24px;
+  margin-bottom:16px;
+  position:relative;
+}
+.act-banner-body{flex:1;min-width:0}
+.act-banner-title{font-size:13px;color:var(--cs);line-height:1.5}
+.act-banner-btn{
+  flex-shrink:0;
+  background:var(--ap);color:#fff;border:none;
+  border-radius:var(--r);
+  padding:8px 12px;font-size:14px;font-weight:500;
+  white-space:nowrap;display:flex;align-items:center;gap:6px;
+}
+.act-banner-btn:hover{opacity:.88}
+.act-banner-close{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  width:32px;height:32px;border:none;background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--cs);border-radius:var(--r);cursor:pointer;
+}
+.act-banner-close:hover{background:rgba(31,34,38,.06)}
+
+/* Pro variant banner — same style, just Pro button */
+.act-banner-btn.pro-btn{
+  background:var(--ap);
+  display:flex;align-items:center;gap:6px;
+}
+.pro-star{font-size:11px;opacity:.7}
+
+/* ── Toolbar ── */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:0}
+
+/* ── Filter dropdown ── */
+.filter-wrap{position:relative;flex:1}
+.filter-btn{
+  width:100%;display:flex;align-items:center;gap:0;
+  border:1px solid var(--bt);border-radius:var(--r2);height:48px;
+  background:#fff;cursor:pointer;overflow:hidden;
+  transition:border-color .12s;
+}
+.filter-btn:hover{background:rgba(31,34,38,.015)}
+.filter-btn.open{border-color:var(--ap);box-shadow:0 0 0 1px var(--ap)}
+.filter-icon{width:48px;height:48px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.filter-icon svg{width:20px;height:20px;opacity:.55}
+.filter-label{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:500;color:var(--cp)}
+.filter-badge{height:24px;min-width:24px;padding:0 9px;border-radius:var(--rr);background:var(--ss);font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;color:var(--cp)}
+.filter-badge.neg{background:rgba(255,74,77,.12);color:var(--cn)}
+.filter-amount{margin-left:auto;font-size:16px;color:var(--cs);padding:0 10px;display:flex;align-items:center;gap:6px;white-space:nowrap;font-feature-settings:'lnum'1,'tnum'1}
+.filter-amount svg{width:16px;height:16px;opacity:.5}
+/* past due active state */
+.filter-btn.past-active{background:var(--sneg);border-color:rgba(255,74,77,.25)}
+.filter-btn.past-active .filter-label{color:var(--cn)}
+.filter-btn.past-active .filter-amount{color:var(--cn)}
+.filter-btn.past-active .filter-icon svg{opacity:.7;stroke:var(--cn)}
+
+/* dropdown menu */
+.filter-menu{
+  display:none;position:absolute;top:calc(100% + 4px);left:0;
+  background:#fff;border:1px solid var(--bt);border-radius:var(--r2);
+  box-shadow:0 8px 16px -4px rgba(31,34,38,.2);
+  min-width:320px;z-index:100;overflow:hidden;
+}
+.filter-menu.open{display:block}
+.fmenu-item{
+  display:flex;align-items:center;gap:12px;
+  height:56px;padding:0 16px;cursor:pointer;
+  border-bottom:1px solid var(--bt);
+  transition:background .1s;
+}
+.fmenu-item:last-child{border-bottom:none}
+.fmenu-item:hover{background:var(--hf)}
+.fmenu-check{width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fmenu-check svg{width:16px;height:16px;display:none}
+.fmenu-item.selected .fmenu-check svg{display:block}
+.fmenu-name{font-size:16px;font-weight:600;color:var(--cp);flex:1}
+.fmenu-item:not(.selected) .fmenu-name{font-weight:400}
+.fmenu-badge{height:24px;min-width:24px;padding:0 9px;border-radius:var(--rr);font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center}
+.fmenu-amount{font-size:14px;color:var(--cs);font-feature-settings:'lnum'1,'tnum'1}
+.btn-primary{background:var(--ap);color:#fff;border:none;border-radius:var(--r);height:46px;padding:0 18px;font-size:15px;font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:7px;flex-shrink:0}
+.btn-primary:hover{opacity:.9}
+.btn-outline{background:transparent;border:1px solid var(--ao);border-radius:var(--r);padding:8px 14px;font-size:14px;font-weight:500;color:var(--cp)}
+.btn-outline:hover{background:rgba(31,34,38,.04)}
+
+/* ── List ── */
+.list{padding-top:16px}
+.litem{display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--bt);padding:14px 0;transition:background .1s}
+.litem:hover{background:var(--hf);padding-left:8px;padding-right:8px;margin:0 -8px;border-radius:4px;cursor:pointer}
+.litem-left{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.lname{font-size:15px}
+.lmeta{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--cs);flex-wrap:wrap}
+.lreminder{font-size:12px;color:var(--cs);margin-top:1px}
+.litem-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.lamount{font-size:15px}
+.lbadges{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.loverdue{font-size:12px;color:var(--cn)}
+.dot{color:var(--cs);font-size:11px}
+
+/* ── Badges ── */
+.badge{display:inline-flex;align-items:center;height:22px;min-width:22px;padding:0 8px;border-radius:var(--rr);font-size:12px;white-space:nowrap}
+.b-beige{background:var(--ss);color:var(--cp);font-weight:500}
+.b-pos{background:var(--spos);color:#1a6b4a;font-weight:500}
+.b-neg{background:var(--sneg);color:var(--cn);font-weight:500}
+.b-outline{border:1px solid var(--bt);color:var(--cs)}
+.b-overdue{font-size:13px;color:var(--cn)}
+
+/* ── Step nav ── */
+.stepnav{display:flex;align-items:center;justify-content:space-between;padding:24px 0 0;border-top:1px solid var(--bt);margin-top:40px}
+.stepnav-lbl{font-size:12px;color:var(--cs)}
+.sbtn{display:flex;align-items:center;gap:7px;border:1px solid var(--ao);background:transparent;border-radius:var(--r);padding:9px 14px;font-size:13px;font-weight:500;color:var(--cp);cursor:pointer}
+.sbtn:hover{background:var(--hf)}
+.sbtn.primary{background:var(--ap);color:#fff;border-color:var(--ap)}
+.sbtn.primary:hover{opacity:.9}
+.sbtn svg{width:14px;height:14px}
+
+/* ── Settings ── */
+.s-section-lbl{font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--cs);margin:28px 0 10px}
+.s-section-lbl:first-of-type{margin-top:0}
+.s-card{border:1px solid var(--bt);border-radius:var(--rxl);overflow:hidden}
+.s-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 24px}
+.s-row+.s-row{border-top:1px solid var(--bt)}
+.s-row-text{display:flex;flex-direction:column;gap:3px}
+.s-label{font-size:15px;font-weight:500;display:flex;align-items:center;gap:8px}
+.s-hint{font-size:13px;color:var(--cs);line-height:1.5}
+.toggle{width:42px;height:24px;border-radius:12px;background:var(--ap);position:relative;flex-shrink:0;margin-top:2px;border:none;cursor:pointer}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:3px;left:21px;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.toggle.off{background:rgba(31,34,38,.15)}
+.toggle.off::after{left:3px}
+.s-rule{margin:0 24px 0;background:var(--hf);border-radius:var(--r);padding:12px 16px;display:flex;flex-direction:column;gap:3px;border-bottom:1px solid var(--bt)}
+.s-rule-title{font-size:14px;font-weight:500}
+.s-rule-hint{font-size:13px;color:var(--cs)}
+.s-rule-params{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.s-param{display:flex;align-items:center;gap:6px;border:1px solid var(--bt);border-radius:var(--r);padding:7px 12px;font-size:13px;background:#fff}
+.s-param-lbl{color:var(--cs)}
+.s-param-val{font-weight:500}
+.s-param svg{width:14px;height:14px;opacity:.4}
+.s-btns{padding:20px 24px;display:flex;gap:10px}
+.s-save{background:var(--ap);color:#fff;border:none;border-radius:var(--r);padding:10px 24px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:7px}
+.s-save:hover{opacity:.88}
+.s-cancel{background:transparent;border:1px solid var(--ao);border-radius:var(--r);padding:10px 20px;font-size:14px;font-weight:500;color:var(--cp);cursor:pointer}
+.s-dim{opacity:.38;pointer-events:none}
+
+/* Pro badge inline */
+.pro-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--gold-bg);border:1px solid var(--gold-border);
+  border-radius:var(--rr);padding:2px 8px;
+  font-size:11px;font-weight:600;color:var(--gold);
+}
+.pro-badge svg{width:11px;height:11px}
+
+/* Pro save button */
+.s-save.pro-save{background:var(--gold);color:#fff}
+
+/* ── Paywall overlay ── */
+.paywall-screen{background:rgba(31,34,38,.55);padding-top:40px}
+.pw-modal{
+  background:#fff;border-radius:16px;width:100%;max-width:480px;
+  padding:32px;display:flex;flex-direction:column;gap:20px;
+  box-shadow:0 8px 48px rgba(0,0,0,.18);
+  margin:auto;
+}
+.pw-eyebrow{font-size:10px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--gold)}
+.pw-title{font-size:22px;font-weight:600;letter-spacing:-.2px;margin-top:4px}
+.pw-sub{font-size:14px;color:var(--cs);line-height:1.6}
+.pw-features{display:flex;flex-direction:column;gap:10px}
+.pw-feat{display:flex;align-items:flex-start;gap:10px;font-size:14px}
+.pw-feat-icon{width:22px;height:22px;border-radius:50%;background:var(--spos);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.pw-feat-icon svg{width:12px;height:12px}
+.pw-divider{height:1px;background:var(--bt)}
+.pw-price{display:flex;align-items:baseline;gap:6px}
+.pw-amount{font-size:28px;font-weight:600;letter-spacing:-.5px}
+.pw-period{font-size:14px;color:var(--cs)}
+.pw-trial{font-size:12px;color:var(--aq);font-weight:500;margin-top:2px}
+.pw-cta{background:var(--gold);color:#fff;border:none;border-radius:var(--r);width:100%;height:48px;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.pw-cta:hover{opacity:.9}
+.pw-skip{background:transparent;border:none;font-size:13px;color:var(--cs);cursor:pointer;text-align:center;padding:4px}
+.pw-skip:hover{color:var(--cp)}
+
+/* ── Invoice detail ── */
+.inv-toolbar{display:flex;align-items:center;gap:8px;padding:28px 0 0}
+.inv-back{display:flex;align-items:center;gap:6px;border:1px solid var(--ao);border-radius:var(--r);padding:8px 12px;font-size:14px;font-weight:500;color:var(--cp);background:transparent;cursor:pointer}
+.inv-back svg{width:16px;height:16px}
+.inv-btn-icon{width:36px;height:36px;border:1px solid var(--ao);border-radius:var(--r);display:flex;align-items:center;justify-content:center;background:transparent;cursor:pointer}
+.inv-btn-icon svg{width:16px;height:16px;opacity:.7}
+.inv-spacer{flex:1}
+.inv-title{font-size:30px;font-weight:600;letter-spacing:-.3px;padding:20px 0 4px}
+.inv-subtitle{font-size:14px;color:var(--cs);padding-bottom:32px}
+.inv-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+/* invoice image stub */
+.inv-preview{border:1px solid var(--bt);border-radius:var(--rxl);overflow:hidden;position:relative;background:#fff}
+.inv-preview img{width:100%;display:block}
+.inv-preview-zoom{position:absolute;bottom:12px;left:12px;width:36px;height:36px;background:var(--ss);border-radius:var(--rr);display:flex;align-items:center;justify-content:center}
+.inv-preview-zoom svg{width:16px;height:16px;opacity:.6}
+/* summary card */
+.inv-summary{background:var(--ss);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:20px}
+.inv-due-label{font-size:14px;color:var(--cp)}
+.inv-amount{font-size:26px;font-weight:600;letter-spacing:-.3px}
+.inv-actions{display:flex;gap:8px}
+.inv-send-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--ao);border-radius:var(--r);padding:12px 16px;font-size:15px;font-weight:500;background:#fff;cursor:pointer}
+.inv-send-btn svg{width:18px;height:18px;opacity:.7}
+.inv-link-label{font-size:12px;font-weight:600}
+.inv-link-field{display:flex;align-items:center;border:1px solid var(--bt);border-radius:6px;height:36px;background:#fff;overflow:hidden}
+.inv-link-text{flex:1;padding:0 12px;font-size:12px;color:var(--cs);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inv-link-copy{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer}
+.inv-link-copy svg{width:16px;height:16px;opacity:.5}
+/* reminder block */
+.inv-reminders{border:1px solid var(--bt);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:10px;margin-top:0}
+.inv-rem-title{font-size:14px;font-weight:600}
+.inv-rem-row{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--cs)}
+.inv-rem-dot{width:6px;height:6px;border-radius:50%;background:var(--aq);flex-shrink:0}
+.inv-send-now{display:flex;align-items:center;gap:6px;border:1px solid var(--ao);border-radius:var(--r);padding:8px 14px;font-size:13px;font-weight:500;background:transparent;cursor:pointer;margin-top:4px;width:fit-content}
+.inv-send-now svg{width:14px;height:14px;opacity:.6}
+/* tracker */
+.inv-tracker{border:1px solid var(--bt);border-radius:12px;padding:28px;display:flex;flex-direction:column;gap:0;grid-column:2}
+.tracker-row{display:flex;gap:16px;align-items:flex-start}
+.tracker-timeline{display:flex;flex-direction:column;align-items:center;width:20px;flex-shrink:0}
+.tracker-dot{width:10px;height:10px;border-radius:50%;background:var(--ap);flex-shrink:0;margin-top:4px}
+.tracker-dot.empty{background:transparent;border:2px solid var(--bt)}
+.tracker-line{width:2px;flex:1;min-height:36px;background:var(--bt);margin:4px 0}
+.tracker-content{flex:1;padding-bottom:36px}
+.tracker-content:last-child{padding-bottom:0}
+.tracker-label{font-size:15px;font-weight:600;color:var(--cp)}
+.tracker-label.dim{font-size:14px;font-weight:400;color:var(--cs)}
+.tracker-btn{display:inline-flex;align-items:center;border:1px solid var(--ao);border-radius:var(--r);padding:7px 12px;font-size:13px;font-weight:500;background:#fff;cursor:pointer;margin-top:8px;gap:6px}
+.tracker-btn.primary{background:var(--ap);color:#fff;border-color:var(--ap)}
+/* updates */
+.inv-updates{grid-column:1/3;margin-top:8px}
+.upd-title{font-size:20px;font-weight:600;letter-spacing:-.1px;margin-bottom:20px}
+.upd-item{display:flex;gap:16px;align-items:flex-start;padding-bottom:24px}
+.upd-icon{width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.upd-icon svg{width:14px;height:14px;opacity:.5}
+.upd-body{flex:1}
+.upd-date{font-size:13px;color:var(--cs);margin-bottom:2px}
+.upd-text{font-size:14px;color:var(--cp);line-height:1.5}
+.upd-chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--bs);border-radius:4px;padding:7px 12px;font-size:13px;color:var(--cp);margin-top:8px;cursor:pointer}
+.upd-chip svg{width:14px;height:14px;opacity:.5}
+.upd-reminder{color:var(--aq);font-weight:500}
+
+/* ── Email preview modal ── */
+.email-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(31,34,38,.5);align-items:center;justify-content:center;padding:40px 24px}
+.email-overlay.open{display:flex}
+.email-modal{background:#fff;border-radius:12px;width:100%;max-width:520px;box-shadow:0 8px 48px rgba(0,0,0,.18);overflow:hidden}
+.email-modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bt)}
+.email-modal-title{font-size:13px;font-weight:600;color:var(--cp)}
+.email-modal-close{width:28px;height:28px;border:none;background:transparent;border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--cs);cursor:pointer}
+.email-modal-close:hover{background:var(--hf)}
+.email-meta{padding:16px 20px;border-bottom:1px solid var(--bt);display:flex;flex-direction:column;gap:4px}
+.email-meta-row{display:flex;gap:8px;font-size:12px}
+.email-meta-lbl{color:var(--cs);min-width:40px}
+.email-meta-val{color:var(--cp)}
+.email-body{padding:24px 20px;font-size:14px;color:var(--cp);line-height:1.7}
+.email-body p{margin-bottom:12px}
+.email-body p:last-child{margin-bottom:0}
+.email-pay-btn{display:inline-flex;align-items:center;background:var(--ap);color:#fff;border:none;border-radius:var(--r);padding:10px 20px;font-size:14px;font-weight:500;cursor:default;margin:4px 0 16px}
+
+</style>
+</head>
+<body>
+
+<!-- ═══ JOURNEY BAR ═══ -->
+<nav class="jbar">
+  <a href="#" data-go="list-free" id="jbar-list-free">
+    <span class="jnum">1</span> All invoices
+  </a>
+  <span class="jarr">›</span>
+  <a href="#" data-go="list-past-free" id="jbar-list-past-free">
+    <span class="jnum">2</span> Past due
+  </a>
+  <span class="jarr">›</span>
+  <a href="#" data-go="settings-free" id="jbar-settings-free">
+    <span class="jnum">3</span> Automation
+  </a>
+  <span class="jsep"></span>
+  <div class="jvar">
+    <span class="jvar-lbl">Variant:</span>
+    <button class="jvar-btn active" id="btn-free" onclick="setVariant('free')">Free</button>
+    <button class="jvar-btn" id="btn-pro" onclick="setVariant('pro')">Pro</button>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════
+     FREE VARIANT — SCREEN 1: ALL INVOICES
+═══════════════════════════════════════════ -->
+<section id="screen-list-free" class="screen active">
+  <nav class="sidenav">
+    <div class="nav-top">
+      <div class="nav-userpic">B</div>
+      <div class="nav-biz">Brick Builder<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+    </div>
+    <div class="navlink" onclick="goToNav('mytofu')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>My Tofu</div>
+    <div class="navlink" onclick="goToNav('jobs')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="1.5"/><path d="M7 4V2M13 4V2M3 8h14"/></svg>Jobs</div>
+    <div class="navlink active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>Invoices</div>
+    <div class="navlink" onclick="goToNav('clients')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6"/></svg>Clients</div>
+    <div class="nav-bottom">
+      <div class="navlink" onclick="goToNav('settings')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>Settings</div>
+    </div>
+  </nav>
+  <div class="maincol">
+    <div class="wrap">
+      <div class="phead" style="padding-bottom:20px">
+        <div class="ptitle">Invoices</div>
+      </div>
+
+      <!-- ACTIVATION BANNER — FREE, ALL -->
+      <div class="act-banner" id="banner-all-free">
+        <div class="act-banner-body">
+          <span class="act-banner-title">$5,250 overdue across 4 invoices — set up auto-reminders to collect faster</span>
+        </div>
+        <button class="act-banner-btn" onclick="goTo('settings-free')">Set up</button>
+        <button class="act-banner-close" onclick="document.getElementById('banner-all-free').style.display='none'">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5l10 10M15 5L5 15"/></svg>
+        </button>
+      </div>
+
+      <div class="toolbar">
+        <div class="filter-wrap" id="fw-all-free">
+          <button class="filter-btn" id="fb-all-free" onclick="toggleFilter('all-free')">
+            <div class="filter-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h14M6 10h8M9 15h2"/></svg></div>
+            <div class="filter-label" id="fl-all-free">All invoices <span class="filter-badge" id="fbadge-all-free">10</span></div>
+            <div class="filter-amount" id="famt-all-free">$14,590<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+          </button>
+          <div class="filter-menu" id="fm-all-free">
+            <div class="fmenu-item selected" onclick="selectFilter('all-free','all')">
+              <div class="fmenu-check"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 10l5 5 7-8"/></svg></div>
+              <div class="fmenu-name">All invoices</div>
+              <div class="fmenu-badge b-beige">10</div>
+              <div class="fmenu-amount" style="margin-left:8px">$14,590</div>
+            </div>
+            <div class="fmenu-item" onclick="selectFilter('all-free','past')">
+              <div class="fmenu-check"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 10l5 5 7-8"/></svg></div>
+              <div class="fmenu-name">Past due</div>
+              <div class="fmenu-badge" style="background:rgba(255,74,77,.12);color:var(--cn)">4</div>
+              <div class="fmenu-amount" style="margin-left:8px;color:var(--cn)">$5,250</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>
+          Create Invoice
+        </button>
+      </div>
+
+      <div class="list">
+        <div class="litem">
+          <div class="litem-left">
+            <div class="lname">Sophia Chen</div>
+            <div class="lmeta"><span>#004, Jun 5</span><span class="dot">·</span><span>No job linked</span></div>
+          </div>
+          <div class="litem-right">
+            <div class="lamount lnum">$750.00</div>
+            <div class="lbadges"><span class="badge b-beige">Sent</span></div>
+          </div>
+        </div>
+        <div class="litem">
+          <div class="litem-left">
+            <div class="lname">Michael Brown</div>
+            <div class="lmeta"><span>#003, Jun 1</span><span class="dot">·</span><span>Job #164</span></div>
+          </div>
+          <div class="litem-right">
+            <div class="lamount lnum">$3,000.00</div>
+            <div class="lbadges"><span class="loverdue">Overdue 2d</span><span class="badge b-beige">Sent</span></div>
+          </div>
+        </div>
+        <div class="litem">
+          <div class="litem-left">
+            <div class="lname">Anna</div>
+            <div class="lmeta"><span>#002, May 28</span><span class="dot">·</span><span>No job linked</span></div>
+          </div>
+          <div class="litem-right">
+            <div class="lamount lnum">$400.00</div>
+            <div class="lbadges"><span class="loverdue">Overdue 9d</span><span class="badge b-beige">Sent</span></div>
+          </div>
+        </div>
+        <div class="litem">
+          <div class="litem-left">
+            <div class="lname">Allen Ridge Lounge</div>
+            <div class="lmeta"><span>#010, May 26</span><span class="dot">·</span><span>No job linked</span></div>
+          </div>
+          <div class="litem-right">
+            <div class="lamount lnum">$850.00</div>
+            <div class="lbadges"><span class="loverdue">Overdue 14d</span><span class="badge b-beige">Sent</span></div>
+          </div>
+        </div>
+        <div class="litem">
+          <div class="litem-left">
+            <div class="lname">James Carter</div>
+            <div class="lmeta"><span>#006, May 17</span><span class="dot">·</span><span>Job #151</span></div>
+          </div>
+          <div class="litem-right">
+            <div class="lamount lnum">$1,000.00</div>
+            <div class="lbadges"><span class="loverdue">Overdue 23d</span><span class="badge b-beige">Sent</span></div>
+          </div>
+        </div>
+        <div class="litem">
+          <div class="litem-left">
+            <div class="lname">Daniel Kim</div>
+            <div class="lmeta"><span>#009, Jun 1</span></div>
+          </div>
+          <div class="litem-right">
+            <div class="lamount lnum">$950.00</div>
+            <div class="lbadges"><span class="badge b-pos">Paid</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stepnav">
+        <div style="width:120px"></div>
+        <span class="stepnav-lbl">Step 1 → click "Set up" on the banner</span>
+        <button class="sbtn primary" onclick="goTo('list-past-free')">
+          Past due
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 10h10M11 6l4 4-4 4"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     FREE VARIANT — SCREEN 2: PAST DUE
+═══════════════════════════════════════════ -->
+<section id="screen-list-past-free" class="screen">
+  <nav class="sidenav">
+    <div class="nav-top">
+      <div class="nav-userpic">B</div>
+      <div class="nav-biz">Brick Builder<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+    </div>
+    <div class="navlink" onclick="goToNav('mytofu')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>My Tofu</div>
+    <div class="navlink" onclick="goToNav('jobs')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="1.5"/><path d="M7 4V2M13 4V2M3 8h14"/></svg>Jobs</div>
+    <div class="navlink active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>Invoices</div>
+    <div class="navlink" onclick="goToNav('clients')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6"/></svg>Clients</div>
+    <div class="nav-bottom">
+      <div class="navlink" onclick="goToNav('settings')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>Settings</div>
+    </div>
+  </nav>
+  <div class="maincol">
+    <div class="wrap">
+      <div class="phead" style="padding-bottom:20px">
+        <div class="ptitle">Invoices</div>
+      </div>
+
+      <!-- ACTIVATION BANNER — FREE, PAST DUE -->
+      <div class="act-banner" id="banner-past-free">
+        <div class="act-banner-body">
+          <span class="act-banner-title">$5,250 overdue across 4 invoices — set up auto-reminders to collect faster</span>
+        </div>
+        <button class="act-banner-btn" onclick="goTo('settings-free')">Set up</button>
+        <button class="act-banner-close" onclick="document.getElementById('banner-past-free').style.display='none'">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5l10 10M15 5L5 15"/></svg>
+        </button>
+      </div>
+
+      <div class="toolbar">
+        <div class="filter-wrap" id="fw-past-free">
+          <button class="filter-btn past-active" id="fb-past-free" onclick="toggleFilter('past-free')">
+            <div class="filter-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h14M6 10h8M9 15h2"/></svg></div>
+            <div class="filter-label" id="fl-past-free" style="color:var(--cn)">Past due <span class="filter-badge neg" id="fbadge-past-free">4</span></div>
+            <div class="filter-amount" id="famt-past-free" style="color:var(--cn)">$5,250<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+          </button>
+          <div class="filter-menu" id="fm-past-free">
+            <div class="fmenu-item" onclick="selectFilter('past-free','all')">
+              <div class="fmenu-check"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 10l5 5 7-8"/></svg></div>
+              <div class="fmenu-name">All invoices</div>
+              <div class="fmenu-badge b-beige">10</div>
+              <div class="fmenu-amount" style="margin-left:8px">$14,590</div>
+            </div>
+            <div class="fmenu-item selected" onclick="selectFilter('past-free','past')">
+              <div class="fmenu-check"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 10l5 5 7-8"/></svg></div>
+              <div class="fmenu-name">Past due</div>
+              <div class="fmenu-badge" style="background:rgba(255,74,77,.12);color:var(--cn)">4</div>
+              <div class="fmenu-amount" style="margin-left:8px;color:var(--cn)">$5,250</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>
+          Create Invoice
+        </button>
+      </div>
+
+      <div class="list">
+        <div class="litem" onclick="openInvoice('list-past-free','Michael Brown','#003 · Jun 1 · Job #164')">
+          <div class="litem-left">
+            <div class="lname">Michael Brown</div>
+            <div class="lmeta"><span>#003, Jun 1</span><span class="dot">·</span><span>Job #164</span></div>
+          </div>
+          <div class="litem-right">
+            <div class="lamount lnum">$3,000.00</div>
+            <div class="lbadges"><span class="loverdue">Overdue 2d</span><span class="badge b-beige">Sent</span></div>
+          </div>
+        </div>
+        <div class="litem" onclick="openInvoice('list-past-free','Anna','#002 · May 28 · No job linked')">
+          <div class="litem-left">
+            <div class="lname">Anna</div>
+            <div class="lmeta"><span>#002, May 28</span><span class="dot">·</span><span>No job linked</span></div>
+          </div>
+          <div class="litem-right">
+            <div class="lamount lnum">$400.00</div>
+            <div class="lbadges"><span class="loverdue">Overdue 9d</span><span class="badge b-beige">Sent</span></div>
+          </div>
+        </div>
+        <div class="litem" onclick="openInvoice('list-past-free','Allen Ridge Lounge','#010 · May 26 · No job linked')">
+          <div class="litem-left">
+            <div class="lname">Allen Ridge Lounge</div>
+            <div class="lmeta"><span>#010, May 26</span></div>
+          </div>
+          <div class="litem-right">
+            <div class="lamount lnum">$850.00</div>
+            <div class="lbadges"><span class="loverdue">Overdue 14d</span><span class="badge b-beige">Sent</span></div>
+          </div>
+        </div>
+        <div class="litem" onclick="openInvoice('list-past-free','James Carter','#006 · May 17 · Job #151')">
+          <div class="litem-left">
+            <div class="lname">James Carter</div>
+            <div class="lmeta"><span>#006, May 17</span><span class="dot">·</span><span>Job #151</span></div>
+          </div>
+          <div class="litem-right">
+            <div class="lamount lnum">$1,000.00</div>
+            <div class="lbadges"><span class="loverdue">Overdue 23d</span><span class="badge b-beige">Sent</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stepnav">
+        <button class="sbtn" onclick="goTo('list-free')">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10H5M9 14l-4-4 4-4"/></svg>
+          All invoices
+        </button>
+        <span class="stepnav-lbl">Step 2 → click "Set up" on the banner</span>
+        <button class="sbtn primary" onclick="goTo('settings-free')">
+          Automation
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 10h10M11 6l4 4-4 4"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     FREE VARIANT — SCREEN 3: SETTINGS AUTOMATION
+═══════════════════════════════════════════ -->
+<section id="screen-settings-free" class="screen">
+  <nav class="sidenav">
+    <div class="nav-top">
+      <div class="nav-userpic">B</div>
+      <div class="nav-biz">Brick Builder<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+    </div>
+    <div class="navlink" onclick="goToNav('mytofu')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>My Tofu</div>
+    <div class="navlink" onclick="goToNav('jobs')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="1.5"/><path d="M7 4V2M13 4V2M3 8h14"/></svg>Jobs</div>
+    <div class="navlink" onclick="goToNav('invoices')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>Invoices</div>
+    <div class="navlink" onclick="goToNav('clients')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6"/></svg>Clients</div>
+    <div class="nav-bottom">
+      <div class="navlink active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>Settings</div>
+    </div>
+  </nav>
+  <div class="maincol">
+    <div class="wrap">
+      <div class="phead">
+        <div class="ptitle">Automation</div>
+        <div style="font-size:14px;color:var(--cs);margin-top:6px">Configure once — runs automatically on every matching invoice.</div>
+      </div>
+
+      <div class="s-section-lbl">Invoice follow-up</div>
+      <div class="s-card">
+        <div class="s-row">
+          <div class="s-row-text">
+            <div class="s-label">Automatic payment reminders</div>
+            <div class="s-hint">Send email reminders for unpaid invoices after the due date.<br>Applies to Sent invoices only. Stops automatically when paid.</div>
+          </div>
+          <button class="toggle off" id="free-toggle" onclick="this.classList.toggle('off');activateSave('save-free')"></button>
+        </div>
+        <div class="s-rule">
+          <div class="s-rule-title">Reminder rule</div>
+          <div class="s-rule-hint">After due date, Tofu sends reminders on this schedule:</div>
+          <div class="s-rule-params">
+            <div class="s-param"><span class="s-param-lbl">Frequency</span><span class="s-param-val">Every 7 days</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+            <div class="s-param"><span class="s-param-lbl">Maximum</span><span class="s-param-val">3 reminders</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+          </div>
+        </div>
+        <div class="s-btns">
+          <button class="s-save s-dim" id="save-free" onclick="goTo('list-past-activated-free')" disabled style="opacity:.35;pointer-events:none">Save</button>
+          <button class="s-cancel" onclick="openEmail()">Preview email</button>
+        </div>
+      </div>
+
+      <div class="s-section-lbl">Other automations</div>
+      <div class="s-card s-dim">
+        <div class="s-row">
+          <div class="s-row-text">
+            <div class="s-label">Auto-send receipts</div>
+            <div class="s-hint">Send payment confirmation automatically when invoice is paid</div>
+          </div>
+          <button class="toggle off"></button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     FREE VARIANT — SCREEN 4: PAST DUE (ACTIVATED)
+═══════════════════════════════════════════ -->
+<section id="screen-list-past-activated-free" class="screen">
+  <nav class="sidenav">
+    <div class="nav-top">
+      <div class="nav-userpic">B</div>
+      <div class="nav-biz">Brick Builder<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+    </div>
+    <div class="navlink" onclick="goToNav('mytofu')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>My Tofu</div>
+    <div class="navlink" onclick="goToNav('jobs')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="1.5"/><path d="M7 4V2M13 4V2M3 8h14"/></svg>Jobs</div>
+    <div class="navlink active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>Invoices</div>
+    <div class="navlink" onclick="goToNav('clients')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6"/></svg>Clients</div>
+    <div class="nav-bottom">
+      <div class="navlink" onclick="goToNav('settings')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>Settings</div>
+    </div>
+  </nav>
+  <div class="maincol">
+    <div class="wrap">
+      <div class="phead" style="padding-bottom:20px">
+        <div class="ptitle">Invoices</div>
+      </div>
+
+      <div class="toolbar">
+        <div class="filter-wrap" id="fw-past-act-free">
+          <button class="filter-btn" id="fb-past-act-free" onclick="toggleFilter('past-act-free')">
+            <div class="filter-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h14M6 10h8M9 15h2"/></svg></div>
+            <div class="filter-label">Past due <span class="filter-badge">4</span></div>
+            <div class="filter-amount">$5,250<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+          </button>
+          <div class="filter-menu" id="fm-past-act-free">
+            <div class="fmenu-item" onclick="selectFilter('past-act-free','all')">
+              <div class="fmenu-check"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 10l5 5 7-8"/></svg></div>
+              <div class="fmenu-name">All invoices</div>
+              <div class="fmenu-badge b-beige">10</div>
+              <div class="fmenu-amount" style="margin-left:8px">$14,590</div>
+            </div>
+            <div class="fmenu-item selected" onclick="selectFilter('past-act-free','past')">
+              <div class="fmenu-check"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 10l5 5 7-8"/></svg></div>
+              <div class="fmenu-name">Past due</div>
+              <div class="fmenu-badge" style="background:rgba(255,74,77,.12);color:var(--cn)">4</div>
+              <div class="fmenu-amount" style="margin-left:8px;color:var(--cn)">$5,250</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>
+          Create Invoice
+        </button>
+      </div>
+
+      <div class="list">
+  <div class="litem" onclick="openInvoice('list-past-activated-free','Michael Brown','#003 · Jun 1 · Job #164','r0')">
+    <div class="litem-left">
+      <div class="lname">Michael Brown</div>
+      <div class="lmeta"><span>#003, Jun 1</span><span class="dot">·</span><span>Job #164</span></div>
+      <div class="lreminder" style="color:var(--cs)">Reminder sending soon · Jun 8</div>
+    </div>
+    <div class="litem-right">
+      <div class="lamount lnum">$3,000.00</div>
+      <div class="lbadges"><span class="loverdue">Overdue 2d</span><span class="badge b-beige">Sent</span></div>
+    </div>
+  </div>
+  <div class="litem" onclick="openInvoice('list-past-activated-free','Anna','#002 · May 28 · No job linked','r1')">
+    <div class="litem-left">
+      <div class="lname">Anna</div>
+      <div class="lmeta"><span>#002, May 28</span><span class="dot">·</span><span>No job linked</span></div>
+      <div class="lreminder">Reminder sent ×1</div>
+    </div>
+    <div class="litem-right">
+      <div class="lamount lnum">$400.00</div>
+      <div class="lbadges"><span class="loverdue">Overdue 9d</span><span class="badge b-beige">Sent</span></div>
+    </div>
+  </div>
+  <div class="litem" onclick="openInvoice('list-past-activated-free','Allen Ridge Lounge','#010 · May 26 · No job linked','r2')">
+    <div class="litem-left">
+      <div class="lname">Allen Ridge Lounge</div>
+      <div class="lmeta"><span>#010, May 26</span></div>
+      <div class="lreminder">Reminder sent ×2</div>
+    </div>
+    <div class="litem-right">
+      <div class="lamount lnum">$850.00</div>
+      <div class="lbadges"><span class="loverdue">Overdue 14d</span><span class="badge b-beige">Sent</span></div>
+    </div>
+  </div>
+  <div class="litem" onclick="openInvoice('list-past-activated-free','James Carter','#006 · May 17 · Job #151','r3')">
+    <div class="litem-left">
+      <div class="lname">James Carter</div>
+      <div class="lmeta"><span>#006, May 17</span><span class="dot">·</span><span>Job #151</span></div>
+      <div class="lreminder">Reminder sent ×3</div>
+    </div>
+    <div class="litem-right">
+      <div class="lamount lnum">$1,000.00</div>
+      <div class="lbadges"><span class="loverdue">Overdue 23d</span><span class="badge b-beige">Sent</span></div>
+    </div>
+  </div>
+</div>
+
+      <div class="stepnav">
+        <button class="sbtn" onclick="goTo('settings-free')">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10H5M9 14l-4-4 4-4"/></svg>
+          Automation
+        </button>
+        <span class="stepnav-lbl">✓ Флоу завершён — ремайндеры включены</span>
+        <div style="width:120px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PRO VARIANT — SCREEN 1: ALL INVOICES
+═══════════════════════════════════════════ -->
+<section id="screen-list-pro" class="screen">
+  <nav class="sidenav">
+    <div class="nav-top">
+      <div class="nav-userpic">B</div>
+      <div class="nav-biz">Brick Builder<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+    </div>
+    <div class="navlink" onclick="goToNav('mytofu')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>My Tofu</div>
+    <div class="navlink" onclick="goToNav('jobs')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="1.5"/><path d="M7 4V2M13 4V2M3 8h14"/></svg>Jobs</div>
+    <div class="navlink active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>Invoices</div>
+    <div class="navlink" onclick="goToNav('clients')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6"/></svg>Clients</div>
+    <div class="nav-bottom">
+      <div class="navlink" onclick="goToNav('settings')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>Settings</div>
+    </div>
+  </nav>
+  <div class="maincol">
+    <div class="wrap">
+      <div class="phead" style="padding-bottom:20px">
+        <div class="ptitle">Invoices</div>
+      </div>
+
+      <!-- ACTIVATION BANNER — PRO, ALL -->
+      <div class="act-banner" id="banner-all-pro">
+        <div class="act-banner-body">
+          <span class="act-banner-title">$5,250 overdue across 4 invoices — auto-reminders available on Pro</span>
+        </div>
+        <button class="act-banner-btn pro-btn" onclick="goTo('settings-pro')"><span class="pro-star">★</span> Set up · Pro</button>
+        <button class="act-banner-close" onclick="document.getElementById('banner-all-pro').style.display='none'">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5l10 10M15 5L5 15"/></svg>
+        </button>
+      </div>
+
+      <div class="toolbar">
+        <div class="filter-wrap" id="fw-all-pro">
+          <button class="filter-btn" id="fb-all-pro" onclick="toggleFilter('all-pro')">
+            <div class="filter-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h14M6 10h8M9 15h2"/></svg></div>
+            <div class="filter-label" id="fl-all-pro">All invoices <span class="filter-badge" id="fbadge-all-pro">10</span></div>
+            <div class="filter-amount" id="famt-all-pro">$14,590<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+          </button>
+          <div class="filter-menu" id="fm-all-pro">
+            <div class="fmenu-item selected" onclick="selectFilter('all-pro','all')">
+              <div class="fmenu-check"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 10l5 5 7-8"/></svg></div>
+              <div class="fmenu-name">All invoices</div>
+              <div class="fmenu-badge b-beige">10</div>
+              <div class="fmenu-amount" style="margin-left:8px">$14,590</div>
+            </div>
+            <div class="fmenu-item" onclick="selectFilter('all-pro','past')">
+              <div class="fmenu-check"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 10l5 5 7-8"/></svg></div>
+              <div class="fmenu-name">Past due</div>
+              <div class="fmenu-badge" style="background:rgba(255,74,77,.12);color:var(--cn)">4</div>
+              <div class="fmenu-amount" style="margin-left:8px;color:var(--cn)">$5,250</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>
+          Create Invoice
+        </button>
+      </div>
+
+      <div class="list">
+        <div class="litem"><div class="litem-left"><div class="lname">Sophia Chen</div><div class="lmeta"><span>#004, Jun 5</span></div></div><div class="litem-right"><div class="lamount lnum">$750.00</div><div class="lbadges"><span class="badge b-beige">Sent</span></div></div></div>
+        <div class="litem"><div class="litem-left"><div class="lname">Michael Brown</div><div class="lmeta"><span>#003, Jun 1</span><span class="dot">·</span><span>Job #164</span></div></div><div class="litem-right"><div class="lamount lnum">$3,000.00</div><div class="lbadges"><span class="b-overdue">2d past due</span><span class="badge b-beige">Sent</span></div></div></div>
+        <div class="litem"><div class="litem-left"><div class="lname">Anna</div><div class="lmeta"><span>#002, May 28</span></div></div><div class="litem-right"><div class="lamount lnum">$400.00</div><div class="lbadges"><span class="b-overdue">9d past due</span><span class="badge b-beige">Sent</span></div></div></div>
+        <div class="litem"><div class="litem-left"><div class="lname">Allen Ridge Lounge</div><div class="lmeta"><span>#010, May 26</span></div></div><div class="litem-right"><div class="lamount lnum">$850.00</div><div class="lbadges"><span class="b-overdue">14d past due</span><span class="badge b-beige">Sent</span></div></div></div>
+        <div class="litem"><div class="litem-left"><div class="lname">James Carter</div><div class="lmeta"><span>#006, May 17</span><span class="dot">·</span><span>Job #151</span></div></div><div class="litem-right"><div class="lamount lnum">$1,000.00</div><div class="lbadges"><span class="b-overdue">23d past due</span><span class="badge b-beige">Sent</span></div></div></div>
+        <div class="litem"><div class="litem-left"><div class="lname">Daniel Kim</div><div class="lmeta"><span>#009, Jun 1</span></div></div><div class="litem-right"><div class="lamount lnum">$950.00</div><div class="lbadges"><span class="badge b-pos">Paid</span></div></div></div>
+      </div>
+
+      <div class="stepnav">
+        <div style="width:120px"></div>
+        <span class="stepnav-lbl">Step 1 → click "Set up · Pro" on the banner</span>
+        <button class="sbtn primary" onclick="goTo('list-past-pro')">Past due <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 10h10M11 6l4 4-4 4"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PRO VARIANT — SCREEN 2: PAST DUE
+═══════════════════════════════════════════ -->
+<section id="screen-list-past-pro" class="screen">
+  <nav class="sidenav">
+    <div class="nav-top"><div class="nav-userpic">B</div><div class="nav-biz">Brick Builder<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div></div>
+    <div class="navlink" onclick="goToNav('mytofu')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>My Tofu</div>
+    <div class="navlink" onclick="goToNav('jobs')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="1.5"/><path d="M7 4V2M13 4V2M3 8h14"/></svg>Jobs</div>
+    <div class="navlink active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>Invoices</div>
+    <div class="navlink" onclick="goToNav('clients')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6"/></svg>Clients</div>
+    <div class="nav-bottom"><div class="navlink"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>Settings</div></div>
+  </nav>
+  <div class="maincol">
+    <div class="wrap">
+      <div class="phead" style="padding-bottom:20px"><div class="ptitle">Invoices</div></div>
+
+      <!-- ACTIVATION BANNER — PRO, PAST DUE -->
+      <div class="act-banner" id="banner-past-pro">
+        <div class="act-banner-body">
+          <span class="act-banner-title">$5,250 overdue across 4 invoices — auto-reminders available on Pro</span>
+        </div>
+        <button class="act-banner-btn pro-btn" onclick="goTo('settings-pro')"><span class="pro-star">★</span> Set up · Pro</button>
+        <button class="act-banner-close" onclick="document.getElementById('banner-past-pro').style.display='none'">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 5l10 10M15 5L5 15"/></svg>
+        </button>
+      </div>
+
+      <div class="toolbar">
+        <div class="filter-wrap" id="fw-past-pro">
+          <button class="filter-btn past-active" id="fb-past-pro" onclick="toggleFilter('past-pro')">
+            <div class="filter-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h14M6 10h8M9 15h2"/></svg></div>
+            <div class="filter-label" id="fl-past-pro" style="color:var(--cn)">Past due <span class="filter-badge neg" id="fbadge-past-pro">4</span></div>
+            <div class="filter-amount" id="famt-past-pro" style="color:var(--cn)">$5,250<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+          </button>
+          <div class="filter-menu" id="fm-past-pro">
+            <div class="fmenu-item" onclick="selectFilter('past-pro','all')">
+              <div class="fmenu-check"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 10l5 5 7-8"/></svg></div>
+              <div class="fmenu-name">All invoices</div>
+              <div class="fmenu-badge b-beige">10</div>
+              <div class="fmenu-amount" style="margin-left:8px">$14,590</div>
+            </div>
+            <div class="fmenu-item selected" onclick="selectFilter('past-pro','past')">
+              <div class="fmenu-check"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 10l5 5 7-8"/></svg></div>
+              <div class="fmenu-name">Past due</div>
+              <div class="fmenu-badge" style="background:rgba(255,74,77,.12);color:var(--cn)">4</div>
+              <div class="fmenu-amount" style="margin-left:8px;color:var(--cn)">$5,250</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary"><svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>Create Invoice</button>
+      </div>
+
+      <div class="list">
+        <div class="litem" onclick="openInvoice('list-past-pro','Michael Brown','#003 · Jun 1 · Job #164')"><div class="litem-left"><div class="lname">Michael Brown</div><div class="lmeta"><span>#003, Jun 1</span><span class="dot">·</span><span>Job #164</span></div></div><div class="litem-right"><div class="lamount lnum">$3,000.00</div><div class="lbadges"><span class="b-overdue">2d past due</span><span class="badge b-beige">Sent</span></div></div></div>
+        <div class="litem" onclick="openInvoice('list-past-pro','Anna','#002 · May 28 · No job linked')"><div class="litem-left"><div class="lname">Anna</div><div class="lmeta"><span>#002, May 28</span></div></div><div class="litem-right"><div class="lamount lnum">$400.00</div><div class="lbadges"><span class="b-overdue">9d past due</span><span class="badge b-beige">Sent</span></div></div></div>
+        <div class="litem" onclick="openInvoice('list-past-pro','Allen Ridge Lounge','#010 · May 26 · No job linked')"><div class="litem-left"><div class="lname">Allen Ridge Lounge</div><div class="lmeta"><span>#010, May 26</span></div></div><div class="litem-right"><div class="lamount lnum">$850.00</div><div class="lbadges"><span class="b-overdue">14d past due</span><span class="badge b-beige">Sent</span></div></div></div>
+        <div class="litem" onclick="openInvoice('list-past-pro','James Carter','#006 · May 17 · Job #151')"><div class="litem-left"><div class="lname">James Carter</div><div class="lmeta"><span>#006, May 17</span><span class="dot">·</span><span>Job #151</span></div></div><div class="litem-right"><div class="lamount lnum">$1,000.00</div><div class="lbadges"><span class="b-overdue">23d past due</span><span class="badge b-beige">Sent</span></div></div></div>
+      </div>
+
+      <div class="stepnav">
+        <button class="sbtn" onclick="goTo('list-pro')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10H5M9 14l-4-4 4-4"/></svg>All invoices</button>
+        <span class="stepnav-lbl">Step 2 → click "Set up · Pro" on the banner</span>
+        <button class="sbtn primary" onclick="goTo('settings-pro')">Automation <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 10h10M11 6l4 4-4 4"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PRO VARIANT — SCREEN 3: SETTINGS (locked)
+═══════════════════════════════════════════ -->
+<section id="screen-settings-pro" class="screen">
+  <nav class="sidenav">
+    <div class="nav-top"><div class="nav-userpic">B</div><div class="nav-biz">Brick Builder<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div></div>
+    <div class="navlink" onclick="goToNav('mytofu')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>My Tofu</div>
+    <div class="navlink" onclick="goToNav('jobs')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="1.5"/><path d="M7 4V2M13 4V2M3 8h14"/></svg>Jobs</div>
+    <div class="navlink" onclick="goToNav('invoices')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>Invoices</div>
+    <div class="navlink" onclick="goToNav('clients')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6"/></svg>Clients</div>
+    <div class="nav-bottom"><div class="navlink active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>Settings</div></div>
+  </nav>
+  <div class="maincol">
+    <div class="wrap">
+      <div class="phead">
+        <div class="ptitle">Automation</div>
+        <div style="font-size:14px;color:var(--cs);margin-top:6px">Configure once — runs automatically on every matching invoice.</div>
+      </div>
+
+      <div class="s-section-lbl">Invoice follow-up</div>
+      <div class="s-card">
+        <div class="s-row">
+          <div class="s-row-text">
+            <div class="s-label">
+              Automatic payment reminders
+              <span class="pro-badge">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="10,2 12.9,7.6 19,8.6 14.5,13 15.8,19 10,16 4.2,19 5.5,13 1,8.6 7.1,7.6"/></svg>
+                Pro
+              </span>
+            </div>
+            <div class="s-hint">Send email reminders for unpaid invoices after the due date.<br>Applies to Sent invoices only. Stops automatically when paid.</div>
+          </div>
+          <button class="toggle off" id="pro-toggle" onclick="this.classList.toggle('off')"></button>
+        </div>
+        <div class="s-rule">
+          <div class="s-rule-title">Reminder rule</div>
+          <div class="s-rule-hint">After due date, Tofu sends reminders on this schedule:</div>
+          <div class="s-rule-params">
+            <div class="s-param"><span class="s-param-lbl">Frequency</span><span class="s-param-val">Every 7 days</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+            <div class="s-param"><span class="s-param-lbl">Maximum</span><span class="s-param-val">3 reminders</span><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+          </div>
+        </div>
+        <div class="s-btns">
+          <button class="s-save pro-save" id="save-pro" onclick="goTo('paywall-pro')">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="10,2 12.9,7.6 19,8.6 14.5,13 15.8,19 10,16 4.2,19 5.5,13 1,8.6 7.1,7.6"/></svg>
+            Save · Upgrade to Pro
+          </button>
+          <button class="s-cancel" onclick="openEmail()">Preview email</button>
+        </div>
+      </div>
+
+      <div class="s-section-lbl">Other automations</div>
+      <div class="s-card s-dim">
+        <div class="s-row">
+          <div class="s-row-text"><div class="s-label">Auto-send receipts</div><div class="s-hint">Send payment confirmation automatically when invoice is paid</div></div>
+          <button class="toggle off"></button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PRO VARIANT — PAYWALL
+═══════════════════════════════════════════ -->
+<section id="screen-paywall-pro" class="screen paywall-screen">
+  <div class="pw-modal">
+    <div>
+      <div class="pw-eyebrow">Upgrade to Pro</div>
+      <div class="pw-title">Автоматические напоминания об оплате</div>
+      <div class="pw-sub">Tofu сам напомнит клиентам после due date. Вы занимаетесь бизнесом — Tofu занимается деньгами.</div>
+    </div>
+
+    <div class="pw-features">
+      <div class="pw-feat">
+        <div class="pw-feat-icon"><svg viewBox="0 0 20 20" fill="none" stroke="var(--aq)" stroke-width="2"><path d="M4 10l4 4 8-8"/></svg></div>
+        <div>Email-напоминания каждые 7 дней после due date</div>
+      </div>
+      <div class="pw-feat">
+        <div class="pw-feat-icon"><svg viewBox="0 0 20 20" fill="none" stroke="var(--aq)" stroke-width="2"><path d="M4 10l4 4 8-8"/></svg></div>
+        <div>Максимум 3 напоминания — стоп при оплате</div>
+      </div>
+      <div class="pw-feat">
+        <div class="pw-feat-icon"><svg viewBox="0 0 20 20" fill="none" stroke="var(--aq)" stroke-width="2"><path d="M4 10l4 4 8-8"/></svg></div>
+        <div>Уведомление когда клиент открыл письмо</div>
+      </div>
+      <div class="pw-feat">
+        <div class="pw-feat-icon"><svg viewBox="0 0 20 20" fill="none" stroke="var(--aq)" stroke-width="2"><path d="M4 10l4 4 8-8"/></svg></div>
+        <div>Фильтр Past due с суммой долга по каждому клиенту</div>
+      </div>
+    </div>
+
+    <div class="pw-divider"></div>
+
+    <div>
+      <div class="pw-price">
+        <div class="pw-amount">$49</div>
+        <div class="pw-period">/ месяц</div>
+      </div>
+      <div class="pw-trial">7 дней бесплатно — отмена в любой момент</div>
+    </div>
+
+    <button class="pw-cta" onclick="goTo('list-past-activated-pro')">
+      <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="10,2 12.9,7.6 19,8.6 14.5,13 15.8,19 10,16 4.2,19 5.5,13 1,8.6 7.1,7.6"/></svg>
+      Start free trial
+    </button>
+    <button class="pw-skip" onclick="goTo('settings-pro')">Go back</button>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PRO VARIANT — SCREEN 5: PAST DUE (ACTIVATED)
+═══════════════════════════════════════════ -->
+<section id="screen-list-past-activated-pro" class="screen">
+  <nav class="sidenav">
+    <div class="nav-top"><div class="nav-userpic">B</div><div class="nav-biz">Brick Builder<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div></div>
+    <div class="navlink" onclick="goToNav('mytofu')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>My Tofu</div>
+    <div class="navlink" onclick="goToNav('jobs')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="1.5"/><path d="M7 4V2M13 4V2M3 8h14"/></svg>Jobs</div>
+    <div class="navlink active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>Invoices</div>
+    <div class="navlink" onclick="goToNav('clients')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6"/></svg>Clients</div>
+    <div class="nav-bottom"><div class="navlink" onclick="goToNav('settings')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>Settings</div></div>
+  </nav>
+  <div class="maincol">
+    <div class="wrap">
+      <div class="phead" style="padding-bottom:20px">
+        <div class="ptitle">Invoices</div>
+      </div>
+
+      <div class="toolbar">
+        <div class="filter-wrap" id="fw-past-act-pro">
+          <button class="filter-btn" id="fb-past-act-pro" onclick="toggleFilter('past-act-pro')">
+            <div class="filter-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h14M6 10h8M9 15h2"/></svg></div>
+            <div class="filter-label">Past due <span class="filter-badge">4</span></div>
+            <div class="filter-amount">$5,250<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+          </button>
+          <div class="filter-menu" id="fm-past-act-pro">
+            <div class="fmenu-item" onclick="selectFilter('past-act-pro','all')">
+              <div class="fmenu-check"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 10l5 5 7-8"/></svg></div>
+              <div class="fmenu-name">All invoices</div>
+              <div class="fmenu-badge b-beige">10</div>
+              <div class="fmenu-amount" style="margin-left:8px">$14,590</div>
+            </div>
+            <div class="fmenu-item selected" onclick="selectFilter('past-act-pro','past')">
+              <div class="fmenu-check"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 10l5 5 7-8"/></svg></div>
+              <div class="fmenu-name">Past due</div>
+              <div class="fmenu-badge" style="background:rgba(255,74,77,.12);color:var(--cn)">4</div>
+              <div class="fmenu-amount" style="margin-left:8px;color:var(--cn)">$5,250</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-primary">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 4v12M4 10h12"/></svg>
+          Create Invoice
+        </button>
+      </div>
+
+      <div class="list">
+  <div class="litem" onclick="openInvoice('list-past-activated-pro','Michael Brown','#003 · Jun 1 · Job #164','r0')">
+    <div class="litem-left">
+      <div class="lname">Michael Brown</div>
+      <div class="lmeta"><span>#003, Jun 1</span><span class="dot">·</span><span>Job #164</span></div>
+      <div class="lreminder" style="color:var(--cs)">Reminder sending soon · Jun 8</div>
+    </div>
+    <div class="litem-right">
+      <div class="lamount lnum">$3,000.00</div>
+      <div class="lbadges"><span class="loverdue">Overdue 2d</span><span class="badge b-beige">Sent</span></div>
+    </div>
+  </div>
+  <div class="litem" onclick="openInvoice('list-past-activated-pro','Anna','#002 · May 28 · No job linked','r1')">
+    <div class="litem-left">
+      <div class="lname">Anna</div>
+      <div class="lmeta"><span>#002, May 28</span><span class="dot">·</span><span>No job linked</span></div>
+      <div class="lreminder">Reminder sent ×1</div>
+    </div>
+    <div class="litem-right">
+      <div class="lamount lnum">$400.00</div>
+      <div class="lbadges"><span class="loverdue">Overdue 9d</span><span class="badge b-beige">Sent</span></div>
+    </div>
+  </div>
+  <div class="litem" onclick="openInvoice('list-past-activated-pro','Allen Ridge Lounge','#010 · May 26 · No job linked','r2')">
+    <div class="litem-left">
+      <div class="lname">Allen Ridge Lounge</div>
+      <div class="lmeta"><span>#010, May 26</span></div>
+      <div class="lreminder">Reminder sent ×2</div>
+    </div>
+    <div class="litem-right">
+      <div class="lamount lnum">$850.00</div>
+      <div class="lbadges"><span class="loverdue">Overdue 14d</span><span class="badge b-beige">Sent</span></div>
+    </div>
+  </div>
+  <div class="litem" onclick="openInvoice('list-past-activated-pro','James Carter','#006 · May 17 · Job #151','r3')">
+    <div class="litem-left">
+      <div class="lname">James Carter</div>
+      <div class="lmeta"><span>#006, May 17</span><span class="dot">·</span><span>Job #151</span></div>
+      <div class="lreminder">Reminder sent ×3</div>
+    </div>
+    <div class="litem-right">
+      <div class="lamount lnum">$1,000.00</div>
+      <div class="lbadges"><span class="loverdue">Overdue 23d</span><span class="badge b-beige">Sent</span></div>
+    </div>
+  </div>
+</div>
+
+      <div class="stepnav">
+        <button class="sbtn" onclick="goTo('paywall-pro')">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 10H5M9 14l-4-4 4-4"/></svg>
+          Upgrade
+        </button>
+        <span class="stepnav-lbl">✓ Флоу завершён — Pro активирован</span>
+        <div style="width:120px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     INVOICE DETAIL (shared, used by both variants)
+═══════════════════════════════════════════ -->
+<section id="screen-invoice-detail" class="screen">
+  <nav class="sidenav">
+    <div class="nav-top">
+      <div class="nav-userpic">B</div>
+      <div class="nav-biz">Brick Builder<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8l3 3 3-3"/></svg></div>
+    </div>
+    <div class="navlink" onclick="goToNav('mytofu')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>My Tofu</div>
+    <div class="navlink" onclick="goToNav('jobs')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="13" rx="1.5"/><path d="M7 4V2M13 4V2M3 8h14"/></svg>Jobs</div>
+    <div class="navlink active"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>Invoices</div>
+    <div class="navlink" onclick="goToNav('clients')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6"/></svg>Clients</div>
+    <div class="nav-bottom">
+      <div class="navlink" onclick="goToNav('settings')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>Settings</div>
+    </div>
+  </nav>
+  <div class="maincol">
+    <div class="wrap">
+
+      <!-- toolbar -->
+      <div class="inv-toolbar">
+        <button class="inv-back" id="inv-back-btn" onclick="goBack()">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 4l-6 6 6 6"/></svg>
+          Back
+        </button>
+        <div class="inv-spacer"></div>
+        <button class="inv-btn-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 13v3h3l8-8-3-3-8 8zM14.5 5.5l-2-2"/></svg></button>
+        <button class="inv-btn-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="10" r="1.2"/><circle cx="10" cy="10" r="1.2"/><circle cx="15" cy="10" r="1.2"/></svg></button>
+      </div>
+
+      <!-- title -->
+      <div class="inv-title" id="inv-client-name">James Carter</div>
+      <div class="inv-subtitle" id="inv-meta">#006 · May 17 · Job #151</div>
+
+      <!-- 2-col grid -->
+      <div class="inv-grid">
+
+        <!-- LEFT: invoice image stub -->
+        <div class="inv-preview">
+          <svg viewBox="0 0 354 490" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;background:#fff">
+            <!-- header blue bar -->
+            <rect x="0" y="0" width="354" height="56" fill="#2563EB"/>
+            <!-- logo area -->
+            <rect x="20" y="14" width="28" height="28" rx="4" fill="#fff" opacity=".2"/>
+            <text x="24" y="33" font-family="Inter,sans-serif" font-size="12" fill="#fff" font-weight="600">BB</text>
+            <!-- INVOICE label -->
+            <text x="20" y="90" font-family="Inter,sans-serif" font-size="22" fill="#1f2226" font-weight="700" letter-spacing="-0.5">INVOICE</text>
+            <!-- right meta -->
+            <text x="334" y="70" font-family="Inter,sans-serif" font-size="10" fill="#ff4a4d" text-anchor="end">Overdue 23d</text>
+            <text x="334" y="84" font-family="Inter,sans-serif" font-size="10" fill="#888" text-anchor="end">Issued May 17, 2026</text>
+            <!-- Bill to -->
+            <text x="20" y="120" font-family="Inter,sans-serif" font-size="9" fill="#888" letter-spacing=".5" text-transform="uppercase">BILL TO</text>
+            <text x="20" y="134" font-family="Inter,sans-serif" font-size="11" fill="#1f2226" font-weight="600">James Carter</text>
+            <text x="20" y="147" font-family="Inter,sans-serif" font-size="10" fill="#888">james.carter@email.com</text>
+            <text x="20" y="159" font-family="Inter,sans-serif" font-size="10" fill="#888">451 Oak Lane, Austin, TX 73301</text>
+            <!-- table header -->
+            <rect x="20" y="175" width="314" height="22" fill="#2563EB" rx="2"/>
+            <text x="28" y="189" font-family="Inter,sans-serif" font-size="9" fill="#fff" font-weight="600">DESCRIPTION</text>
+            <text x="240" y="189" font-family="Inter,sans-serif" font-size="9" fill="#fff" font-weight="600">QTY</text>
+            <text x="270" y="189" font-family="Inter,sans-serif" font-size="9" fill="#fff" font-weight="600">PRICE</text>
+            <text x="314" y="189" font-family="Inter,sans-serif" font-size="9" fill="#fff" font-weight="600" text-anchor="end">AMOUNT</text>
+            <!-- row 1 -->
+            <text x="28" y="210" font-family="Inter,sans-serif" font-size="10" fill="#1f2226">Lawn care — monthly</text>
+            <text x="240" y="210" font-family="Inter,sans-serif" font-size="10" fill="#1f2226">1</text>
+            <text x="270" y="210" font-family="Inter,sans-serif" font-size="10" fill="#1f2226">$600</text>
+            <text x="334" y="210" font-family="Inter,sans-serif" font-size="10" fill="#1f2226" text-anchor="end">$600.00</text>
+            <line x1="20" y1="218" x2="334" y2="218" stroke="#e5e7eb" stroke-width="1"/>
+            <!-- row 2 -->
+            <text x="28" y="232" font-family="Inter,sans-serif" font-size="10" fill="#1f2226">Hedge trimming</text>
+            <text x="240" y="232" font-family="Inter,sans-serif" font-size="10" fill="#1f2226">1</text>
+            <text x="270" y="232" font-family="Inter,sans-serif" font-size="10" fill="#1f2226">$250</text>
+            <text x="334" y="232" font-family="Inter,sans-serif" font-size="10" fill="#1f2226" text-anchor="end">$250.00</text>
+            <line x1="20" y1="240" x2="334" y2="240" stroke="#e5e7eb" stroke-width="1"/>
+            <!-- row 3 -->
+            <text x="28" y="254" font-family="Inter,sans-serif" font-size="10" fill="#1f2226">Leaf removal</text>
+            <text x="240" y="254" font-family="Inter,sans-serif" font-size="10" fill="#1f2226">1</text>
+            <text x="270" y="254" font-family="Inter,sans-serif" font-size="10" fill="#1f2226">$150</text>
+            <text x="334" y="254" font-family="Inter,sans-serif" font-size="10" fill="#1f2226" text-anchor="end">$150.00</text>
+            <!-- subtotal -->
+            <line x1="220" y1="270" x2="334" y2="270" stroke="#e5e7eb" stroke-width="1"/>
+            <text x="280" y="283" font-family="Inter,sans-serif" font-size="10" fill="#888">Subtotal</text>
+            <text x="334" y="283" font-family="Inter,sans-serif" font-size="10" fill="#1f2226" text-anchor="end">$1,000.00</text>
+            <text x="280" y="298" font-family="Inter,sans-serif" font-size="10" fill="#888">Tax (0%)</text>
+            <text x="334" y="298" font-family="Inter,sans-serif" font-size="10" fill="#1f2226" text-anchor="end">$0.00</text>
+            <line x1="220" y1="305" x2="334" y2="305" stroke="#1f2226" stroke-width="1.5"/>
+            <text x="280" y="318" font-family="Inter,sans-serif" font-size="11" fill="#1f2226" font-weight="700">Total</text>
+            <text x="334" y="318" font-family="Inter,sans-serif" font-size="11" fill="#1f2226" font-weight="700" text-anchor="end">$1,000.00</text>
+            <!-- footer -->
+            <text x="20" y="370" font-family="Inter,sans-serif" font-size="9" fill="#aaa">For online payment scan QR code or visit: https://pay.tofu.com/inv/...</text>
+            <text x="20" y="420" font-family="Inter,sans-serif" font-size="9" fill="#aaa">Brick Builder · brick@builder.com · Invoice #006 · 1 of 1</text>
+          </svg>
+          <div class="inv-preview-zoom">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3h5M3 3v5M17 3h-5M17 3v5M3 17h5M3 17v-5M17 17h-5M17 17v-5"/></svg>
+          </div>
+        </div>
+
+        <!-- RIGHT col -->
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+          <!-- summary card -->
+          <div class="inv-summary">
+            <div>
+              <div class="inv-due-label">Due Jun 7, 2026</div>
+              <div class="inv-amount lnum">$1,000.00</div>
+            </div>
+            <div class="inv-actions">
+              <button class="inv-send-btn">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="16" height="13" rx="1.5"/><path d="M2 7l8 5 8-5"/></svg>
+                Send reminder now
+              </button>
+              <button class="inv-btn-icon" style="background:#fff;flex-shrink:0;width:48px;height:48px"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l3-1 8-8-2-2-8 8-1 3z"/></svg></button>
+              <button class="inv-btn-icon" style="background:#fff;flex-shrink:0;width:48px;height:48px"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 13v3h3l8-8-3-3-8 8z"/></svg></button>
+            </div>
+            <div>
+              <div class="inv-link-label">Invoice link:</div>
+              <div class="inv-link-field" style="margin-top:6px">
+                <div class="inv-link-text">https://pay.tofu.com/inv/b8f07a72-bc73-47...</div>
+                <button class="inv-link-copy"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M13 7V4a1 1 0 00-1-1H4a1 1 0 00-1 1v8a1 1 0 001 1h3"/></svg></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- r0: soon — no reminders sent yet -->
+          <div class="inv-reminders" id="rem-state-r0" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="inv-rem-title">Payment reminders</div>
+              <span style="font-size:12px;font-weight:500;color:var(--aq);background:var(--spos);padding:2px 8px;border-radius:var(--rr)">Active</span>
+            </div>
+            <div style="font-size:13px;color:var(--cs)">After due date · every 7 days · max 3</div>
+            <div style="width:100%;height:1px;background:var(--bt);margin:6px 0"></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot" style="background:var(--bt)"></div><span style="color:var(--cs)">Reminder ×1</span><span style="margin-left:auto;font-size:12px;color:var(--aq);font-weight:500" class="lnum">Jun 8 · sending soon</span></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot" style="background:var(--bt)"></div><span style="color:var(--cs)">Reminder ×2</span><span style="margin-left:auto;font-size:12px;color:var(--cs)" class="lnum">Jun 15</span></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot" style="background:var(--bt)"></div><span style="color:var(--cs)">Reminder ×3</span><span style="margin-left:auto;font-size:12px;color:var(--cs)" class="lnum">Jun 22</span></div>
+          </div>
+
+          <!-- r1: 1 sent -->
+          <div class="inv-reminders" id="rem-state-r1" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="inv-rem-title">Payment reminders</div>
+              <span style="font-size:12px;font-weight:500;color:var(--aq);background:var(--spos);padding:2px 8px;border-radius:var(--rr)">Active</span>
+            </div>
+            <div style="font-size:13px;color:var(--cs)">After due date · every 7 days · max 3</div>
+            <div style="width:100%;height:1px;background:var(--bt);margin:6px 0"></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot"></div><span style="color:var(--cp)">Reminder sent ×1</span><span style="margin-left:auto;font-size:12px" class="lnum">Jun 4</span></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot" style="background:var(--bt)"></div><span style="color:var(--cs)">Reminder ×2</span><span style="margin-left:auto;font-size:12px;color:var(--cs)" class="lnum">Jun 11</span></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot" style="background:var(--bt)"></div><span style="color:var(--cs)">Reminder ×3</span><span style="margin-left:auto;font-size:12px;color:var(--cs)" class="lnum">Jun 18</span></div>
+          </div>
+
+          <!-- r2: 2 sent -->
+          <div class="inv-reminders" id="rem-state-r2" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="inv-rem-title">Payment reminders</div>
+              <span style="font-size:12px;font-weight:500;color:var(--aq);background:var(--spos);padding:2px 8px;border-radius:var(--rr)">Active</span>
+            </div>
+            <div style="font-size:13px;color:var(--cs)">After due date · every 7 days · max 3</div>
+            <div style="width:100%;height:1px;background:var(--bt);margin:6px 0"></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot"></div><span style="color:var(--cp)">Reminder sent ×1</span><span style="margin-left:auto;font-size:12px" class="lnum">May 26</span></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot"></div><span style="color:var(--cp)">Reminder sent ×2</span><span style="margin-left:auto;font-size:12px" class="lnum">Jun 2</span></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot" style="background:var(--bt)"></div><span style="color:var(--cs)">Reminder ×3</span><span style="margin-left:auto;font-size:12px;color:var(--cs)" class="lnum">Jun 9</span></div>
+          </div>
+
+          <!-- r3: max reached (existing rem-state-max content stays, just rename id references) -->
+          <div class="inv-reminders" id="rem-state-max">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="inv-rem-title">Payment reminders</div>
+              <span style="font-size:12px;font-weight:500;color:var(--cn);background:rgba(255,74,77,.1);padding:2px 8px;border-radius:var(--rr)">Max reached</span>
+            </div>
+            <div style="font-size:13px;color:var(--cs)">After due date · every 7 days · max 3</div>
+            <div style="width:100%;height:1px;background:var(--bt);margin:6px 0"></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot"></div><span style="color:var(--cp)">Reminder sent ×1</span><span style="margin-left:auto;font-size:12px" class="lnum">May 24</span></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot"></div><span style="color:var(--cp)">Reminder sent ×2</span><span style="margin-left:auto;font-size:12px" class="lnum">May 31</span></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot"></div><span style="color:var(--cp)">Reminder sent ×3</span><span style="margin-left:auto;font-size:12px" class="lnum">Jun 7</span></div>
+            <div style="width:100%;height:1px;background:var(--bt);margin:6px 0"></div>
+            <div style="font-size:12px;color:var(--cs);margin-bottom:6px">No more reminders scheduled. Restart to begin a new cycle.</div>
+            <button class="inv-send-now" onclick="restartReminders()" style="background:var(--ap);color:#fff;border-color:var(--ap)">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 4v5h5M16 16v-5h-5"/><path d="M4.93 9A8 8 0 1115.07 11"/></svg>
+              Restart reminders
+            </button>
+          </div>
+
+          <!-- after restart: active with send now -->
+          <div class="inv-reminders" id="rem-state-active" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="inv-rem-title">Payment reminders</div>
+              <span style="font-size:12px;font-weight:500;color:var(--aq);background:var(--spos);padding:2px 8px;border-radius:var(--rr)">Active</span>
+            </div>
+            <div style="font-size:13px;color:var(--cs)">After due date · every 7 days · max 3</div>
+            <div style="width:100%;height:1px;background:var(--bt);margin:6px 0"></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot" style="background:var(--bt)"></div><span style="color:var(--cs)">Reminder ×1</span><span style="margin-left:auto;font-size:12px;color:var(--cs)" class="lnum">Jun 17</span></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot" style="background:var(--bt)"></div><span style="color:var(--cs)">Reminder ×2</span><span style="margin-left:auto;font-size:12px;color:var(--cs)" class="lnum">Jun 24</span></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot" style="background:var(--bt)"></div><span style="color:var(--cs)">Reminder ×3</span><span style="margin-left:auto;font-size:12px;color:var(--cs)" class="lnum">Jul 1</span></div>
+            <div style="width:100%;height:1px;background:var(--bt);margin:6px 0"></div>
+            <button class="inv-send-now" onclick="sendNow()">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><rect x="2" y="4" width="16" height="13" rx="1.5"/><path d="M2 7l8 5 8-5"/></svg>
+              Send reminder now
+            </button>
+          </div>
+
+          <!-- after send now -->
+          <div class="inv-reminders" id="rem-state-sent" style="display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="inv-rem-title">Payment reminders</div>
+              <span style="font-size:12px;font-weight:500;color:var(--aq);background:var(--spos);padding:2px 8px;border-radius:var(--rr)">Active</span>
+            </div>
+            <div style="font-size:13px;color:var(--cs)">After due date · every 7 days · max 3</div>
+            <div style="width:100%;height:1px;background:var(--bt);margin:6px 0"></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot"></div><span style="color:var(--cp);font-weight:500">Manual reminder sent</span><span style="margin-left:auto;font-size:12px" class="lnum">Jun 10</span></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot" style="background:var(--bt)"></div><span style="color:var(--cs)">Reminder ×1</span><span style="margin-left:auto;font-size:12px;color:var(--cs)" class="lnum">Jun 17</span></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot" style="background:var(--bt)"></div><span style="color:var(--cs)">Reminder ×2</span><span style="margin-left:auto;font-size:12px;color:var(--cs)" class="lnum">Jun 24</span></div>
+            <div class="inv-rem-row"><div class="inv-rem-dot" style="background:var(--bt)"></div><span style="color:var(--cs)">Reminder ×3</span><span style="margin-left:auto;font-size:12px;color:var(--cs)" class="lnum">Jul 1</span></div>
+          </div>
+
+          <!-- tracker -->
+          <div class="inv-tracker">
+            <div class="tracker-row">
+              <div class="tracker-timeline">
+                <div class="tracker-dot"></div>
+                <div class="tracker-line"></div>
+              </div>
+              <div class="tracker-content">
+                <div class="tracker-label">Created from job</div>
+                <button class="tracker-btn">View job #151</button>
+              </div>
+            </div>
+            <div class="tracker-row">
+              <div class="tracker-timeline">
+                <div class="tracker-dot"></div>
+                <div class="tracker-line"></div>
+              </div>
+              <div class="tracker-content">
+                <div class="tracker-label">Sent to client</div>
+              </div>
+            </div>
+            <div class="tracker-row">
+              <div class="tracker-timeline">
+                <div class="tracker-dot empty"></div>
+              </div>
+              <div class="tracker-content" style="padding-bottom:0">
+                <div class="tracker-label dim">Paid</div>
+                <div style="display:flex;gap:8px;margin-top:10px">
+                  <button class="tracker-btn primary">Mark as paid</button>
+                  <button class="tracker-btn">Add payment</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPDATES — full width -->
+        <div class="inv-updates">
+          <div class="upd-title">Updates</div>
+
+          <div class="upd-item">
+            <div class="upd-icon"><svg viewBox="0 0 20 20" fill="none" stroke="var(--aq)" stroke-width="2"><path d="M4 10l4 4 8-8"/></svg></div>
+            <div class="upd-body">
+              <div class="upd-date">Jun 7, 2026 at 9:00 AM</div>
+              <div class="upd-text upd-reminder">Payment reminder sent to james.carter@email.com (Reminder ×3)</div>
+            </div>
+          </div>
+
+          <div class="upd-item">
+            <div class="upd-icon"><svg viewBox="0 0 20 20" fill="none" stroke="var(--aq)" stroke-width="2"><path d="M4 10l4 4 8-8"/></svg></div>
+            <div class="upd-body">
+              <div class="upd-date">May 31, 2026 at 9:00 AM</div>
+              <div class="upd-text upd-reminder">Payment reminder sent to james.carter@email.com (Reminder ×2)</div>
+            </div>
+          </div>
+
+          <div class="upd-item">
+            <div class="upd-icon"><svg viewBox="0 0 20 20" fill="none" stroke="var(--aq)" stroke-width="2"><path d="M4 10l4 4 8-8"/></svg></div>
+            <div class="upd-body">
+              <div class="upd-date">May 24, 2026 at 9:00 AM</div>
+              <div class="upd-text upd-reminder">Payment reminder sent to james.carter@email.com (Reminder ×1)</div>
+            </div>
+          </div>
+
+          <div class="upd-item">
+            <div class="upd-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="16" height="13" rx="1.5"/><path d="M2 7l8 5 8-5"/></svg></div>
+            <div class="upd-body">
+              <div class="upd-date">May 17, 2026 at 10:30 AM</div>
+              <div class="upd-text">You marked this invoice as sent</div>
+            </div>
+          </div>
+
+          <div class="upd-item">
+            <div class="upd-icon"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4v12M4 10h12"/></svg></div>
+            <div class="upd-body">
+              <div class="upd-date">May 17, 2026 at 10:15 AM</div>
+              <div class="upd-text">You created this invoice</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /inv-grid -->
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══ EMAIL PREVIEW MODAL ═══ -->
+<div class="email-overlay" id="email-overlay" onclick="if(event.target===this)closeEmail()">
+  <div class="email-modal">
+    <div class="email-modal-head">
+      <span class="email-modal-title">Email preview — Payment reminder</span>
+      <button class="email-modal-close" onclick="closeEmail()">
+        <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 5l10 10M15 5L5 15"/></svg>
+      </button>
+    </div>
+    <div class="email-meta">
+      <div class="email-meta-row"><span class="email-meta-lbl">From</span><span class="email-meta-val">Brick Builder &lt;no-reply@tofu.com&gt;</span></div>
+      <div class="email-meta-row"><span class="email-meta-lbl">To</span><span class="email-meta-val">client@example.com</span></div>
+      <div class="email-meta-row"><span class="email-meta-lbl">Subj</span><span class="email-meta-val">Payment reminder — Invoice #006 · $1,000.00</span></div>
+    </div>
+    <div class="email-body">
+      <p>Hi Michael,</p>
+      <p>This is a reminder that invoice #006 for <strong>$1,000.00</strong> was due on Jun 7, 2026 and remains unpaid.</p>
+      <p>If you've already sent payment, please disregard this message. Otherwise, we'd appreciate you taking care of it at your earliest convenience.</p>
+      <button class="email-pay-btn">View &amp; pay invoice</button>
+      <p>Questions? Reply to this email and we'll get back to you.</p>
+      <p>Thank you,<br><strong>Brick Builder</strong></p>
+    </div>
+  </div>
+</div>
+
+
+<script>
+var currentVariant = 'free';
+
+function goToNav(section) {
+  if (section === 'invoices') {
+    goTo(currentVariant === 'free' ? 'list-free' : 'list-pro');
+  } else if (section === 'settings') {
+    goTo(currentVariant === 'free' ? 'settings-free' : 'settings-pro');
+  } else {
+    // jobs, clients, mytofu — not in prototype, just show current list
+    goTo(currentVariant === 'free' ? 'list-free' : 'list-pro');
+  }
+}
+
+var flowFree  = ['list-free','list-past-free','settings-free','list-past-activated-free','invoice-detail'];
+var flowPro   = ['list-pro','list-past-pro','settings-pro','paywall-pro','list-past-activated-pro','invoice-detail'];
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(function(s) {
+    s.classList.remove('active');
+    s.style.display = 'none';
+  });
+  var el = document.getElementById('screen-' + id);
+  if (!el) return;
+  el.classList.add('active');
+  if (id === 'paywall-pro') {
+    el.style.display = 'flex';
+  } else {
+    el.style.display = 'flex';
+  }
+
+  var flow = currentVariant === 'free' ? flowFree : flowPro;
+  var idx = flow.indexOf(id);
+  document.querySelectorAll('.jbar a[data-go]').forEach(function(a) {
+    var go = a.dataset.go;
+    a.classList.remove('active','done');
+    if (go === id) { a.classList.add('active'); return; }
+    var aIdx = flow.indexOf(go);
+    if (aIdx >= 0 && aIdx < idx) a.classList.add('done');
+  });
+
+  var mc = el.querySelector('.maincol');
+  if (mc) mc.scrollTop = 0;
+}
+
+function setVariant(v) {
+  currentVariant = v;
+  document.getElementById('btn-free').classList.toggle('active', v === 'free');
+  document.getElementById('btn-pro').classList.toggle('active',  v === 'pro');
+
+  // update jbar links
+  var links = [
+    {id:'jbar-list-free',     free:'list-free',      pro:'list-pro'},
+    {id:'jbar-list-past-free',free:'list-past-free',  pro:'list-past-pro'},
+    {id:'jbar-settings-free', free:'settings-free',   pro:'settings-pro'},
+  ];
+  links.forEach(function(l) {
+    var a = document.getElementById(l.id);
+    a.dataset.go = v === 'free' ? l.free : l.pro;
+  });
+
+  goTo(v === 'free' ? 'list-free' : 'list-pro');
+}
+
+document.querySelectorAll('.jbar a[data-go]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    goTo(a.dataset.go);
+  });
+});
+
+/* ── Filter dropdown ── */
+function toggleFilter(id) {
+  var btn = document.getElementById('fb-' + id);
+  var menu = document.getElementById('fm-' + id);
+  var isOpen = menu.classList.contains('open');
+  // close all open menus
+  document.querySelectorAll('.filter-menu.open').forEach(function(m) { m.classList.remove('open'); });
+  document.querySelectorAll('.filter-btn.open').forEach(function(b) { b.classList.remove('open'); });
+  if (!isOpen) {
+    menu.classList.add('open');
+    btn.classList.add('open');
+  }
+}
+
+function selectFilter(id, choice) {
+  var menu = document.getElementById('fm-' + id);
+  var btn = document.getElementById('fb-' + id);
+  if (menu) menu.classList.remove('open');
+  if (btn) btn.classList.remove('open');
+
+  var v = id.indexOf('pro') >= 0 ? 'pro' : 'free';
+  var activated = id.indexOf('act') >= 0;
+
+  if (choice === 'all') {
+    goTo('list-' + v);
+  } else {
+    goTo(activated ? 'list-past-activated-' + v : 'list-past-' + v);
+  }
+}
+
+// close dropdowns on outside click
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.filter-wrap')) {
+    document.querySelectorAll('.filter-menu.open').forEach(function(m) { m.classList.remove('open'); });
+    document.querySelectorAll('.filter-btn.open').forEach(function(b) { b.classList.remove('open'); });
+  }
+});
+
+goTo('list-free');
+
+var prevScreen = 'list-past-activated-free';
+function openInvoice(fromScreen, clientName, meta, reminderState) {
+  prevScreen = fromScreen;
+  reminderState = reminderState || 'r3';
+  document.getElementById('inv-client-name').textContent = clientName;
+  document.getElementById('inv-meta').textContent = meta;
+  document.getElementById('inv-back-btn').innerHTML = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 4l-6 6 6 6"/></svg> Back';
+  // show correct reminder block, hide others
+  document.getElementById('rem-state-max').style.display = 'none';
+  document.getElementById('rem-state-active').style.display = 'none';
+  document.getElementById('rem-state-sent').style.display = 'none';
+  document.getElementById('rem-state-r0').style.display = 'none';
+  document.getElementById('rem-state-r1').style.display = 'none';
+  document.getElementById('rem-state-r2').style.display = 'none';
+  if (reminderState === 'r0') document.getElementById('rem-state-r0').style.display = 'flex';
+  else if (reminderState === 'r1') document.getElementById('rem-state-r1').style.display = 'flex';
+  else if (reminderState === 'r2') document.getElementById('rem-state-r2').style.display = 'flex';
+  else { document.getElementById('rem-state-max').style.display = 'flex'; }
+  goTo('invoice-detail');
+}
+function goBack() {
+  goTo(prevScreen);
+}
+
+function restartReminders() {
+  document.getElementById('rem-state-max').style.display = 'none';
+  document.getElementById('rem-state-active').style.display = 'flex';
+  document.getElementById('rem-state-sent').style.display = 'none';
+}
+function sendNow() {
+  document.getElementById('rem-state-max').style.display = 'none';
+  document.getElementById('rem-state-active').style.display = 'none';
+  document.getElementById('rem-state-sent').style.display = 'flex';
+}
+
+function openEmail() {
+  document.getElementById('email-overlay').classList.add('open');
+}
+function closeEmail() {
+  document.getElementById('email-overlay').classList.remove('open');
+}
+
+function activateSave(id) {
+  var btn = document.getElementById(id);
+  if (btn) { btn.style.opacity='1'; btn.style.pointerEvents='auto'; btn.disabled=false; }
+}
+</script>
+</body>
+</html>
