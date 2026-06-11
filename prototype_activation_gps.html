@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tofu FSM — GPS Activation Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cp:   #1f2226;
+    --cs:   rgba(31,34,38,.65);
+    --ct:   rgba(31,34,38,.45);
+    --cb:   rgba(31,34,38,.10);   /* border/tertiary */
+    --cbs:  rgba(31,34,38,.30);   /* border/secondary */
+    --sp:   #ffffff;
+    --ss:   #f1ede4;              /* surface/secondary */
+    --hf:   #f8f6f2;              /* hover fill */
+    --sneg: #f6e9ea;
+    --spos: #e5f2ed;
+    --aq:   #4e9b7d;
+    --cn:   #ff4a4d;
+    --r:    8px;
+    --rxl:  12px;
+    --rr:   100px;
+    --nav:  240px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--cp);
+    background: var(--sp);
+    min-height: 100vh;
+  }
+
+  /* ── Journey bar ── */
+  .journey-bar {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 40px;
+    background: var(--cp);
+    display: flex; align-items: center; justify-content: center; gap: 0;
+    z-index: 1000;
+  }
+  .journey-step {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 16px; height: 40px;
+    font-size: 12px; color: rgba(255,255,255,.45);
+    cursor: pointer; user-select: none;
+    transition: color .15s;
+  }
+  .journey-step .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,.25); flex-shrink: 0;
+    transition: background .15s;
+  }
+  .journey-step.active { color: #fff; font-weight: 600; }
+  .journey-step.active .dot { background: #fff; }
+  .journey-step.done { color: var(--aq); }
+  .journey-step.done .dot { background: var(--aq); }
+  .journey-sep { color: rgba(255,255,255,.2); font-size: 11px; flex-shrink: 0; }
+
+  /* ── App shell ── */
+  .app-shell { display: flex; padding-top: 40px; min-height: 100vh; }
+
+  /* ── Side nav — exact Figma: 240px, border-right surface/secondary ── */
+  .side-nav {
+    width: var(--nav); flex-shrink: 0;
+    background: var(--sp);
+    border-right: 1px solid var(--ss);
+    display: flex; flex-direction: column;
+    position: fixed; top: 40px; bottom: 0; left: 0;
+    overflow-y: auto; z-index: 100;
+  }
+
+  /* Account block: px-24 py-36, gap-12 */
+  .nav-account {
+    display: flex; flex-direction: column; gap: 12px;
+    padding: 36px 24px; flex-shrink: 0;
+  }
+  .nav-userpic {
+    width: 36px; height: 36px;
+    border-radius: 2px; /* radius/small */
+    background: var(--cp); color: #fff;
+    font-size: 20px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .nav-company {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 16px; font-weight: 600; color: var(--cp);
+  }
+  .nav-company-chevron { opacity: .45; font-size: 13px; }
+
+  /* Nav items: px-24 py-16, gap-16, font 14px */
+  .nav-items { display: flex; flex-direction: column; flex: 1; }
+  .nav-item {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 24px;
+    font-size: 14px; font-weight: 400; color: var(--cp);
+    cursor: pointer; user-select: none;
+    position: relative; transition: background .1s;
+    text-decoration: none;
+  }
+  .nav-item:hover { background: var(--hf); }
+  .nav-item.active { background: var(--ss); font-weight: 600; }
+  .nav-item svg { flex-shrink: 0; width: 24px; height: 24px; }
+  .nav-spacer { flex: 1; }
+
+  /* ── Main content ── */
+  .main-content { margin-left: var(--nav); flex: 1; min-height: calc(100vh - 40px); }
+
+  /* ── Screen system ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── Container: max-width 840px, px-60, pb-60 ── */
+  .container {
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .container-inner {
+    width: 100%; max-width: 840px;
+    padding: 0 60px 60px;
+  }
+
+  /* ── Nav bar (page header): pt-36 pb-24 ── */
+  .page-nav-bar {
+    padding: 36px 0 24px;
+  }
+  .page-title-row {
+    display: flex; align-items: center; gap: 16px;
+    padding-top: 24px;
+  }
+  /* Display: 32px semibold tracking -0.32px */
+  .page-title {
+    font-size: 32px; font-weight: 600; color: var(--cp);
+    letter-spacing: -0.32px; line-height: 1.2;
+  }
+
+  /* Sub-title / page subtitle: Body/Large/Regular 16px */
+  .page-subtitle {
+    font-size: 16px; font-weight: 400; color: var(--cs);
+    line-height: 1.5; margin-top: 8px;
+  }
+
+  /* Back nav bar (inner pages) — sticky */
+  .inner-nav-bar {
+    background: var(--sp);
+    border-bottom: 1px solid var(--ss);
+    padding: 14px 60px;
+    display: flex; align-items: center; gap: 16px;
+    position: sticky; top: 40px; z-index: 50;
+  }
+  .back-btn {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 14px; color: var(--cs); cursor: pointer;
+    user-select: none; transition: color .12s;
+  }
+  .back-btn:hover { color: var(--cp); }
+  .inner-nav-titles { flex: 1; }
+  /* Heading/Heading Small 20px semibold */
+  .inner-nav-title { font-size: 20px; font-weight: 600; color: var(--cp); letter-spacing: -0.5px; line-height: 1.4; }
+  .inner-nav-sub { font-size: 12px; color: var(--ct); margin-top: 1px; }
+
+  /* ── Activation point chip ── */
+  .ap-label {
+    display: inline-flex; align-items: center;
+    font-size: 11px; font-weight: 600;
+    background: #fff3cd; color: #856404;
+    border-radius: var(--rr);
+    padding: 3px 10px; margin-bottom: 8px;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    border: none; border-radius: var(--r);
+    font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 500;
+    cursor: pointer; padding: 12px 20px;
+    transition: opacity .12s, filter .12s;
+    white-space: nowrap; user-select: none;
+  }
+  .btn:hover { filter: brightness(.93); }
+  .btn:active { filter: brightness(.87); }
+  .btn-primary { background: var(--cp); color: #fff; }
+  .btn-secondary {
+    background: var(--sp); color: var(--cp);
+    border: 1px solid var(--cb);
+  }
+  .btn-ghost {
+    background: transparent; color: var(--cs);
+    padding: 6px 10px; font-size: 13px; font-weight: 500;
+  }
+  .btn-ghost:hover { background: var(--hf); color: var(--cp); }
+  .btn-sm { padding: 8px 16px; font-size: 14px; }
+
+  /* ── SCREEN 1: Crew empty ─────────────── */
+  .empty-state-box {
+    border: 1.5px dashed var(--cbs);
+    border-radius: var(--rxl);
+    min-height: 460px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 56px 40px; text-align: center;
+  }
+
+  /* Heading inside empty state */
+  .empty-heading {
+    font-size: 20px; font-weight: 600; color: var(--cp);
+    letter-spacing: -0.5px; line-height: 1.4;
+    margin-top: 8px; margin-bottom: 6px;
+  }
+  .empty-sub {
+    font-size: 16px; font-weight: 400; color: var(--cs);
+    line-height: 1.5; max-width: 380px; margin-bottom: 32px;
+  }
+
+  .value-bullets {
+    display: flex; flex-direction: column; gap: 24px;
+    margin-bottom: 36px; text-align: left;
+    max-width: 460px; width: 100%;
+  }
+  .value-bullet { display: flex; align-items: flex-start; gap: 14px; }
+  .bullet-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--hf); border: 1px solid var(--cb);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 18px;
+  }
+  .bullet-title { font-size: 14px; font-weight: 600; color: var(--cp); margin-bottom: 2px; }
+  .bullet-sub { font-size: 13px; color: var(--cs); line-height: 1.5; }
+
+  /* ── SCREEN 2: Job page ─────────────── */
+  /* page content gap: 36px (as Figma content block) */
+  .page-content { display: flex; flex-direction: column; gap: 36px; padding-top: 8px; }
+
+  /* Job page two-column layout */
+  .job-layout { display: flex; gap: 24px; align-items: flex-start; }
+  .job-main { flex: 1; min-width: 0; }
+  .job-sidebar { width: 260px; flex-shrink: 0; }
+
+  /* Card component */
+  .card {
+    background: var(--sp);
+    border: 1px solid var(--cb);
+    border-radius: var(--rxl);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .card:last-child { margin-bottom: 0; }
+
+  /* Card title: Body/Large/Emphasized 16px semibold */
+  .card-title {
+    font-size: 16px; font-weight: 600; color: var(--cp);
+    line-height: 1.5; margin-bottom: 12px;
+  }
+
+  /* Section header row (Visits heading + Add button) */
+  .section-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  /* Section title: Body/XLarge 18px */
+  .section-title {
+    font-size: 18px; font-weight: 600; color: var(--cp); line-height: 1.4;
+  }
+
+  /* Empty visit card (dashed) */
+  .empty-card-dashed {
+    border: 1.5px dashed var(--cbs);
+    border-radius: var(--rxl);
+    padding: 32px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    text-align: center;
+  }
+
+  /* Visit row in list */
+  .visit-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border: 1px solid var(--cb);
+    border-radius: var(--rxl);
+    cursor: pointer; transition: background .12s;
+    margin-bottom: 8px; background: var(--sp);
+  }
+  .visit-row:hover { background: var(--hf); }
+  .visit-row-left { display: flex; align-items: center; gap: 12px; }
+  .visit-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; }
+  /* Body/Large/Regular 16px for visit date */
+  .visit-row-date { font-size: 16px; font-weight: 400; color: var(--cp); line-height: 1.5; }
+  .visit-row-meta { font-size: 12px; color: var(--ct); margin-top: 1px; line-height: 1.4; }
+  .visit-row-chevron { color: var(--ct); font-size: 18px; }
+
+  /* Property details */
+  .prop-address { font-size: 16px; font-weight: 500; color: var(--cp); margin-bottom: 8px; line-height: 1.5; }
+  .prop-contacts { font-size: 14px; color: var(--cs); display: flex; flex-direction: column; gap: 4px; }
+  .prop-contacts a { color: var(--cs); text-decoration: none; }
+
+  /* Timeline */
+  .timeline { display: flex; flex-direction: column; }
+  .tl-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding-bottom: 20px; position: relative;
+  }
+  .tl-item:not(:last-child)::before {
+    content: ''; position: absolute;
+    left: 9px; top: 20px; bottom: 0; width: 2px;
+    background: var(--cb);
+  }
+  .tl-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--hf); border: 2px solid var(--cb);
+    flex-shrink: 0; z-index: 1;
+  }
+  .tl-dot.done { background: var(--aq); border-color: var(--aq); }
+  .tl-dot.active { background: #fff; border-color: var(--cp); box-shadow: 0 0 0 3px rgba(31,34,38,.08); }
+  .tl-label { font-size: 14px; font-weight: 500; color: var(--cp); padding-top: 1px; line-height: 1.4; }
+  .tl-date { font-size: 12px; color: var(--ct); margin-top: 2px; line-height: 1.4; }
+
+  /* ── SCREENS 3 & 4: Visit overview ─────────────── */
+  .visit-actions-row { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid var(--cb); border-radius: var(--r);
+    background: var(--sp);
+    font-size: 14px; font-weight: 500; color: var(--cp);
+    cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+
+  .visit-grid { display: flex; gap: 24px; align-items: flex-start; }
+  .visit-main { flex: 1; min-width: 0; }
+
+  /* Dashed card (unassigned tech) */
+  .card-dashed {
+    border: 1.5px dashed var(--cbs);
+    border-radius: var(--rxl);
+    padding: 24px; margin-bottom: 16px;
+  }
+  /* Tech card label: 12px semibold upper */
+  .tech-label {
+    font-size: 12px; font-weight: 600; color: var(--ct);
+    text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px;
+  }
+  .tech-hint { font-size: 16px; color: var(--cs); margin-bottom: 16px; line-height: 1.5; }
+
+  /* Tech dropdown */
+  .tech-dropdown {
+    display: none; background: var(--sp);
+    border: 1px solid var(--cb); border-radius: var(--r);
+    margin-top: 8px; overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  }
+  .tech-dropdown.open { display: block; }
+  .tech-option {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; cursor: pointer; transition: background .1s;
+  }
+  .tech-option:hover { background: var(--hf); }
+
+  /* Avatar sizes */
+  .avatar {
+    border-radius: 50%; background: var(--ss); color: var(--cs);
+    font-weight: 600; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .avatar-36 { width: 36px; height: 36px; font-size: 14px; }
+  .avatar-32 { width: 32px; height: 32px; font-size: 12px; }
+  .avatar-dark { background: var(--cp); color: #fff; }
+
+  .option-name { font-size: 14px; font-weight: 500; color: var(--cp); }
+  .option-role { font-size: 12px; color: var(--ct); margin-top: 1px; }
+  .option-badge {
+    margin-left: auto;
+    font-size: 12px; font-weight: 500;
+    background: var(--spos); color: #1a7a52;
+    border-radius: var(--rr); padding: 2px 8px;
+  }
+
+  /* Assigned tech row */
+  .tech-assigned-row { display: flex; align-items: center; gap: 12px; }
+  .tech-assigned-info { flex: 1; }
+  .tech-name { font-size: 16px; font-weight: 600; color: var(--cp); line-height: 1.5; }
+  .tech-meta { font-size: 14px; color: var(--cs); margin-top: 2px; line-height: 1.4; }
+  .change-link {
+    font-size: 13px; color: var(--ct);
+    cursor: pointer; text-decoration: underline; text-underline-offset: 2px;
+  }
+  .change-link:hover { color: var(--cp); }
+
+  /* Photos */
+  .photos-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .photos-grid { display: flex; gap: 10px; margin-bottom: 12px; }
+  .photo-thumb {
+    width: 100px; height: 80px;
+    border-radius: var(--r); position: relative; overflow: hidden;
+    flex-shrink: 0; cursor: pointer;
+  }
+  .photo-bg { position: absolute; inset: 0; }
+  .photo-location-tag {
+    position: absolute; bottom: 5px; left: 5px; right: 5px;
+    background: rgba(31,34,38,.72); color: #fff;
+    font-size: 10px; border-radius: 3px;
+    padding: 3px 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    cursor: pointer; z-index: 2;
+  }
+  .photos-note { font-size: 12px; color: var(--ct); line-height: 1.5; margin-top: 4px; }
+  .photos-note.positive { color: var(--aq); font-weight: 500; }
+
+  /* GPS callout */
+  .gps-callout {
+    background: var(--ss); border-radius: var(--rxl);
+    padding: 20px 24px; margin-bottom: 16px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .gps-callout-icon { font-size: 20px; flex-shrink: 0; padding-top: 2px; }
+  .gps-callout-title { font-size: 14px; font-weight: 600; color: var(--cp); margin-bottom: 4px; }
+  .gps-callout-text { font-size: 13px; color: var(--cs); line-height: 1.6; }
+
+  /* ── Schedule modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(31,34,38,.2);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2000; backdrop-filter: blur(2px);
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal-card {
+    background: #fff; border-radius: var(--rxl);
+    padding: 36px; width: 440px; position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,.12);
+  }
+  .modal-title { font-size: 24px; font-weight: 600; color: var(--cp); margin-bottom: 24px; }
+  .modal-close {
+    position: absolute; right: 16px; top: 16px;
+    background: var(--hf); border: none; border-radius: 50%;
+    width: 32px; height: 32px; font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--cs); font-family: 'Inter', sans-serif;
+  }
+  .modal-close:hover { background: var(--cb); }
+
+  .form-field { margin-bottom: 16px; }
+  .form-label {
+    font-size: 12px; font-weight: 600; color: var(--ct);
+    text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;
+  }
+  .form-input {
+    width: 100%; padding: 10px 14px;
+    border: 1px solid var(--cb); border-radius: var(--r);
+    font-size: 14px; font-family: 'Inter', sans-serif;
+    color: var(--cp); background: var(--sp); outline: none;
+  }
+  .form-input:focus { border-color: var(--cp); }
+  .input-wrap { position: relative; }
+  .input-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ct); pointer-events: none; font-size: 14px; }
+  .input-wrap .form-input { padding-left: 36px; }
+
+  /* Tech picker chip */
+  .tech-chip-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px;
+    background: var(--hf); border: 1.5px dashed var(--cbs);
+    border-radius: var(--rr);
+    font-size: 13px; font-weight: 500; color: var(--cs);
+    cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  .tech-chip-btn:hover { background: var(--ss); color: var(--cp); }
+  .tech-chip-selected {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px;
+    background: var(--cp); border-radius: var(--rr);
+    font-size: 13px; font-weight: 500; color: #fff;
+  }
+  .chip-remove { cursor: pointer; opacity: .7; }
+  .chip-remove:hover { opacity: 1; }
+  .tech-picker-hint { font-size: 13px; color: var(--ct); margin-top: 8px; line-height: 1.5; }
+  .tech-picker-dd {
+    display: none; background: var(--sp);
+    border: 1px solid var(--cb); border-radius: var(--r);
+    margin-top: 8px; overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  }
+  .tech-picker-dd.open { display: block; }
+
+  .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+
+  /* ── Map modal ── */
+  .map-modal-inner {
+    background: #fff; border-radius: var(--rxl);
+    padding: 32px; width: 400px; position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,.12);
+  }
+  .map-title { font-size: 18px; font-weight: 600; color: var(--cp); margin-bottom: 4px; }
+  .map-addr { font-size: 14px; color: var(--cs); margin-bottom: 16px; }
+  .map-block {
+    width: 100%; height: 200px;
+    background: linear-gradient(135deg,#d4e8d6,#a8d4ab);
+    border-radius: var(--r); position: relative; overflow: hidden;
+  }
+  .map-grid {
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.3) 39px,rgba(255,255,255,.3) 40px),
+      repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.3) 39px,rgba(255,255,255,.3) 40px);
+  }
+  .map-pin { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-100%); font-size: 28px; }
+  .map-hint { margin-top: 12px; font-size: 13px; color: var(--ct); }
+</style>
+</head>
+<body>
+
+<!-- Journey bar -->
+<div class="journey-bar">
+  <div class="journey-step" id="jstep-crew-empty" onclick="goTo('crew-empty')">
+    <div class="dot"></div>Crew (empty)
+  </div>
+  <div class="journey-sep">›</div>
+  <div class="journey-step" id="jstep-job-page" onclick="goTo('job-page')">
+    <div class="dot"></div>Job page
+  </div>
+  <div class="journey-sep">›</div>
+  <div class="journey-step" id="jstep-visit-no-tech" onclick="goTo('visit-no-tech')">
+    <div class="dot"></div>Visit · no tech
+  </div>
+  <div class="journey-sep">›</div>
+  <div class="journey-step" id="jstep-visit-tech" onclick="goTo('visit-tech')">
+    <div class="dot"></div>Visit · tech assigned
+  </div>
+</div>
+
+<div class="app-shell">
+
+  <!-- Side navigation — exact Figma structure -->
+  <nav class="side-nav">
+    <div class="nav-account">
+      <div class="nav-userpic">B</div>
+      <div class="nav-company">
+        Brick Builder <span class="nav-company-chevron">›</span>
+      </div>
+    </div>
+
+    <div class="nav-items">
+      <div class="nav-item" id="nav-mytofu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <rect x="3" y="3" width="8" height="8" rx="1.5"/>
+          <rect x="13" y="3" width="8" height="8" rx="1.5"/>
+          <rect x="3" y="13" width="8" height="8" rx="1.5"/>
+          <rect x="13" y="13" width="8" height="8" rx="1.5"/>
+        </svg>
+        My Tofu
+      </div>
+      <div class="nav-item" id="nav-jobs" onclick="goTo('job-page')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <rect x="4" y="4" width="16" height="16" rx="2"/>
+          <path d="M4 9h16M9 4v5"/>
+        </svg>
+        Jobs
+      </div>
+      <div class="nav-item" id="nav-invoices">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <rect x="4" y="2" width="16" height="20" rx="2"/>
+          <path d="M8 9h8M8 13h6M8 17h4"/>
+        </svg>
+        Invoices
+      </div>
+      <div class="nav-item" id="nav-estimates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M3 17l4-4 4 4 6-8"/>
+        </svg>
+        Estimates
+      </div>
+      <div class="nav-item" id="nav-clients">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-3.866 3.582-7 8-7s8 3.134 8 7"/>
+        </svg>
+        Clients
+      </div>
+      <div class="nav-item" id="nav-crew" onclick="goTo('crew-empty')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="8" cy="7" r="3"/>
+          <circle cx="16" cy="7" r="3"/>
+          <path d="M2 19c0-3 2.686-5 6-5s6 2 6 5"/>
+          <path d="M16 14c3.314 0 6 2 6 5"/>
+        </svg>
+        Crew
+      </div>
+      <div class="nav-spacer"></div>
+      <div class="nav-item" id="nav-settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+        Settings
+      </div>
+      <div class="nav-item" id="nav-support">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 16v-1M12 12c0-1.5 1-2 2-3s1-2.5-1-3.5a3 3 0 00-3 1.5"/>
+        </svg>
+        Support
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-content">
+
+    <!-- ════════════════════════════════════════════ -->
+    <!-- SCREEN 1: Crew — empty state               -->
+    <!-- ════════════════════════════════════════════ -->
+    <div class="screen" id="screen-crew-empty">
+      <div class="container">
+        <div class="container-inner">
+          <div class="page-nav-bar">
+            <div class="page-title-row">
+              <div class="page-title">Crew</div>
+            </div>
+          </div>
+
+          <div class="empty-state-box">
+            <div class="ap-label">ACTIVATION POINT A</div>
+            <div class="empty-sub" style="margin-bottom:28px;">Your crew works from their phone. You see what's happening — without calling anyone.</div>
+
+            <div class="value-bullets">
+              <div class="value-bullet">
+                <div class="bullet-icon">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 4.5"/></svg>
+                </div>
+                <div>
+                  <div class="bullet-title">Everything in one place — for you and your techs</div>
+                  <div class="bullet-sub">Job details and schedule straight to their phone. No calls before every visit.</div>
+                </div>
+              </div>
+              <div class="value-bullet">
+                <div class="bullet-icon">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 4.5"/></svg>
+                </div>
+                <div>
+                  <div class="bullet-title">No more switching between apps and chats</div>
+                  <div class="bullet-sub">Assign jobs, share details, track progress — all in Tofu.</div>
+                </div>
+              </div>
+              <div class="value-bullet">
+                <div class="bullet-icon">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 4.5"/></svg>
+                </div>
+                <div>
+                  <div class="bullet-title">Proof every visit was done</div>
+                  <div class="bullet-sub">Photos and GPS check-in — close client disputes in seconds.</div>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="goTo('job-page')">Invite tech</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════ -->
+    <!-- SCREEN 2: Job page                         -->
+    <!-- ════════════════════════════════════════════ -->
+    <div class="screen" id="screen-job-page">
+
+      <div class="inner-nav-bar">
+        <div class="back-btn" onclick="goTo('crew-empty')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 3L5 8l5 5"/></svg>
+          Jobs
+        </div>
+        <div class="inner-nav-titles">
+          <div class="inner-nav-title">Emily Johnson</div>
+          <div class="inner-nav-sub">Job #1 · Today</div>
+        </div>
+        <button class="btn btn-secondary btn-sm">Mark completed</button>
+      </div>
+
+      <div class="container">
+        <div class="container-inner">
+          <div class="page-content">
+            <div class="job-layout">
+
+              <!-- Main column -->
+              <div class="job-main">
+
+                <!-- Property -->
+                <div class="card">
+                  <div class="card-title">Property</div>
+                  <div class="prop-address">10848 Wagner St, Culver City, CA 90230</div>
+                  <div class="prop-contacts">
+                    <span>📞 <a href="#">(310) 216-1600</a></span>
+                    <span>✉️ <a href="#">emily.johnson@gmail.com</a></span>
+                  </div>
+                </div>
+
+                <!-- Visits -->
+                <div class="section-hdr">
+                  <div class="section-title">Visits</div>
+                  <div id="add-visit-btn-area"></div>
+                </div>
+
+                <div id="visits-list">
+                  <div class="empty-card-dashed" id="empty-visit-state">
+                    <div style="font-size:14px;color:var(--ct);">Schedule a visit to get started</div>
+                    <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="openScheduleModal()">Schedule a visit</button>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Sidebar -->
+              <div class="job-sidebar">
+                <div class="card">
+                  <div class="card-title">Job status</div>
+                  <div class="timeline">
+                    <div class="tl-item">
+                      <div class="tl-dot done"></div>
+                      <div><div class="tl-label">Created</div><div class="tl-date">Today, 9:00 AM</div></div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot active"></div>
+                      <div><div class="tl-label">Scheduled</div><div class="tl-date">Jun 15 at 10:00 AM</div></div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot"></div>
+                      <div><div class="tl-label">In progress</div><div class="tl-date">—</div></div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot"></div>
+                      <div><div class="tl-label">Completed</div><div class="tl-date">—</div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════ -->
+    <!-- SCREEN 3: Visit overview — no tech         -->
+    <!-- ════════════════════════════════════════════ -->
+    <div class="screen" id="screen-visit-no-tech">
+
+      <div class="inner-nav-bar">
+        <div class="back-btn" onclick="goTo('job-page')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 3L5 8l5 5"/></svg>
+          Job #1 for Emily Johnson
+        </div>
+        <div class="inner-nav-titles">
+          <div class="inner-nav-title">Jun 15 at 10:00 AM</div>
+          <div class="inner-nav-sub">Visit #1 · Scheduled</div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="container-inner" style="padding-top:32px;">
+
+          <div class="visit-actions-row">
+            <button class="status-pill">Scheduled ▾</button>
+            <button class="btn btn-primary btn-sm">Start visit</button>
+            <button class="btn btn-secondary btn-sm">Delete visit</button>
+          </div>
+
+          <div class="visit-grid">
+            <div class="visit-main">
+
+              <!-- Tech card — AP-C, no tech -->
+              <div class="card-dashed">
+                <div class="ap-label">ACTIVATION POINT C</div>
+                <div class="tech-label">Tech</div>
+                <div class="tech-hint">Assign a tech — and stop wondering if the job got done.</div>
+                <button class="btn btn-secondary btn-sm" onclick="toggleTechDd()">+ Add tech</button>
+                <div class="tech-dropdown" id="tech-dd-s3">
+                  <div class="tech-option" onclick="assignTechS3()">
+                    <div class="avatar avatar-36 avatar-dark">JM</div>
+                    <div>
+                      <div class="option-name">James Miller</div>
+                      <div class="option-role">Technician</div>
+                    </div>
+                    <div class="option-badge">Active</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Photos — empty state (no photos yet) -->
+              <div class="card-dashed">
+                <div class="photos-header">
+                  <div class="card-title" style="margin:0;">Photos</div>
+                  <button class="btn btn-secondary btn-sm">Add photos</button>
+                </div>
+                <div style="font-size:14px;color:var(--cs);line-height:1.6;">
+                  Add photos as proof of work — location tags are added automatically when your tech uses Tofu for crew app.
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════ -->
+    <!-- SCREEN 4: Visit overview — tech assigned   -->
+    <!-- ════════════════════════════════════════════ -->
+    <div class="screen" id="screen-visit-tech">
+
+      <div class="inner-nav-bar">
+        <div class="back-btn" onclick="goTo('job-page')">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 3L5 8l5 5"/></svg>
+          Job #1 for Emily Johnson
+        </div>
+        <div class="inner-nav-titles">
+          <div class="inner-nav-title">Jun 15 at 10:00 AM</div>
+          <div class="inner-nav-sub">Visit #1 · Scheduled</div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="container-inner" style="padding-top:32px;">
+
+          <div class="visit-actions-row">
+            <button class="status-pill">Scheduled ▾</button>
+            <button class="btn btn-primary btn-sm">Start visit</button>
+            <button class="btn btn-secondary btn-sm">Delete visit</button>
+          </div>
+
+          <div class="visit-grid">
+            <div class="visit-main">
+
+              <!-- Tech card — assigned -->
+              <div class="card" style="margin-bottom:16px;">
+                <div class="tech-label">Tech</div>
+                <div class="tech-assigned-row">
+                  <div class="avatar avatar-36 avatar-dark">JM</div>
+                  <div class="tech-assigned-info">
+                    <div class="tech-name">James Miller</div>
+                    <div class="tech-meta">GPS active · Active</div>
+                  </div>
+                  <div class="change-link" onclick="goTo('visit-no-tech')">Change</div>
+                </div>
+              </div>
+
+              <!-- Photos — with GPS -->
+              <div class="card">
+                <div class="photos-header">
+                  <div class="card-title" style="margin:0;">Photos</div>
+                  <button class="btn btn-ghost">+ Add photos</button>
+                </div>
+                <div class="photos-grid">
+                  <div class="photo-thumb" onclick="openMapModal()">
+                    <div class="photo-bg" style="background:linear-gradient(135deg,#c8e6c9,#81c784);"></div>
+                    <div class="photo-location-tag">📍 10848 Wagner St</div>
+                  </div>
+                  <div class="photo-thumb" onclick="openMapModal()">
+                    <div class="photo-bg" style="background:linear-gradient(135deg,#bbdefb,#64b5f6);"></div>
+                    <div class="photo-location-tag">📍 10848 Wagner St</div>
+                  </div>
+                  <div class="photo-thumb">
+                    <div class="photo-bg" style="background:linear-gradient(135deg,#fff9c4,#fff176);"></div>
+                  </div>
+                </div>
+              </div>
+
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app-shell -->
+
+<!-- ════════════════════════════════════════════ -->
+<!-- Modal: Schedule visit                       -->
+<!-- ════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="schedule-modal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeScheduleModal()">×</button>
+    <div class="modal-title">Schedule visit</div>
+
+    <div class="form-field">
+      <div class="form-label">Date</div>
+      <div class="input-wrap">
+        <span class="input-icon">📅</span>
+        <input class="form-input" type="text" value="Jun 15, 2026" readonly>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <div class="form-label">Time</div>
+      <div class="input-wrap">
+        <span class="input-icon">🕐</span>
+        <input class="form-input" type="text" placeholder="For example, 2:30pm or 14:00">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <div class="form-label">Tech</div>
+      <div id="modal-chip-area">
+        <button class="tech-chip-btn" onclick="toggleModalTechDd()">+ Add tech</button>
+      </div>
+      <div class="tech-picker-dd" id="modal-tech-dd">
+        <div class="tech-option" onclick="selectModalTech('James Miller','JM')">
+          <div class="avatar avatar-32 avatar-dark">JM</div>
+          <div>
+            <div class="option-name">James Miller</div>
+            <div class="option-role">Technician</div>
+          </div>
+          <div class="option-badge">Active</div>
+        </div>
+      </div>
+      <div class="tech-picker-hint" id="modal-tech-hint">Add a tech so they get the details — and you get proof the visit was done</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-primary" style="flex:1;" onclick="scheduleVisit()">Schedule</button>
+      <button class="btn btn-secondary" onclick="closeScheduleModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- Modal: Map                                  -->
+<!-- ════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="map-modal">
+  <div class="map-modal-inner">
+    <button class="modal-close" onclick="closeMapModal()">×</button>
+    <div class="map-title">Photo location</div>
+    <div class="map-addr">10848 Wagner St, Culver City, CA 90230</div>
+    <div class="map-block">
+      <div class="map-grid"></div>
+      <div class="map-pin">📍</div>
+    </div>
+    <div class="map-hint">Tap to open in Maps →</div>
+  </div>
+</div>
+
+<script>
+var selectedTech = null;
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  var t = document.getElementById('screen-' + id);
+  if (t) t.classList.add('active');
+
+  var steps = ['crew-empty','job-page','visit-no-tech','visit-tech'];
+  var idx = steps.indexOf(id);
+  steps.forEach(function(s, i){
+    var el = document.getElementById('jstep-' + s);
+    if (!el) return;
+    el.classList.remove('active','done');
+    if (i < idx) el.classList.add('done');
+    else if (i === idx) el.classList.add('active');
+  });
+
+  // Side nav active state
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  if (id === 'crew-empty') document.getElementById('nav-crew').classList.add('active');
+  else document.getElementById('nav-jobs').classList.add('active');
+
+  window.scrollTo(0, 0);
+}
+
+// Schedule modal
+function openScheduleModal() {
+  document.getElementById('schedule-modal').classList.remove('hidden');
+}
+function closeScheduleModal() {
+  document.getElementById('schedule-modal').classList.add('hidden');
+  document.getElementById('modal-tech-dd').classList.remove('open');
+}
+
+// Tech picker in modal
+function toggleModalTechDd() {
+  document.getElementById('modal-tech-dd').classList.toggle('open');
+}
+function selectModalTech(name, initials) {
+  selectedTech = { name: name, initials: initials };
+  document.getElementById('modal-tech-dd').classList.remove('open');
+  document.getElementById('modal-tech-hint').style.display = 'none';
+  document.getElementById('modal-chip-area').innerHTML =
+    '<div class="tech-chip-selected">' +
+      '<div class="avatar avatar-32" style="background:rgba(255,255,255,.2);color:#fff;width:20px;height:20px;font-size:10px;">' + initials + '</div>' +
+      name +
+      ' <span class="chip-remove" onclick="removeModalTech()">×</span>' +
+    '</div>';
+}
+function removeModalTech() {
+  selectedTech = null;
+  document.getElementById('modal-tech-hint').style.display = '';
+  document.getElementById('modal-chip-area').innerHTML =
+    '<button class="tech-chip-btn" onclick="toggleModalTechDd()">+ Add tech</button>';
+}
+
+function scheduleVisit() {
+  closeScheduleModal();
+  addVisitRow();
+  goTo(selectedTech ? 'visit-tech' : 'visit-no-tech');
+}
+
+function addVisitRow() {
+  var emptyState = document.getElementById('empty-visit-state');
+  if (emptyState) emptyState.style.display = 'none';
+
+  var list = document.getElementById('visits-list');
+  var existing = document.getElementById('visit-row-1');
+  if (existing) existing.remove();
+
+  var hasTech = !!selectedTech;
+  var dest = hasTech ? 'visit-tech' : 'visit-no-tech';
+
+  var row = document.createElement('div');
+  row.className = 'visit-row';
+  row.id = 'visit-row-1';
+  row.onclick = function(){ goTo(dest); };
+  row.innerHTML =
+    '<div class="visit-row-left">' +
+      '<div class="visit-status-dot"></div>' +
+      '<div>' +
+        '<div class="visit-row-date">Jun 15 at 10:00 AM</div>' +
+        '<div class="visit-row-meta">Visit #1 · ' + (hasTech ? selectedTech.name : 'No tech assigned') + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="visit-row-chevron">›</div>';
+  list.appendChild(row);
+
+  var btnArea = document.getElementById('add-visit-btn-area');
+  if (btnArea && !document.getElementById('add-visit-hdr-btn')) {
+    var btn = document.createElement('button');
+    btn.id = 'add-visit-hdr-btn';
+    btn.className = 'btn btn-primary btn-sm';
+    btn.textContent = 'Add visit';
+    btn.onclick = openScheduleModal;
+    btnArea.appendChild(btn);
+  }
+}
+
+// Tech dropdown on screen 3
+function toggleTechDd() {
+  document.getElementById('tech-dd-s3').classList.toggle('open');
+}
+function assignTechS3() {
+  document.getElementById('tech-dd-s3').classList.remove('open');
+  selectedTech = { name: 'James Miller', initials: 'JM' };
+  var row = document.getElementById('visit-row-1');
+  if (row) {
+    row.onclick = function(){ goTo('visit-tech'); };
+    var meta = row.querySelector('.visit-row-meta');
+    if (meta) meta.textContent = 'Visit #1 · James Miller';
+  }
+  setTimeout(function(){ goTo('visit-tech'); }, 250);
+}
+
+// Map modal
+function openMapModal() { document.getElementById('map-modal').classList.remove('hidden'); }
+function closeMapModal() { document.getElementById('map-modal').classList.add('hidden'); }
+
+document.getElementById('map-modal').addEventListener('click', function(e){ if (e.target === this) closeMapModal(); });
+document.getElementById('schedule-modal').addEventListener('click', function(e){ if (e.target === this) closeScheduleModal(); });
+
+goTo('crew-empty');
+</script>
+</body>
+</html>
