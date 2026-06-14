@@ -213,6 +213,11 @@
     letter-spacing: -0.5px; line-height: 1.4;
     margin-top: 8px; margin-bottom: 6px;
   }
+  .empty-title {
+    font-size: 24px; font-weight: 700; color: var(--cp);
+    letter-spacing: -0.6px; line-height: 1.3;
+    margin-top: 8px; margin-bottom: 10px; max-width: 420px;
+  }
   .empty-sub {
     font-size: 16px; font-weight: 400; color: var(--cs);
     line-height: 1.5; max-width: 380px; margin-bottom: 32px;
@@ -490,6 +495,117 @@
 
   .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
 
+  /* ── Invite worker bottom sheet ── */
+  .invite-overlay {
+    position: fixed; inset: 0;
+    background: rgba(31,34,38,.45);
+    z-index: 3000;
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+    backdrop-filter: blur(2px);
+  }
+  .invite-overlay.open { opacity: 1; pointer-events: all; }
+  .invite-sheet {
+    background: var(--sp); border-radius: 20px 20px 0 0;
+    padding: 24px 28px 44px; width: 100%; max-width: 540px;
+    transform: translateY(100%);
+    transition: transform .3s cubic-bezier(.32,0,.67,0);
+    box-shadow: 0 -8px 40px rgba(0,0,0,.12);
+  }
+  .invite-overlay.open .invite-sheet {
+    transform: translateY(0);
+    transition: transform .38s cubic-bezier(.34,1.15,.64,1);
+  }
+  .invite-handle {
+    width: 36px; height: 4px; border-radius: 2px;
+    background: var(--cb); margin: 0 auto 22px;
+  }
+  .invite-title { font-size: 18px; font-weight: 700; letter-spacing: -.3px; margin-bottom: 4px; }
+  .invite-subtitle { font-size: 13px; color: var(--cs); margin-bottom: 18px; }
+  .invite-context {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--ss); border-radius: 10px;
+    padding: 10px 14px; margin-bottom: 18px;
+    font-size: 13px; color: var(--cs);
+  }
+  .invite-context strong { color: var(--cp); font-weight: 600; }
+  .invite-field-label {
+    font-size: 11px; font-weight: 700; color: var(--ct);
+    text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
+  }
+  .invite-input {
+    width: 100%; padding: 12px 14px; border-radius: 10px;
+    border: 1.5px solid var(--cb); font-size: 14px;
+    font-family: 'Inter', sans-serif; color: var(--cp);
+    background: var(--sp); outline: none;
+    transition: border-color .15s;
+  }
+  .invite-input:focus { border-color: var(--cp); }
+  .invite-hint { font-size: 12px; color: var(--ct); margin-top: 6px; }
+  .invite-preview {
+    background: var(--ss); border-radius: 10px;
+    padding: 10px 14px; margin-top: 12px;
+    font-size: 13px; color: var(--cs);
+  }
+  .invite-preview strong { color: var(--cp); }
+  .invite-actions { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+  .invite-btn-primary {
+    width: 100%; padding: 14px; border: none; border-radius: 12px;
+    background: var(--cp); color: #fff;
+    font-size: 15px; font-weight: 600; font-family: 'Inter', sans-serif;
+    cursor: pointer; transition: opacity .12s;
+  }
+  .invite-btn-primary:hover { opacity: .88; }
+  .invite-btn-ghost {
+    width: 100%; padding: 11px; border: 1px solid var(--cb); border-radius: 12px;
+    background: transparent; color: var(--cs);
+    font-size: 14px; font-weight: 500; font-family: 'Inter', sans-serif;
+    cursor: pointer; transition: background .12s;
+  }
+  .invite-btn-ghost:hover { background: var(--hf); }
+
+  /* ── Pending tech row ── */
+  .pending-tech-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0; margin-top: 10px;
+  }
+  .pending-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1.5px dashed rgba(60,60,67,.45);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: rgba(60,60,67,.45); flex-shrink: 0;
+  }
+  .pending-info { flex: 1; min-width: 0; }
+  .pending-email { font-size: 14px; font-weight: 500; color: var(--cp); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pending-status { font-size: 12px; color: rgba(60,60,67,.6); margin-top: 2px; }
+  .pending-badge {
+    font-size: 11px; font-weight: 600; color: rgba(60,60,67,.6);
+    border: 1px dashed rgba(60,60,67,.4); border-radius: 20px;
+    padding: 2px 10px; flex-shrink: 0;
+  }
+  .pending-cancel {
+    background: none; border: none; cursor: pointer;
+    color: rgba(60,60,67,.4); font-size: 18px; padding: 4px;
+    border-radius: 4px; line-height: 1;
+  }
+  .pending-cancel:hover { color: var(--cn); background: var(--sneg); }
+
+  /* ── Toast ── */
+  .toast-bar {
+    position: fixed; bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--cp); color: #fff;
+    padding: 12px 20px; border-radius: 12px;
+    font-size: 13px; font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    z-index: 9999; opacity: 0;
+    transition: transform .3s cubic-bezier(.34,1.4,.64,1), opacity .25s;
+    display: flex; align-items: center; gap: 10px;
+    white-space: nowrap;
+  }
+  .toast-bar.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
   /* ── Map modal ── */
   .map-modal-inner {
     background: #fff; border-radius: var(--rxl);
@@ -517,8 +633,12 @@
 
 <!-- Journey bar -->
 <div class="journey-bar">
+  <div class="journey-step" id="jstep-schedule" onclick="goTo('schedule')">
+    <div class="dot"></div>Schedule
+  </div>
+  <div class="journey-sep">›</div>
   <div class="journey-step" id="jstep-crew-empty" onclick="goTo('crew-empty')">
-    <div class="dot"></div>Crew (empty)
+    <div class="dot"></div>Team (empty)
   </div>
   <div class="journey-sep">›</div>
   <div class="journey-step" id="jstep-job-page" onclick="goTo('job-page')">
@@ -527,10 +647,6 @@
   <div class="journey-sep">›</div>
   <div class="journey-step" id="jstep-visit-no-tech" onclick="goTo('visit-no-tech')">
     <div class="dot"></div>Visit · no tech
-  </div>
-  <div class="journey-sep">›</div>
-  <div class="journey-step" id="jstep-visit-tech" onclick="goTo('visit-tech')">
-    <div class="dot"></div>Visit · tech assigned
   </div>
 </div>
 
@@ -554,6 +670,13 @@
           <rect x="13" y="13" width="8" height="8" rx="1.5"/>
         </svg>
         My Tofu
+      </div>
+      <div class="nav-item" id="nav-schedule" onclick="goTo('schedule')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <path d="M3 10h18M8 2v4M16 2v4"/>
+        </svg>
+        Schedule
       </div>
       <div class="nav-item" id="nav-jobs" onclick="goTo('job-page')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
@@ -589,7 +712,7 @@
           <path d="M2 19c0-3 2.686-5 6-5s6 2 6 5"/>
           <path d="M16 14c3.314 0 6 2 6 5"/>
         </svg>
-        Crew
+        Team
       </div>
       <div class="nav-spacer"></div>
       <div class="nav-item" id="nav-settings">
@@ -612,29 +735,217 @@
   <div class="main-content">
 
     <!-- ════════════════════════════════════════════ -->
-    <!-- SCREEN 1: Crew — empty state               -->
+    <!-- SCREEN: Schedule                           -->
+    <!-- ════════════════════════════════════════════ -->
+    <div class="screen" id="screen-schedule" style="height:calc(100vh - 40px);flex-direction:row;overflow:hidden;">
+
+      <!-- Calendar area -->
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--cb);">
+
+        <!-- Toolbar -->
+        <div style="display:flex;align-items:center;gap:12px;padding:0 24px;height:64px;border-bottom:1px solid var(--cb);flex-shrink:0;">
+          <div style="font-size:18px;font-weight:600;color:var(--cp);">Jun 9 – 15</div>
+          <div style="display:flex;gap:4px;margin-left:8px;">
+            <button style="width:32px;height:32px;border:1px solid var(--cb);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;color:var(--cs);">‹</button>
+            <button style="width:32px;height:32px;border:1px solid var(--cb);border-radius:6px;background:#fff;cursor:pointer;font-size:14px;color:var(--cs);">›</button>
+          </div>
+          <button style="margin-left:4px;height:32px;padding:0 12px;border:1px solid var(--cb);border-radius:6px;background:#fff;font-size:13px;color:var(--cs);cursor:pointer;">Today</button>
+          <div style="flex:1;"></div>
+          <button onclick="openScheduleModal()" style="height:36px;padding:0 16px;border-radius:8px;background:var(--cp);color:#fff;border:none;font-size:14px;font-weight:500;cursor:pointer;">+ New visit</button>
+        </div>
+
+        <!-- Week header -->
+        <div style="display:grid;grid-template-columns:56px repeat(7,1fr);border-bottom:1px solid var(--cb);flex-shrink:0;">
+          <div style="height:48px;"></div>
+          <div style="height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-left:1px solid var(--cb);">
+            <div style="font-size:11px;color:var(--ct);text-transform:uppercase;letter-spacing:.5px;">Mon</div>
+            <div style="font-size:18px;font-weight:500;color:var(--cs);">9</div>
+          </div>
+          <div style="height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-left:1px solid var(--cb);">
+            <div style="font-size:11px;color:var(--ct);text-transform:uppercase;letter-spacing:.5px;">Tue</div>
+            <div style="font-size:18px;font-weight:500;color:var(--cs);">10</div>
+          </div>
+          <div style="height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-left:1px solid var(--cb);">
+            <div style="font-size:11px;color:var(--ct);text-transform:uppercase;letter-spacing:.5px;">Wed</div>
+            <div style="font-size:18px;font-weight:500;color:var(--cs);">11</div>
+          </div>
+          <div style="height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-left:1px solid var(--cb);">
+            <div style="font-size:11px;color:var(--ct);text-transform:uppercase;letter-spacing:.5px;">Thu</div>
+            <div style="font-size:18px;font-weight:500;color:var(--cs);">12</div>
+          </div>
+          <div style="height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-left:1px solid var(--cb);background:#f8f6f2;">
+            <div style="font-size:11px;color:var(--aq);text-transform:uppercase;letter-spacing:.5px;font-weight:600;">Fri</div>
+            <div style="width:28px;height:28px;border-radius:100px;background:var(--cp);color:#fff;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;">13</div>
+          </div>
+          <div style="height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-left:1px solid var(--cb);">
+            <div style="font-size:11px;color:var(--ct);text-transform:uppercase;letter-spacing:.5px;">Sat</div>
+            <div style="font-size:18px;font-weight:500;color:var(--cs);">14</div>
+          </div>
+          <div style="height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-left:1px solid var(--cb);">
+            <div style="font-size:11px;color:var(--ct);text-transform:uppercase;letter-spacing:.5px;">Sun</div>
+            <div style="font-size:18px;font-weight:500;color:var(--cs);">15</div>
+          </div>
+        </div>
+
+        <!-- Time grid -->
+        <div style="flex:1;overflow-y:auto;position:relative;">
+          <div style="display:grid;grid-template-columns:56px repeat(7,1fr);min-height:960px;">
+            <div style="position:relative;">
+              <div style="position:absolute;top:54px;right:8px;font-size:11px;color:var(--ct);">8 AM</div>
+              <div style="position:absolute;top:162px;right:8px;font-size:11px;color:var(--ct);">9 AM</div>
+              <div style="position:absolute;top:270px;right:8px;font-size:11px;color:var(--ct);">10 AM</div>
+              <div style="position:absolute;top:378px;right:8px;font-size:11px;color:var(--ct);">11 AM</div>
+              <div style="position:absolute;top:486px;right:8px;font-size:11px;color:var(--ct);">12 PM</div>
+              <div style="position:absolute;top:594px;right:8px;font-size:11px;color:var(--ct);">1 PM</div>
+              <div style="position:absolute;top:702px;right:8px;font-size:11px;color:var(--ct);">2 PM</div>
+              <div style="position:absolute;top:810px;right:8px;font-size:11px;color:var(--ct);">3 PM</div>
+            </div>
+            <div style="border-left:1px solid var(--cb);border-top:1px solid var(--cb);position:relative;padding:4px;">
+              <div onclick="showVisitPanel('emily')" style="position:absolute;top:108px;left:4px;right:4px;height:81px;background:#e5f2ed;border-radius:6px;border-left:3px solid var(--aq);padding:6px 8px;cursor:pointer;">
+                <div style="font-size:12px;font-weight:600;color:#1a5c42;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Emily Johnson</div>
+                <div style="font-size:11px;color:#2d7a5a;">9:00 – 10:30 AM</div>
+              </div>
+              <div onclick="showVisitPanel('mark')" style="position:absolute;top:378px;left:4px;right:4px;height:54px;background:#e5f2ed;border-radius:6px;border-left:3px solid var(--aq);padding:6px 8px;cursor:pointer;">
+                <div style="font-size:12px;font-weight:600;color:#1a5c42;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Mark Davis</div>
+                <div style="font-size:11px;color:#2d7a5a;">11:00 AM</div>
+              </div>
+            </div>
+            <div style="border-left:1px solid var(--cb);border-top:1px solid var(--cb);position:relative;padding:4px;">
+              <div onclick="showVisitPanel('retail')" style="position:absolute;top:270px;left:4px;right:4px;height:108px;background:#e5f2ed;border-radius:6px;border-left:3px solid var(--aq);padding:6px 8px;cursor:pointer;">
+                <div style="font-size:12px;font-weight:600;color:#1a5c42;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Retail Floor Cleaning</div>
+                <div style="font-size:11px;color:#2d7a5a;">10:00 – 12:00 PM</div>
+              </div>
+            </div>
+            <div style="border-left:1px solid var(--cb);border-top:1px solid var(--cb);position:relative;padding:4px;"></div>
+            <div style="border-left:1px solid var(--cb);border-top:1px solid var(--cb);position:relative;padding:4px;">
+              <div onclick="showVisitPanel('sarah')" style="position:absolute;top:162px;left:4px;right:4px;height:81px;background:#e5f2ed;border-radius:6px;border-left:3px solid var(--aq);padding:6px 8px;cursor:pointer;">
+                <div style="font-size:12px;font-weight:600;color:#1a5c42;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Sarah Connor</div>
+                <div style="font-size:11px;color:#2d7a5a;">9:00 – 10:30 AM</div>
+              </div>
+            </div>
+            <div style="border-left:1px solid var(--cb);border-top:1px solid var(--cb);background:rgba(248,246,242,.5);position:relative;padding:4px;">
+              <div style="position:absolute;top:324px;left:0;right:0;height:2px;background:var(--cn);z-index:2;">
+                <div style="position:absolute;left:-4px;top:-4px;width:10px;height:10px;border-radius:100px;background:var(--cn);"></div>
+              </div>
+              <div onclick="showVisitPanel('johnson')" style="position:absolute;top:108px;left:4px;right:4px;height:54px;background:#e5f2ed;border-radius:6px;border-left:3px solid var(--aq);padding:6px 8px;cursor:pointer;">
+                <div style="font-size:12px;font-weight:600;color:#1a5c42;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Johnson Residence</div>
+                <div style="font-size:11px;color:#2d7a5a;">9:00 AM</div>
+              </div>
+            </div>
+            <div style="border-left:1px solid var(--cb);border-top:1px solid var(--cb);position:relative;padding:4px;"></div>
+            <div style="border-left:1px solid var(--cb);border-top:1px solid var(--cb);position:relative;padding:4px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visit detail panel -->
+      <div id="visit-panel" style="width:400px;flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto;background:#fff;border-left:1px solid var(--cb);">
+
+        <!-- Empty state — no visit selected -->
+        <div id="visit-panel-empty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;height:100%;">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="rgba(31,34,38,.2)" stroke-width="1.5" stroke-linecap="round">
+            <rect x="6" y="6" width="28" height="28" rx="4"/>
+            <path d="M6 14h28M14 6v8M26 6v8"/>
+          </svg>
+          <div style="margin-top:12px;font-size:14px;color:var(--ct);">Select a visit to see details</div>
+        </div>
+
+        <!-- Visit detail content -->
+        <div id="visit-panel-content" style="display:none;flex-direction:column;">
+
+          <!-- Header -->
+          <div style="padding:20px 24px 0;border-bottom:1px solid var(--cb);flex-shrink:0;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
+              <div>
+                <div id="panel-client-name" style="font-size:18px;font-weight:600;color:var(--cp);">Emily Johnson</div>
+                <div id="panel-visit-date" style="font-size:13px;color:var(--cs);margin-top:2px;">Mon, Jun 9 · 9:00 – 10:30 AM</div>
+              </div>
+              <button onclick="closePanelVisit()" style="width:28px;height:28px;border:none;background:none;font-size:20px;color:var(--ct);cursor:pointer;padding:0;line-height:1;">×</button>
+            </div>
+            <div style="display:flex;gap:8px;padding:12px 0;">
+              <button style="flex:1;height:36px;border:1px solid var(--cb);border-radius:8px;background:#fff;font-size:13px;font-weight:500;color:var(--cp);cursor:pointer;">Edit</button>
+              <button style="flex:1;height:36px;border:1px solid var(--cb);border-radius:8px;background:#fff;font-size:13px;font-weight:500;color:var(--cp);cursor:pointer;">Start visit</button>
+            </div>
+          </div>
+
+          <!-- Cards -->
+          <div style="overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;">
+
+            <!-- Job card -->
+            <div style="border:1px solid var(--cb);border-radius:10px;padding:16px;">
+              <div style="font-size:11px;font-weight:600;color:var(--ct);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Job</div>
+              <div id="panel-job-title" style="font-size:15px;font-weight:500;color:var(--cp);">HVAC Maintenance</div>
+              <div id="panel-job-address" style="font-size:13px;color:var(--cs);margin-top:4px;">1284 Maple Ave, Orlando FL</div>
+            </div>
+
+            <!-- Tech card — AP C -->
+            <div style="border:1px solid var(--cb);border-radius:10px;padding:16px;" id="panel-tech-card">
+              <div style="font-size:11px;font-weight:600;color:var(--ct);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Tech</div>
+              <div class="ap-label" style="margin-bottom:6px;">ACTIVATION POINT C</div>
+              <div style="font-size:13px;color:var(--cs);font-style:italic;margin-bottom:10px;">Assign a tech — and stop wondering if the job got done.</div>
+              <div id="panel-tech-empty">
+                <button onclick="openInviteSheet('panel')" style="height:32px;padding:0 14px;border:1px solid var(--cb);border-radius:6px;background:#fff;font-size:13px;color:var(--cp);cursor:pointer;">+ Assign tech</button>
+              </div>
+              <div id="panel-tech-pending" style="display:none;border:1.5px dashed rgba(60,60,67,.3);border-radius:10px;padding:12px 14px;">
+                <div style="font-size:11px;font-weight:600;color:rgba(60,60,67,.5);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">Pending invite</div>
+                <div class="pending-tech-row" style="padding:0;margin:0;">
+                  <div class="pending-avatar">?</div>
+                  <div class="pending-info">
+                    <div class="pending-email" id="panel-pending-email">—</div>
+                    <div class="pending-status">⏳ Invite sent · Awaiting registration</div>
+                  </div>
+                  <span class="pending-badge">Pending</span>
+                  <button class="pending-cancel" onclick="cancelPanelInvite()">×</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Photos card — AP D -->
+            <div style="border:1px solid var(--cb);border-radius:10px;padding:16px;">
+              <div style="font-size:11px;font-weight:600;color:var(--ct);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Photos</div>
+              <div class="ap-label" style="margin-bottom:6px;">ACTIVATION POINT D</div>
+              <div style="font-size:13px;color:var(--cs);font-style:italic;margin-bottom:10px;">Add photos — or let your tech do it from the job site.</div>
+              <button style="height:32px;padding:0 14px;border:1px solid var(--cb);border-radius:6px;background:#fff;font-size:13px;color:var(--cp);cursor:pointer;">+ Add photo</button>
+            </div>
+
+            <!-- Team notes card — AP E -->
+            <div style="border:1px solid var(--cb);border-radius:10px;padding:16px;">
+              <div style="font-size:11px;font-weight:600;color:var(--ct);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Team notes</div>
+              <div class="ap-label" style="margin-bottom:6px;">ACTIVATION POINT E</div>
+              <div style="font-size:13px;color:var(--cs);font-style:italic;margin-bottom:10px;">Job details, instructions, updates — all in one place.</div>
+              <button style="height:32px;padding:0 14px;border:1px solid var(--cb);border-radius:6px;background:#fff;font-size:13px;color:var(--cp);cursor:pointer;">+ Add note</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════════════════════════════════════ -->
+    <!-- SCREEN 1: Team — empty state               -->
     <!-- ════════════════════════════════════════════ -->
     <div class="screen" id="screen-crew-empty">
       <div class="container">
         <div class="container-inner">
           <div class="page-nav-bar">
             <div class="page-title-row">
-              <div class="page-title">Crew</div>
+              <div class="page-title">Team</div>
             </div>
           </div>
 
           <div class="empty-state-box">
             <div class="ap-label">ACTIVATION POINT A</div>
-            <div class="empty-sub" style="margin-bottom:28px;">Your crew works from their phone. You see what's happening — without calling anyone.</div>
+            <div class="empty-title">Know every job is done — without calling</div>
 
-            <div class="value-bullets">
+            <div class="value-bullets" style="margin-top:24px;">
               <div class="value-bullet">
                 <div class="bullet-icon">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 4.5"/></svg>
                 </div>
                 <div>
-                  <div class="bullet-title">Everything in one place — for you and your techs</div>
-                  <div class="bullet-sub">Job details and schedule straight to their phone. No calls before every visit.</div>
+                  <div class="bullet-title">Your tech gets the details the moment you assign.</div>
+                  <div class="bullet-sub">Address, time, job details — already in their phone.</div>
                 </div>
               </div>
               <div class="value-bullet">
@@ -642,8 +953,8 @@
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 4.5"/></svg>
                 </div>
                 <div>
-                  <div class="bullet-title">No more switching between apps and chats</div>
-                  <div class="bullet-sub">Assign jobs, share details, track progress — all in Tofu.</div>
+                  <div class="bullet-title">Every visit logged — start and finish</div>
+                  <div class="bullet-sub">No more "did they show up?" calls.</div>
                 </div>
               </div>
               <div class="value-bullet">
@@ -651,13 +962,13 @@
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 4.5"/></svg>
                 </div>
                 <div>
-                  <div class="bullet-title">Proof every visit was done</div>
-                  <div class="bullet-sub">Photos and GPS check-in — close client disputes in seconds.</div>
+                  <div class="bullet-title">Photos and "job done" come back from the field</div>
+                  <div class="bullet-sub">Close client disputes in seconds.</div>
                 </div>
               </div>
             </div>
 
-            <button class="btn btn-primary" onclick="goTo('job-page')">Invite tech</button>
+            <button class="btn btn-primary" onclick="openInviteSheet('team')">Invite tech</button>
           </div>
         </div>
       </div>
@@ -773,103 +1084,47 @@
             <div class="visit-main">
 
               <!-- Tech card — AP-C, no tech -->
-              <div class="card-dashed">
+              <div class="card-dashed" id="s3-tech-card">
                 <div class="ap-label">ACTIVATION POINT C</div>
-                <div class="tech-label">Tech</div>
-                <div class="tech-hint">Assign a tech — and stop wondering if the job got done.</div>
-                <button class="btn btn-secondary btn-sm" onclick="toggleTechDd()">+ Add tech</button>
-                <div class="tech-dropdown" id="tech-dd-s3">
-                  <div class="tech-option" onclick="assignTechS3()">
-                    <div class="avatar avatar-36 avatar-dark">JM</div>
-                    <div>
-                      <div class="option-name">James Miller</div>
-                      <div class="option-role">Technician</div>
+                <div id="s3-tech-hint" class="tech-hint">Assign a tech — and stop wondering if the job got done.</div>
+                <div id="s3-tech-empty">
+                  <button class="btn btn-secondary btn-sm" onclick="openInviteSheet('s3')">+ Add tech</button>
+                </div>
+                <div id="s3-tech-pending" style="display:none;margin-top:12px;">
+                  <!-- Pending worker row -->
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px dashed rgba(60,60,67,.3);border-radius:10px;">
+                    <div class="pending-avatar">?</div>
+                    <div class="pending-info">
+                      <div class="pending-email" id="s3-pending-email" style="font-size:14px;font-weight:500;">—</div>
+                      <div style="font-size:12px;color:rgba(60,60,67,.55);margin-top:2px;">Invite sent</div>
                     </div>
-                    <div class="option-badge">Active</div>
+                    <span class="pending-badge">Pending</span>
+                    <button class="pending-cancel" onclick="cancelS3Invite()">×</button>
+                  </div>
+                  <!-- Reassurance hint -->
+                  <div style="margin-top:10px;padding:10px 14px;background:#f5f2eb;border-radius:8px;font-size:13px;color:rgba(31,34,38,.65);line-height:1.5;">
+                    All set. Your tech gets this job the moment they join.
                   </div>
                 </div>
               </div>
 
-              <!-- Photos — empty state (no photos yet) -->
+              <!-- Photos — AP D, no tech -->
               <div class="card-dashed">
+                <div class="ap-label">ACTIVATION POINT D</div>
                 <div class="photos-header">
                   <div class="card-title" style="margin:0;">Photos</div>
                   <button class="btn btn-secondary btn-sm">Add photos</button>
                 </div>
-                <div style="font-size:14px;color:var(--cs);line-height:1.6;">
-                  Add photos as proof of work — location tags are added automatically when your tech uses Tofu for crew app.
-                </div>
+                <div style="font-size:14px;color:var(--cs);line-height:1.6;">Add photos — or let your tech do it from the job site.</div>
               </div>
 
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ════════════════════════════════════════════ -->
-    <!-- SCREEN 4: Visit overview — tech assigned   -->
-    <!-- ════════════════════════════════════════════ -->
-    <div class="screen" id="screen-visit-tech">
-
-      <div class="inner-nav-bar">
-        <div class="back-btn" onclick="goTo('job-page')">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 3L5 8l5 5"/></svg>
-          Job #1 for Emily Johnson
-        </div>
-        <div class="inner-nav-titles">
-          <div class="inner-nav-title">Jun 15 at 10:00 AM</div>
-          <div class="inner-nav-sub">Visit #1 · Scheduled</div>
-        </div>
-      </div>
-
-      <div class="container">
-        <div class="container-inner" style="padding-top:32px;">
-
-          <div class="visit-actions-row">
-            <button class="status-pill">Scheduled ▾</button>
-            <button class="btn btn-primary btn-sm">Start visit</button>
-            <button class="btn btn-secondary btn-sm">Delete visit</button>
-          </div>
-
-          <div class="visit-grid">
-            <div class="visit-main">
-
-              <!-- Tech card — assigned -->
-              <div class="card" style="margin-bottom:16px;">
-                <div class="tech-label">Tech</div>
-                <div class="tech-assigned-row">
-                  <div class="avatar avatar-36 avatar-dark">JM</div>
-                  <div class="tech-assigned-info">
-                    <div class="tech-name">James Miller</div>
-                    <div class="tech-meta">GPS active · Active</div>
-                  </div>
-                  <div class="change-link" onclick="goTo('visit-no-tech')">Change</div>
-                </div>
+              <!-- Team notes — AP E, no tech -->
+              <div class="card-dashed" style="margin-top:16px;">
+                <div class="ap-label">ACTIVATION POINT E</div>
+                <div class="card-title" style="margin-bottom:6px;">Team notes</div>
+                <div style="font-size:14px;color:var(--cs);margin-bottom:4px;">No notes yet</div>
+                <div style="font-size:14px;color:var(--cs);line-height:1.6;">Job details, instructions, updates — all in one place.</div>
               </div>
-
-              <!-- Photos — with GPS -->
-              <div class="card">
-                <div class="photos-header">
-                  <div class="card-title" style="margin:0;">Photos</div>
-                  <button class="btn btn-ghost">+ Add photos</button>
-                </div>
-                <div class="photos-grid">
-                  <div class="photo-thumb" onclick="openMapModal()">
-                    <div class="photo-bg" style="background:linear-gradient(135deg,#c8e6c9,#81c784);"></div>
-                    <div class="photo-location-tag">📍 10848 Wagner St</div>
-                  </div>
-                  <div class="photo-thumb" onclick="openMapModal()">
-                    <div class="photo-bg" style="background:linear-gradient(135deg,#bbdefb,#64b5f6);"></div>
-                    <div class="photo-location-tag">📍 10848 Wagner St</div>
-                  </div>
-                  <div class="photo-thumb">
-                    <div class="photo-bg" style="background:linear-gradient(135deg,#fff9c4,#fff176);"></div>
-                  </div>
-                </div>
-              </div>
-
 
             </div>
           </div>
@@ -905,29 +1160,77 @@
       </div>
     </div>
 
-    <div class="form-field">
-      <div class="form-label">Tech</div>
-      <div id="modal-chip-area">
-        <button class="tech-chip-btn" onclick="toggleModalTechDd()">+ Add tech</button>
+    <!-- Worker field -->
+    <div class="form-field" style="margin-bottom:0;">
+      <div class="form-label">Worker</div>
+
+      <!-- collapsed: just a chip button -->
+      <div id="modal-worker-collapsed">
+        <button class="tech-chip-btn" onclick="expandModalWorker()">+ Add worker</button>
+        <div style="font-size:12px;color:var(--ct);margin-top:6px;">Assign now — they'll see the job right away.</div>
       </div>
-      <div class="tech-picker-dd" id="modal-tech-dd">
-        <div class="tech-option" onclick="selectModalTech('James Miller','JM')">
-          <div class="avatar avatar-32 avatar-dark">JM</div>
-          <div>
-            <div class="option-name">James Miller</div>
-            <div class="option-role">Technician</div>
+
+      <!-- expanded: email input, slides down -->
+      <div id="modal-worker-expanded" style="max-height:0;overflow:hidden;opacity:0;transition:max-height .32s cubic-bezier(.4,0,.2,1),opacity .22s ease,margin-top .32s ease;margin-top:0;">
+        <div style="border:1.5px solid var(--cp);border-radius:10px;padding:14px 16px;background:#fafaf9;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <span style="font-size:13px;font-weight:600;">Worker email</span>
+            <button onclick="collapseModalWorker()" style="background:none;border:none;cursor:pointer;color:var(--ct);font-size:20px;line-height:1;padding:0;">×</button>
           </div>
-          <div class="option-badge">Active</div>
+          <input class="form-input" id="modal-worker-email" type="email" placeholder="worker@example.com" style="margin-bottom:8px;" />
+          <div style="font-size:12px;color:var(--ct);">They'll see the job right away.</div>
         </div>
       </div>
-      <div class="tech-picker-hint" id="modal-tech-hint">Add a tech so they get the details — and you get proof the visit was done</div>
     </div>
 
-    <div class="modal-actions">
+    <div class="modal-actions" style="margin-top:20px;">
       <button class="btn btn-primary" style="flex:1;" onclick="scheduleVisit()">Schedule</button>
       <button class="btn btn-secondary" onclick="closeScheduleModal()">Cancel</button>
     </div>
   </div>
+</div>
+
+<style>
+@keyframes expandIn {
+  from { opacity:0; transform:translateY(-6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+</style>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- Invite Worker Sheet                         -->
+<!-- ════════════════════════════════════════════ -->
+<div class="invite-overlay" id="invite-overlay" onclick="closeInviteOnOverlay(event)">
+  <div class="invite-sheet">
+    <div class="invite-handle"></div>
+    <div class="invite-title">Invite tech to this visit</div>
+    <div class="invite-subtitle">They'll see this job immediately after joining</div>
+
+    <div class="invite-context">
+      <span>📅</span>
+      <span id="invite-context-text"><strong>Visit</strong> · Jun 15 at 10:00 AM</span>
+    </div>
+
+    <div class="invite-field-label">Tech email</div>
+    <input class="invite-input" id="invite-email-input" type="email" placeholder="name@example.com" />
+    <div class="invite-hint">An invite link will be sent — they'll be pre-assigned on join</div>
+
+    <div class="invite-preview">
+      <strong>1 visit</strong> will be pre-assigned when they accept.
+      You can add more visits from their profile later.
+    </div>
+
+    <div class="invite-actions">
+      <button class="invite-btn-primary" onclick="submitInvite()">Send invite</button>
+      <button class="invite-btn-ghost" onclick="closeInviteSheet()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast bar -->
+<div class="toast-bar" id="toast-bar">
+  <span id="toast-icon">✉️</span>
+  <span id="toast-msg">Invite sent</span>
 </div>
 
 <!-- ════════════════════════════════════════════ -->
@@ -954,7 +1257,7 @@ function goTo(id) {
   var t = document.getElementById('screen-' + id);
   if (t) t.classList.add('active');
 
-  var steps = ['crew-empty','job-page','visit-no-tech','visit-tech'];
+  var steps = ['schedule','crew-empty','job-page','visit-no-tech'];
   var idx = steps.indexOf(id);
   steps.forEach(function(s, i){
     var el = document.getElementById('jstep-' + s);
@@ -967,7 +1270,14 @@ function goTo(id) {
   // Side nav active state
   document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
   if (id === 'crew-empty') document.getElementById('nav-crew').classList.add('active');
+  else if (id === 'schedule') document.getElementById('nav-schedule').classList.add('active');
   else document.getElementById('nav-jobs').classList.add('active');
+
+  // Schedule screen needs flex layout
+  var scheduleScreen = document.getElementById('screen-schedule');
+  if (scheduleScreen) {
+    scheduleScreen.style.display = (id === 'schedule') ? 'flex' : 'none';
+  }
 
   window.scrollTo(0, 0);
 }
@@ -978,7 +1288,6 @@ function openScheduleModal() {
 }
 function closeScheduleModal() {
   document.getElementById('schedule-modal').classList.add('hidden');
-  document.getElementById('modal-tech-dd').classList.remove('open');
 }
 
 // Tech picker in modal
@@ -1004,12 +1313,32 @@ function removeModalTech() {
 }
 
 function scheduleVisit() {
+  var emailInput = document.getElementById('modal-worker-email');
+  var pendingEmail = emailInput ? emailInput.value.trim() : '';
+
   closeScheduleModal();
-  addVisitRow();
-  goTo(selectedTech ? 'visit-tech' : 'visit-no-tech');
+  addVisitRow(pendingEmail);
+  goTo('job-page');
+
+  if (pendingEmail) {
+    // show pending state in visit detail card
+    document.getElementById('s3-pending-email').textContent = pendingEmail;
+    document.getElementById('s3-tech-empty').style.display = 'none';
+    document.getElementById('s3-tech-pending').style.display = 'block';
+    var hint = document.getElementById('s3-tech-hint');
+    if (hint) hint.style.display = 'none';
+    showToast('✉️', 'Invite sent to ' + pendingEmail);
+  }
+
+  // reset form
+  if (emailInput) emailInput.value = '';
+  var exp = document.getElementById('modal-worker-expanded');
+  if (exp) { exp.style.maxHeight='0'; exp.style.opacity='0'; exp.style.marginTop='0'; }
+  var col = document.getElementById('modal-worker-collapsed');
+  if (col) { col.style.display='block'; col.style.opacity='1'; }
 }
 
-function addVisitRow() {
+function addVisitRow(pendingEmail) {
   var emptyState = document.getElementById('empty-visit-state');
   if (emptyState) emptyState.style.display = 'none';
 
@@ -1017,19 +1346,18 @@ function addVisitRow() {
   var existing = document.getElementById('visit-row-1');
   if (existing) existing.remove();
 
-  var hasTech = !!selectedTech;
-  var dest = hasTech ? 'visit-tech' : 'visit-no-tech';
+  var workerMeta = '<span style="color:rgba(60,60,67,.4);">No worker assigned</span>';
 
   var row = document.createElement('div');
   row.className = 'visit-row';
   row.id = 'visit-row-1';
-  row.onclick = function(){ goTo(dest); };
+  row.onclick = function(){ goTo('visit-no-tech'); };
   row.innerHTML =
     '<div class="visit-row-left">' +
       '<div class="visit-status-dot"></div>' +
       '<div>' +
         '<div class="visit-row-date">Jun 15 at 10:00 AM</div>' +
-        '<div class="visit-row-meta">Visit #1 · ' + (hasTech ? selectedTech.name : 'No tech assigned') + '</div>' +
+        '<div class="visit-row-meta" style="margin-top:3px;">Visit #1 · ' + workerMeta + '</div>' +
       '</div>' +
     '</div>' +
     '<div class="visit-row-chevron">›</div>';
@@ -1062,12 +1390,209 @@ function assignTechS3() {
   setTimeout(function(){ goTo('visit-tech'); }, 250);
 }
 
+// Schedule visit panel
+var visitData = {
+  emily:   { name: 'Emily Johnson',     date: 'Mon, Jun 9 · 9:00 – 10:30 AM',  job: 'HVAC Maintenance',       address: '1284 Maple Ave, Orlando FL' },
+  mark:    { name: 'Mark Davis',        date: 'Mon, Jun 9 · 11:00 AM',          job: 'Pool Service',           address: '720 Oak St, Orlando FL' },
+  retail:  { name: 'Retail Floor Cleaning', date: 'Tue, Jun 10 · 10:00 AM – 12:00 PM', job: 'Commercial Cleaning', address: '55 Business Blvd, Orlando FL' },
+  sarah:   { name: 'Sarah Connor',      date: 'Thu, Jun 12 · 9:00 – 10:30 AM', job: 'Plumbing Inspection',    address: '300 Palm Dr, Orlando FL' },
+  johnson: { name: 'Johnson Residence', date: 'Fri, Jun 13 · 9:00 AM',         job: 'AC Filter Replacement',  address: '88 Sunset Blvd, Orlando FL' }
+};
+function showVisitPanel(key) {
+  var d = visitData[key];
+  if (!d) return;
+  document.getElementById('panel-client-name').textContent = d.name;
+  document.getElementById('panel-visit-date').textContent = d.date;
+  document.getElementById('panel-job-title').textContent = d.job;
+  document.getElementById('panel-job-address').textContent = d.address;
+  document.getElementById('visit-panel-empty').style.display = 'none';
+  document.getElementById('visit-panel-content').style.display = 'flex';
+}
+function closePanelVisit() {
+  document.getElementById('visit-panel-empty').style.display = 'flex';
+  document.getElementById('visit-panel-content').style.display = 'none';
+}
+
 // Map modal
 function openMapModal() { document.getElementById('map-modal').classList.remove('hidden'); }
 function closeMapModal() { document.getElementById('map-modal').classList.add('hidden'); }
 
 document.getElementById('map-modal').addEventListener('click', function(e){ if (e.target === this) closeMapModal(); });
 document.getElementById('schedule-modal').addEventListener('click', function(e){ if (e.target === this) closeScheduleModal(); });
+
+// ── Invite sheet ──────────────────────────────
+var inviteSource = null;
+
+var inviteContextMap = {
+  panel: 'Emily Johnson · Mon Jun 9, 9:00–10:30 AM',
+  s3:    'Jun 15 at 10:00 AM · Visit #1',
+  modal: 'Jun 15 at 10:00 AM · New visit',
+  team:  'Jun 15 at 10:00 AM · New visit'
+};
+var inviteContextLabel = {
+  panel: '<strong>Emily Johnson</strong> · Mon Jun 9, 9:00–10:30 AM',
+  s3:    '<strong>Visit #1</strong> · Jun 15 at 10:00 AM',
+  modal: '<strong>New visit</strong> · Jun 15 at 10:00 AM',
+  team:  '<strong>New visit</strong> · Jun 15 at 10:00 AM'
+};
+
+function openInviteSheet(source) {
+  inviteSource = source;
+  document.getElementById('invite-context-text').innerHTML = inviteContextLabel[source] || '<strong>Visit</strong>';
+  document.getElementById('invite-email-input').value = '';
+  document.getElementById('invite-overlay').classList.add('open');
+  setTimeout(function(){ document.getElementById('invite-email-input').focus(); }, 350);
+}
+
+function closeInviteSheet() {
+  document.getElementById('invite-overlay').classList.remove('open');
+}
+
+function closeInviteOnOverlay(e) {
+  if (e.target === document.getElementById('invite-overlay')) closeInviteSheet();
+}
+
+function submitInvite() {
+  var email = document.getElementById('invite-email-input').value.trim() || 'worker@example.com';
+  closeInviteSheet();
+
+  // Show pending state in the right place
+  if (inviteSource === 'panel') {
+    document.getElementById('panel-pending-email').textContent = email;
+    document.getElementById('panel-tech-empty').style.display = 'none';
+    document.getElementById('panel-tech-pending').style.display = 'block';
+  } else if (inviteSource === 's3') {
+    document.getElementById('s3-pending-email').textContent = email;
+    document.getElementById('s3-tech-empty').style.display = 'none';
+    document.getElementById('s3-tech-pending').style.display = 'block';
+    // Update card border
+    var card = document.getElementById('s3-tech-card');
+    if (card) { card.style.border = '1.5px dashed rgba(60,60,67,.35)'; }
+  } else if (inviteSource === 'modal') {
+    // Show chip in schedule modal
+    document.getElementById('modal-tech-hint').style.display = 'none';
+    document.getElementById('modal-chip-area').innerHTML =
+      '<div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;background:var(--ss);border:1.5px dashed rgba(60,60,67,.35);border-radius:100px;font-size:13px;font-weight:500;color:var(--cs);">' +
+        '<span>?</span>' + email +
+        ' <span style="cursor:pointer;opacity:.6" onclick="resetModalTech()">×</span>' +
+        ' <span style="font-size:11px;color:rgba(60,60,67,.5);margin-left:2px;">Pending</span>' +
+      '</div>';
+  } else if (inviteSource === 'team') {
+    // From Team empty: navigate to job-page and show pending there via s3 after brief delay
+    setTimeout(function(){ goTo('job-page'); }, 200);
+  }
+
+  showToast('✉️', 'Invite sent to ' + email);
+}
+
+// ── Modal worker inline expand ─────────────────
+function expandModalWorker() {
+  var collapsed = document.getElementById('modal-worker-collapsed');
+  var expanded  = document.getElementById('modal-worker-expanded');
+
+  // Fade out the chip
+  collapsed.style.transition = 'opacity .15s ease';
+  collapsed.style.opacity = '0';
+  setTimeout(function(){
+    collapsed.style.display = 'none';
+    collapsed.style.opacity = '1'; // reset for next time
+
+    // Slide down the form
+    expanded.style.display = 'block'; // must be block before measuring
+    var target = expanded.scrollHeight + 'px';
+    expanded.style.maxHeight = '0';
+    expanded.style.opacity   = '0';
+    expanded.style.marginTop = '0';
+
+    // Trigger reflow so transition fires
+    expanded.getBoundingClientRect();
+
+    expanded.style.maxHeight = target;
+    expanded.style.opacity   = '1';
+    expanded.style.marginTop = '8px';
+
+    setTimeout(function(){ document.getElementById('modal-worker-email').focus(); }, 200);
+  }, 120);
+}
+
+function collapseModalWorker() {
+  var collapsed = document.getElementById('modal-worker-collapsed');
+  var expanded  = document.getElementById('modal-worker-expanded');
+
+  // Slide up
+  expanded.style.maxHeight = '0';
+  expanded.style.opacity   = '0';
+  expanded.style.marginTop = '0';
+
+  setTimeout(function(){
+    expanded.style.display = 'none';
+    document.getElementById('modal-worker-email').value = '';
+
+    // Fade in chip
+    collapsed.style.opacity = '0';
+    collapsed.style.display = 'block';
+    collapsed.getBoundingClientRect();
+    collapsed.style.transition = 'opacity .18s ease';
+    collapsed.style.opacity = '1';
+  }, 300);
+}
+
+function resetModalWorker() {
+  document.getElementById('modal-worker-pending').style.display = 'none';
+  var collapsed = document.getElementById('modal-worker-collapsed');
+  collapsed.style.opacity = '0';
+  collapsed.style.display = 'block';
+  collapsed.getBoundingClientRect();
+  collapsed.style.transition = 'opacity .18s ease';
+  collapsed.style.opacity = '1';
+}
+
+function updateModalSendBtn() {
+  // no-op — kept for potential future validation UI
+}
+
+// Commit the inline worker email → pending chip (called from scheduleVisit)
+function commitModalWorker() {
+  var emailEl = document.getElementById('modal-worker-email');
+  var expanded = document.getElementById('modal-worker-expanded');
+  // expanded is open when maxHeight is not '0' and not '' (initial)
+  var isOpen = expanded.style.display !== 'none' && expanded.style.maxHeight !== '0px' && expanded.style.maxHeight !== '0' && expanded.style.maxHeight !== '';
+  if (!isOpen) return null;
+  var email = emailEl.value.trim();
+  if (!email) return null;
+  return email;
+}
+
+function resetModalTech() {
+  // legacy — kept for safety, no-op now
+}
+
+function cancelPanelInvite() {
+  document.getElementById('panel-tech-pending').style.display = 'none';
+  document.getElementById('panel-tech-empty').style.display = 'block';
+  showToast('✕', 'Invite cancelled');
+}
+
+function cancelS3Invite() {
+  document.getElementById('s3-tech-pending').style.display = 'none';
+  document.getElementById('s3-tech-empty').style.display = 'block';
+  var card = document.getElementById('s3-tech-card');
+  if (card) { card.style.border = ''; }
+  showToast('✕', 'Invite cancelled');
+}
+
+// ── Toast ──────────────────────────────────────
+function showToast(icon, msg) {
+  var t = document.getElementById('toast-bar');
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') closeInviteSheet();
+});
 
 goTo('crew-empty');
 </script>
