@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tofu iOS — Worker Up Activation Prototype</title>
+<style>
+  /* ── Tokens (Figma exact) ── */
+  :root {
+    --label-primary:     #000000;
+    --label-title:       #333333;
+    --label-secondary:   rgba(60,60,67,.6);
+    --label-tertiary:    rgba(60,60,67,.3);
+    --label-controls:    #404040;
+    --surface:           #FFFFFF;
+    --surface-ss:        #F5F2EB;   /* plan card / avatar bg */
+    --surface-banner:    #F1EDE4;   /* scheduled banner / picker chip */
+    --surface-overdue:   #F6E9EA;
+    --surface-inprog:    #E8EFF5;
+    --destructive:       #FF383C;
+    --tofu-dark:         #1F2226;
+    --separator:         #C6C6C8;
+    --glass-bg:          rgba(120,120,128,.16);
+    --glass-btn:         #F7F7F7;
+    --r-card:            16px;
+    --r-plan:            12px;
+    --r-thumb:           12px;
+    --r-avatar:          100px;
+    --r-cta:             1000px;
+    --r-sheet:           34px;
+    --r-empty:           8px;
+  }
+
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+  body {
+    background: #e8e8ed;
+    font-family: -apple-system, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 24px 60px;
+    min-height: 100vh;
+  }
+
+  /* ── Journey bar (top) ── */
+  .journey-bar {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 40px;
+    background: var(--tofu-dark);
+    display: flex; align-items: center; justify-content: center; gap: 0;
+    z-index: 9000;
+  }
+  .journey-step {
+    display: flex; align-items: center; gap: 7px;
+    padding: 0 13px; height: 40px;
+    font-size: 11px; color: rgba(255,255,255,.4);
+    cursor: pointer; user-select: none;
+    font-family: -apple-system, system-ui, sans-serif;
+    transition: color .15s;
+    white-space: nowrap;
+  }
+  .journey-step .dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: rgba(255,255,255,.22); flex-shrink: 0;
+    transition: background .15s;
+  }
+  .journey-step.active { color: #fff; font-weight: 600; }
+  .journey-step.active .dot { background: #fff; }
+  .journey-step.done { color: #4e9b7d; }
+  .journey-step.done .dot { background: #4e9b7d; }
+  .journey-sep { color: rgba(255,255,255,.18); font-size: 10px; flex-shrink: 0; }
+
+  /* ── Phone frame ── */
+  .phone {
+    width: 393px;
+    min-height: 852px;
+    background: var(--surface);
+    border-radius: 54px;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,.18),
+      0 0 0 9px #1a1a1a,
+      0 0 0 11px #2a2a2a,
+      0 32px 80px rgba(0,0,0,.38);
+  }
+
+  /* Dynamic island */
+  .dynamic-island {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    width: 126px; height: 37px;
+    background: #000; border-radius: 20px;
+    z-index: 500;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: 59px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 0 28px 10px;
+    position: relative; z-index: 10;
+  }
+  .status-time {
+    font-size: 17px; font-weight: 590; color: var(--label-primary);
+    letter-spacing: -.3px;
+  }
+  .status-icons {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .status-icons svg { color: var(--label-primary); }
+
+  /* ── Screen system ── */
+  .screen { display: none; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    display: flex; align-items: center;
+    padding: 8px 16px 0;
+    position: relative; z-index: 10;
+    min-height: 44px;
+  }
+  .toolbar-back {
+    display: flex; align-items: center; gap: 4px;
+    background: rgba(247,247,247,.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 296px;
+    padding: 7px 14px 7px 10px;
+    font-size: 17px; font-weight: 510; color: var(--label-controls);
+    cursor: pointer; user-select: none; border: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  }
+  .toolbar-back svg { color: var(--label-controls); }
+  .toolbar-title-wrap {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; padding: 0 8px;
+  }
+  .toolbar-title {
+    font-size: 17px; font-weight: 590; color: var(--label-primary);
+    letter-spacing: -.2px;
+  }
+  .toolbar-action {
+    background: rgba(247,247,247,.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 296px;
+    padding: 7px 14px;
+    font-size: 17px; font-weight: 510; color: var(--label-controls);
+    cursor: pointer; user-select: none; border: none;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  }
+
+  /* Large Title (scroll-in header) */
+  .large-title-wrap {
+    padding: 8px 20px 4px;
+  }
+  .large-title {
+    font-size: 34px; font-weight: 700; color: var(--label-title);
+    letter-spacing: -.5px; line-height: 41px;
+  }
+
+  /* ── Scrollable content ── */
+  .screen-content {
+    flex: 1; overflow-y: auto;
+    padding-bottom: 120px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .screen-content::-webkit-scrollbar { display: none; }
+
+  /* ── Primary CTA footer ── */
+  .cta-footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 16px 20px 40px;
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 35%);
+    z-index: 200;
+  }
+  .btn-primary-ios {
+    width: 100%;
+    background: #000;
+    color: #fff;
+    font-size: 17px; font-weight: 510;
+    font-family: -apple-system, system-ui, sans-serif;
+    border: none; border-radius: var(--r-cta);
+    padding: 16px 20px;
+    cursor: pointer; user-select: none;
+    box-shadow: 0 1px 8px rgba(0,0,0,.12), 0 0 2px rgba(0,0,0,.1);
+    transition: opacity .12s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-primary-ios:active { opacity: .7; }
+
+  .btn-outline-ios {
+    width: 100%;
+    background: transparent;
+    color: #000;
+    font-size: 17px; font-weight: 510;
+    font-family: -apple-system, system-ui, sans-serif;
+    border: 0.5px solid #000;
+    border-radius: var(--r-cta);
+    padding: 15px 20px;
+    cursor: pointer; user-select: none;
+    transition: opacity .12s;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 10px;
+  }
+  .btn-outline-ios:active { opacity: .7; }
+
+  /* ── AP chip ── */
+  .ap-chip {
+    display: inline-flex; align-items: center;
+    font-size: 11px; font-weight: 600;
+    background: #fff3cd; color: #856404;
+    border-radius: 100px; padding: 3px 10px;
+    margin-bottom: 8px;
+  }
+
+  /* ──────────────────────────────────────── */
+  /* SCREEN 1: Team empty                    */
+  /* ──────────────────────────────────────── */
+  .empty-state-box {
+    margin: 20px 20px 0;
+    border: 1px dashed rgba(60,60,67,.6);
+    border-radius: var(--r-empty);
+    padding: 48px 24px 40px;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; min-height: 360px; justify-content: center;
+  }
+  .empty-illustration {
+    width: 96px; height: 96px; margin-bottom: 24px;
+    position: relative; flex-shrink: 0;
+  }
+  .empty-illustration svg {
+    width: 96px; height: 96px; color: var(--tofu-dark);
+  }
+  .empty-title {
+    font-size: 22px; font-weight: 400; color: var(--label-primary);
+    line-height: 28px; letter-spacing: .35px;
+  }
+
+  /* ──────────────────────────────────────── */
+  /* SCREEN 2: Job view                      */
+  /* ──────────────────────────────────────── */
+  .job-state-banner {
+    margin: 16px 20px 0;
+    background: var(--surface-banner);
+    border-radius: var(--r-card);
+    padding: 16px 20px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .banner-title {
+    font-size: 20px; font-weight: 590; color: var(--label-primary);
+    letter-spacing: -.3px; line-height: 25px;
+  }
+
+  /* Cards */
+  .ios-card {
+    margin: 12px 20px 0;
+    border: 0.5px solid rgba(60,60,67,.3);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  .ios-card-row {
+    display: flex; align-items: center;
+    padding: 14px 16px;
+    border-bottom: 0.5px solid rgba(60,60,67,.15);
+    cursor: pointer; position: relative;
+    background: var(--surface); min-height: 52px;
+  }
+  .ios-card-row:last-child { border-bottom: none; }
+  .ios-card-row:active { background: #f5f5f5; }
+  .card-row-icon {
+    width: 36px; height: 36px;
+    background: var(--surface-banner);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-right: 14px; font-size: 16px;
+  }
+  .card-row-title {
+    font-size: 17px; font-weight: 590; color: var(--label-primary);
+    flex: 1;
+  }
+  .card-row-subtitle {
+    font-size: 15px; font-weight: 400; color: var(--label-secondary);
+    margin-top: 1px;
+  }
+  .card-row-value {
+    font-size: 15px; color: var(--label-secondary);
+    margin-right: 8px;
+  }
+  .chevron-icon { color: var(--label-tertiary); font-size: 17px; flex-shrink: 0; }
+
+  /* Visits card — empty state inside card */
+  .visits-empty {
+    padding: 24px 16px;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  }
+  .visits-empty-label {
+    font-size: 15px; color: var(--label-secondary);
+  }
+
+  /* Badge */
+  .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 20px;
+    background: #000; color: #fff;
+    font-size: 12px; font-weight: 400; border-radius: 10px;
+    padding: 0 6px;
+  }
+  .badge-inprog {
+    background: var(--surface-inprog); color: #1a4a7a;
+    font-size: 12px; font-weight: 400; border-radius: 10px;
+    padding: 2px 8px; height: auto;
+  }
+
+  /* Updates section */
+  .section-header-label {
+    font-size: 20px; font-weight: 590; color: var(--label-primary);
+    letter-spacing: -.3px; padding: 20px 20px 8px;
+  }
+  .activity-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 8px 20px;
+  }
+  .activity-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1.5px solid rgba(31,34,38,.15);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .activity-date {
+    font-size: 13px; color: var(--label-secondary);
+    line-height: 18px; min-width: 80px; flex-shrink: 0; padding-top: 2px;
+  }
+  .activity-text {
+    font-size: 15px; color: var(--label-secondary);
+    line-height: 20px;
+  }
+
+  /* ──────────────────────────────────────── */
+  /* SCREEN 3: New visit form                */
+  /* ──────────────────────────────────────── */
+  .form-close-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 17px; color: var(--label-controls);
+    padding: 4px;
+  }
+  .form-section {
+    margin: 20px 20px 0;
+  }
+  .form-group {
+    border: 0.5px solid rgba(60,60,67,.3);
+    border-radius: var(--r-card);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .form-row {
+    display: flex; align-items: center;
+    padding: 13px 16px;
+    border-bottom: 0.5px solid rgba(60,60,67,.12);
+    background: var(--surface);
+  }
+  .form-row:last-child { border-bottom: none; }
+  .form-row-label {
+    font-size: 17px; color: var(--label-primary);
+    flex: 1;
+  }
+  .form-row-value {
+    font-size: 17px; color: var(--label-secondary);
+  }
+  .form-chip {
+    background: var(--surface-banner);
+    border-radius: 8px; padding: 4px 12px;
+    font-size: 17px; color: var(--label-primary);
+    font-weight: 400;
+  }
+
+  /* Tech assignment in form */
+  .tech-assign-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 16px;
+    background: var(--surface);
+    cursor: pointer;
+  }
+  .tech-assign-row:active { background: #f5f5f5; }
+  .form-hint-box {
+    background: var(--surface-banner);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px; color: var(--label-secondary);
+    line-height: 1.5;
+    margin: 0 20px 16px;
+    display: none;
+  }
+  .form-hint-box.visible { display: block; }
+
+  /* ──────────────────────────────────────── */
+  /* SCREEN 4: Visit — no tech               */
+  /* ──────────────────────────────────────── */
+  .visit-status-banner {
+    margin: 16px 20px 0;
+    background: var(--surface-banner);
+    border-radius: var(--r-card);
+    padding: 16px 20px;
+  }
+  .visit-status-title {
+    font-size: 20px; font-weight: 590; color: var(--label-primary);
+    letter-spacing: -.3px; margin-bottom: 14px;
+  }
+  .visit-status-btns { display: flex; gap: 10px; }
+  .vs-btn-primary {
+    flex: 1; background: #000; color: #fff;
+    border: none; border-radius: var(--r-cta);
+    padding: 11px 14px; font-size: 15px; font-weight: 510;
+    font-family: -apple-system, system-ui, sans-serif;
+    cursor: pointer;
+  }
+  .vs-btn-outline {
+    flex: 1; background: transparent; color: #000;
+    border: 0.5px solid #000; border-radius: var(--r-cta);
+    padding: 11px 14px; font-size: 15px; font-weight: 510;
+    font-family: -apple-system, system-ui, sans-serif;
+    cursor: pointer;
+  }
+
+  /* Worker dashed card — AP C */
+  .worker-dashed {
+    margin: 12px 20px 0;
+    border: 0.5px dashed rgba(60,60,67,.6);
+    border-radius: var(--r-card);
+    padding: 16px;
+    cursor: pointer;
+    transition: background .1s;
+  }
+  .worker-dashed:active { background: #fafafa; }
+  .worker-dashed-inner {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .worker-avatar-placeholder {
+    width: 40px; height: 40px; border-radius: var(--r-avatar);
+    border: 1.5px dashed rgba(60,60,67,.4);
+    background: var(--surface-ss);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .worker-dashed-label {
+    font-size: 17px; font-weight: 590; color: var(--label-primary); flex: 1;
+  }
+  .worker-dashed-hint {
+    font-size: 15px; color: var(--label-secondary);
+    margin-top: 2px;
+  }
+
+  /* Worker assigned card */
+  .worker-assigned {
+    margin: 12px 20px 0;
+    border: 0.5px solid rgba(60,60,67,.3);
+    border-radius: var(--r-card);
+    padding: 16px;
+    background: var(--surface);
+  }
+  .worker-assigned-inner {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .worker-avatar {
+    width: 40px; height: 40px; border-radius: var(--r-avatar);
+    background: var(--tofu-dark); color: #fff;
+    font-size: 15px; font-weight: 590;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .worker-name {
+    font-size: 17px; font-weight: 400; color: var(--label-primary);
+    flex: 1;
+  }
+  .worker-email {
+    font-size: 15px; color: var(--label-secondary);
+    margin-top: 1px;
+  }
+  .worker-change {
+    font-size: 15px; color: var(--label-secondary);
+    cursor: pointer; text-decoration: none;
+  }
+
+  /* Photos card */
+  .photos-card {
+    margin: 12px 20px 0;
+    border: 0.5px dashed rgba(60,60,67,.4);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  .photos-card-filled {
+    margin: 12px 20px 0;
+    border: 0.5px solid rgba(60,60,67,.3);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  .photos-card-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px;
+  }
+  .photos-icon-circle {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--surface-banner);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .photos-card-title {
+    font-size: 17px; font-weight: 590; color: var(--label-primary);
+    flex: 1;
+  }
+  .photos-card-subtitle {
+    font-size: 15px; color: var(--label-secondary);
+    margin-top: 1px;
+  }
+  .photos-empty-hint {
+    padding: 0 16px 16px;
+    font-size: 14px; color: var(--label-secondary);
+    line-height: 1.55;
+  }
+
+  /* Photos grid */
+  .photos-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2px; padding: 0 16px 16px;
+  }
+  .photo-thumb {
+    aspect-ratio: 1; border-radius: var(--r-thumb);
+    position: relative; overflow: hidden;
+    cursor: pointer;
+  }
+  .photo-thumb-bg { position: absolute; inset: 0; }
+  .photo-location-tag {
+    position: absolute; bottom: 5px; left: 5px; right: 5px;
+    background: rgba(31,34,38,.72); color: #fff;
+    font-size: 9px; border-radius: 3px;
+    padding: 3px 5px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    z-index: 2;
+  }
+  .photo-tag-before {
+    position: absolute; top: 6px; left: 6px;
+    background: rgba(241,237,228,.75);
+    backdrop-filter: blur(8px);
+    border-radius: 4px; padding: 2px 6px;
+    font-size: 11px; font-weight: 590; color: var(--tofu-dark);
+    z-index: 2;
+  }
+  .photo-tag-after {
+    position: absolute; top: 6px; left: 6px;
+    background: rgba(31,34,38,.8);
+    border-radius: 4px; padding: 2px 6px;
+    font-size: 11px; font-weight: 590; color: #fff;
+    z-index: 2;
+  }
+  .photo-add-cell {
+    aspect-ratio: 1; border-radius: var(--r-thumb);
+    border: 1px dashed var(--separator);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; cursor: pointer;
+    background: var(--surface);
+  }
+  .photo-add-cell-icon { font-size: 22px; color: var(--label-primary); }
+  .photo-add-cell-label { font-size: 13px; font-weight: 590; color: var(--label-primary); }
+
+  /* ──────────────────────────────────────── */
+  /* Bottom sheets / overlays                */
+  /* ──────────────────────────────────────── */
+  .sheet-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,.36);
+    z-index: 800;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding-bottom: 12px;
+  }
+  .sheet-overlay.hidden { display: none; }
+
+  .action-sheet {
+    background: rgba(247,247,247,.82);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border-radius: var(--r-sheet);
+    margin: 0 8px 10px;
+    overflow: hidden;
+  }
+  .action-sheet-item {
+    display: flex; align-items: center;
+    padding: 16px 20px; cursor: pointer;
+    border-bottom: 0.5px solid rgba(60,60,67,.12);
+    background: transparent; border: none; width: 100%;
+    font-family: -apple-system, system-ui, sans-serif;
+  }
+  .action-sheet-item:last-child { border-bottom: none; }
+  .action-sheet-item:active { background: rgba(120,120,128,.16); }
+  .action-sheet-title {
+    font-size: 17px; font-weight: 400; color: var(--label-primary);
+    flex: 1; text-align: left;
+  }
+  .action-sheet-cancel {
+    background: rgba(247,247,247,.82);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border-radius: var(--r-sheet);
+    margin: 0 8px;
+    padding: 16px 20px;
+    font-size: 17px; font-weight: 590; color: var(--label-primary);
+    cursor: pointer; text-align: center; border: none; width: calc(100% - 16px);
+    font-family: -apple-system, system-ui, sans-serif;
+  }
+  .action-sheet-cancel:active { background: rgba(120,120,128,.2); }
+
+  /* Tech picker dropdown in form */
+  .tech-picker-list {
+    background: var(--surface);
+    border: 0.5px solid rgba(60,60,67,.2);
+    border-radius: var(--r-card);
+    overflow: hidden;
+    margin: 0 20px 16px;
+    display: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,.1);
+  }
+  .tech-picker-list.open { display: block; }
+  .tech-picker-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; cursor: pointer;
+    border-bottom: 0.5px solid rgba(60,60,67,.1);
+    border: none; width: 100%; background: transparent;
+    font-family: -apple-system, system-ui, sans-serif;
+  }
+  .tech-picker-item:last-child { border-bottom: none; }
+  .tech-picker-item:active { background: #f5f5f5; }
+  .tp-avatar {
+    width: 36px; height: 36px; border-radius: var(--r-avatar);
+    background: var(--tofu-dark); color: #fff;
+    font-size: 13px; font-weight: 590;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .tp-name { font-size: 17px; color: var(--label-primary); text-align: left; }
+  .tp-email { font-size: 15px; color: var(--label-secondary); text-align: left; margin-top: 1px; }
+  .tp-badge {
+    margin-left: auto;
+    background: #e5f2ed; color: #1a7a52;
+    font-size: 13px; border-radius: 100px; padding: 2px 10px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+
+  /* Plan card */
+  .plan-card {
+    margin: 16px 20px 0;
+    background: var(--surface-ss);
+    border-radius: var(--r-plan);
+    padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .plan-label {
+    font-size: 15px; font-weight: 590; color: var(--label-primary);
+  }
+  .plan-detail {
+    font-size: 15px; color: var(--label-secondary);
+  }
+
+  /* Team list rows */
+  .team-list { margin: 12px 20px 0; display: flex; flex-direction: column; gap: 12px; }
+  .team-row {
+    border: 0.5px solid rgba(60,60,67,.3);
+    border-radius: var(--r-card);
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); cursor: pointer;
+  }
+  .team-row:active { background: #f8f8f8; }
+  .team-row-avatar {
+    width: 36px; height: 36px; border-radius: var(--r-avatar);
+    background: var(--surface-ss);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 590; color: var(--label-secondary);
+    flex-shrink: 0;
+  }
+  .team-row-name { font-size: 17px; color: var(--label-primary); flex: 1; }
+  .team-row-email { font-size: 15px; color: var(--label-secondary); margin-top: 1px; }
+  .team-row-status-pending { font-size: 15px; color: var(--label-secondary); }
+  .team-row-status-expired { font-size: 15px; color: var(--destructive); }
+</style>
+</head>
+<body>
+
+<!-- Journey bar -->
+<div class="journey-bar">
+  <div class="journey-step" id="jstep-team-empty" onclick="goTo('team-empty')">
+    <div class="dot"></div>Team (empty)
+  </div>
+  <div class="journey-sep">›</div>
+  <div class="journey-step" id="jstep-job-view" onclick="goTo('job-view')">
+    <div class="dot"></div>Job view
+  </div>
+  <div class="journey-sep">›</div>
+  <div class="journey-step" id="jstep-new-visit" onclick="goTo('new-visit')">
+    <div class="dot"></div>New visit
+  </div>
+  <div class="journey-sep">›</div>
+  <div class="journey-step" id="jstep-visit-no-tech" onclick="goTo('visit-no-tech')">
+    <div class="dot"></div>Visit · no tech
+  </div>
+  <div class="journey-sep">›</div>
+  <div class="journey-step" id="jstep-visit-tech" onclick="goTo('visit-tech')">
+    <div class="dot"></div>Visit · tech assigned
+  </div>
+</div>
+
+<!-- Phone frame -->
+<div class="phone" id="phone">
+  <div class="dynamic-island"></div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN 1: Team — empty state          -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="screen" id="screen-team-empty">
+    <div class="status-bar">
+      <span class="status-time">9:41</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="1" width="3" height="11" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.4A7.2 7.2 0 0 1 13.6 5l1.4-1.4A9.2 9.2 0 0 0 8 0a9.2 9.2 0 0 0-7 3.6L2.4 5A7.2 7.2 0 0 1 8 2.4z"/><path d="M8 5.6A3.6 3.6 0 0 1 10.8 7l1.4-1.4A5.6 5.6 0 0 0 8 3.2a5.6 5.6 0 0 0-4.2 2.4L5.2 7A3.6 3.6 0 0 1 8 5.6z"/><circle cx="8" cy="10" r="2"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0" y="1" width="22" height="10" rx="3" stroke="currentColor" stroke-width="1"/><rect x="1" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="23" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".4"/></svg>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="toolbar-back" onclick="goBack()">
+        <svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2L2 8l6 6"/></svg>
+        Settings
+      </button>
+    </div>
+
+    <div class="large-title-wrap" style="padding-bottom:8px;">
+      <div class="large-title">Team</div>
+    </div>
+
+    <div class="screen-content">
+      <div class="empty-state-box">
+        <div class="empty-illustration">
+          <!-- Calendar + people illustration -->
+          <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="14" y="22" width="52" height="48" rx="8" stroke="currentColor" stroke-width="2.5"/>
+            <rect x="14" y="22" width="52" height="16" rx="8" fill="currentColor" opacity=".08"/>
+            <line x1="14" y1="38" x2="66" y2="38" stroke="currentColor" stroke-width="2"/>
+            <line x1="28" y1="16" x2="28" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="52" y1="16" x2="52" y2="28" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="72" cy="34" r="10" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M62 56c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="30" cy="52" r="6" stroke="currentColor" stroke-width="2"/>
+            <circle cx="44" cy="52" r="6" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="ap-chip">ACTIVATION POINT A</div>
+        <div class="empty-title" style="margin-top:4px;">Your team works from their phone. You see what's happening — without calling anyone.</div>
+      </div>
+    </div>
+
+    <div class="cta-footer">
+      <button class="btn-primary-ios" onclick="goTo('job-view')">Invite tech</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN 2: Job view                    -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="screen" id="screen-job-view">
+    <div class="status-bar">
+      <span class="status-time">2:40</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="1" width="3" height="11" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.4A7.2 7.2 0 0 1 13.6 5l1.4-1.4A9.2 9.2 0 0 0 8 0a9.2 9.2 0 0 0-7 3.6L2.4 5A7.2 7.2 0 0 1 8 2.4z"/><path d="M8 5.6A3.6 3.6 0 0 1 10.8 7l1.4-1.4A5.6 5.6 0 0 0 8 3.2a5.6 5.6 0 0 0-4.2 2.4L5.2 7A3.6 3.6 0 0 1 8 5.6z"/><circle cx="8" cy="10" r="2"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0" y="1" width="22" height="10" rx="3" stroke="currentColor" stroke-width="1"/><rect x="1" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="23" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".4"/></svg>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="toolbar-back" onclick="goTo('team-empty')">
+        <svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2L2 8l6 6"/></svg>
+        Jobs
+      </button>
+      <div style="flex:1;"></div>
+      <button class="toolbar-action">Edit</button>
+    </div>
+
+    <div class="large-title-wrap">
+      <div class="large-title" style="font-size:28px;letter-spacing:-.4px;">Emily Taylor</div>
+      <div style="font-size:15px;color:#999;font-weight:510;margin-top:2px;">#1, Yesterday</div>
+    </div>
+
+    <div class="screen-content">
+      <!-- Job state banner -->
+      <div class="job-state-banner" id="job-banner-add-visit">
+        <div class="banner-title">Job created</div>
+        <div style="font-size:15px;color:var(--label-secondary);margin-bottom:4px;">Schedule your first visit</div>
+        <button class="vs-btn-primary" style="align-self:flex-start;padding:10px 20px;" onclick="goTo('new-visit')">Add visit</button>
+      </div>
+      <div class="job-state-banner" id="job-banner-scheduled" style="display:none;">
+        <div class="banner-title" style="font-size:17px;font-weight:590;">Scheduled:</div>
+        <div class="banner-title">Jun 15 at 10:00 AM</div>
+        <button class="vs-btn-primary" style="align-self:flex-start;padding:10px 20px;" onclick="openVisit()">View visit</button>
+      </div>
+
+      <!-- Cards -->
+      <div class="ios-card">
+        <div class="ios-card-row" id="visits-card-row" onclick="handleVisitsCard()">
+          <div class="card-row-icon">📅</div>
+          <div style="flex:1;">
+            <div class="card-row-title">Visits</div>
+            <div class="card-row-subtitle" id="visits-card-sub">When work happens</div>
+          </div>
+          <div class="card-row-value" id="visits-card-badge"></div>
+          <div class="chevron-icon">›</div>
+        </div>
+      </div>
+
+      <div class="ios-card">
+        <div class="ios-card-row">
+          <div class="card-row-icon">📍</div>
+          <div style="flex:1;">
+            <div class="card-row-title">Property</div>
+            <div class="card-row-subtitle">Where work happens</div>
+          </div>
+          <div class="chevron-icon">›</div>
+        </div>
+        <div class="ios-card-row">
+          <div class="card-row-icon">📋</div>
+          <div style="flex:1;">
+            <div class="card-row-title">Scope</div>
+            <div class="card-row-subtitle">What to do</div>
+          </div>
+          <div class="chevron-icon">›</div>
+        </div>
+        <div class="ios-card-row">
+          <div class="card-row-icon">💰</div>
+          <div style="flex:1;">
+            <div class="card-row-title">Estimate</div>
+            <div class="card-row-subtitle">Build quote</div>
+          </div>
+          <div class="chevron-icon">›</div>
+        </div>
+        <div class="ios-card-row">
+          <div class="card-row-icon">🧾</div>
+          <div style="flex:1;">
+            <div class="card-row-title">Invoice</div>
+            <div class="card-row-subtitle">Create to take payments</div>
+          </div>
+          <div class="chevron-icon">›</div>
+        </div>
+      </div>
+
+      <div class="section-header-label">Updates</div>
+      <div class="activity-item">
+        <div class="activity-dot"></div>
+        <div class="activity-date">Today 9:41 AM</div>
+        <div class="activity-text">You created the job</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN 3: New visit form              -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="screen" id="screen-new-visit">
+    <div class="status-bar">
+      <span class="status-time">2:40</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="1" width="3" height="11" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.4A7.2 7.2 0 0 1 13.6 5l1.4-1.4A9.2 9.2 0 0 0 8 0a9.2 9.2 0 0 0-7 3.6L2.4 5A7.2 7.2 0 0 1 8 2.4z"/><path d="M8 5.6A3.6 3.6 0 0 1 10.8 7l1.4-1.4A5.6 5.6 0 0 0 8 3.2a5.6 5.6 0 0 0-4.2 2.4L5.2 7A3.6 3.6 0 0 1 8 5.6z"/><circle cx="8" cy="10" r="2"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0" y="1" width="22" height="10" rx="3" stroke="currentColor" stroke-width="1"/><rect x="1" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="23" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".4"/></svg>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="form-close-btn" onclick="goTo('job-view')">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"/></svg>
+      </button>
+      <div class="toolbar-title-wrap">
+        <div class="toolbar-title">New visit</div>
+      </div>
+      <div style="width:40px;"></div>
+    </div>
+
+    <div class="screen-content" style="padding-bottom:140px;">
+      <div class="form-section">
+        <div class="form-group">
+          <div class="form-row">
+            <div class="form-row-label">Date</div>
+            <div class="form-chip">Jun 15</div>
+          </div>
+          <div class="form-row">
+            <div class="form-row-label">Time</div>
+            <div class="form-chip">10:00 AM</div>
+          </div>
+        </div>
+
+        <!-- Tech field — AP B-new -->
+        <div class="form-group" id="tech-form-group">
+          <div class="tech-assign-row" onclick="toggleTechPicker()" id="tech-form-row">
+            <div class="form-row-label">Assign tech</div>
+            <div id="tech-form-value" style="font-size:17px;color:var(--label-secondary);">None</div>
+            <div class="chevron-icon" style="margin-left:8px;">›</div>
+          </div>
+        </div>
+
+        <!-- Hint: AP B -->
+        <div class="form-hint-box" id="tech-form-hint">
+          <div class="ap-chip" style="margin-bottom:6px;">ACTIVATION POINT B</div>
+          Assign a tech — they'll see job details right away.
+        </div>
+      </div>
+
+      <!-- Tech picker list -->
+      <div class="tech-picker-list" id="tech-picker-dd">
+        <button class="tech-picker-item" onclick="selectTech('James Miller','JM','james.miller@gmail.com')">
+          <div class="tp-avatar">JM</div>
+          <div style="flex:1;">
+            <div class="tp-name">James Miller</div>
+            <div class="tp-email">james.miller@gmail.com</div>
+          </div>
+          <div class="tp-badge">Active</div>
+        </button>
+        <button class="tech-picker-item" onclick="selectTech('Sam Torres','ST','sam.torres@icloud.com')">
+          <div class="tp-avatar">ST</div>
+          <div style="flex:1;">
+            <div class="tp-name">Sam Torres</div>
+            <div class="tp-email">sam.torres@icloud.com</div>
+          </div>
+          <div class="tp-badge">Active</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="cta-footer">
+      <button class="btn-primary-ios" onclick="saveVisit()">Save</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN 4: Visit — no tech             -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="screen" id="screen-visit-no-tech">
+    <div class="status-bar">
+      <span class="status-time">2:40</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="1" width="3" height="11" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.4A7.2 7.2 0 0 1 13.6 5l1.4-1.4A9.2 9.2 0 0 0 8 0a9.2 9.2 0 0 0-7 3.6L2.4 5A7.2 7.2 0 0 1 8 2.4z"/><path d="M8 5.6A3.6 3.6 0 0 1 10.8 7l1.4-1.4A5.6 5.6 0 0 0 8 3.2a5.6 5.6 0 0 0-4.2 2.4L5.2 7A3.6 3.6 0 0 1 8 5.6z"/><circle cx="8" cy="10" r="2"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0" y="1" width="22" height="10" rx="3" stroke="currentColor" stroke-width="1"/><rect x="1" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="23" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".4"/></svg>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="toolbar-back" onclick="goTo('job-view')">
+        <svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2L2 8l6 6"/></svg>
+        Job #1
+      </button>
+      <div style="flex:1;"></div>
+      <button class="toolbar-action">Edit</button>
+    </div>
+
+    <div class="large-title-wrap">
+      <div class="large-title" style="font-size:26px;">Jun 15, 10:00 AM</div>
+    </div>
+
+    <div class="screen-content">
+      <!-- Status banner -->
+      <div class="visit-status-banner">
+        <div class="visit-status-title">Scheduled</div>
+        <div class="visit-status-btns">
+          <button class="vs-btn-primary">Start visit</button>
+          <button class="vs-btn-outline">Mark complete</button>
+        </div>
+      </div>
+
+      <!-- Worker — AP C (dashed, no tech) -->
+      <div class="worker-dashed" onclick="showWorkerSheet()">
+        <div class="ap-chip">ACTIVATION POINT C</div>
+        <div class="worker-dashed-inner">
+          <div class="worker-avatar-placeholder">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="rgba(60,60,67,.4)" stroke-width="1.5" stroke-linecap="round"><circle cx="9" cy="6" r="3"/><path d="M3 16c0-3.314 2.686-6 6-6s6 2.686 6 6"/></svg>
+          </div>
+          <div style="flex:1;">
+            <div class="worker-dashed-label">Tech</div>
+            <div class="worker-dashed-hint">Assign a tech — and stop wondering if the job got done.</div>
+          </div>
+          <div class="chevron-icon">›</div>
+        </div>
+      </div>
+
+      <!-- Photos — AP C-photos (dashed) -->
+      <div class="photos-card">
+        <div class="photos-card-header">
+          <div class="photos-icon-circle">📷</div>
+          <div>
+            <div class="photos-card-title">Photos</div>
+            <div class="photos-card-subtitle">Add proof of work</div>
+          </div>
+          <div class="chevron-icon" style="margin-left:auto;">›</div>
+        </div>
+        <div class="photos-empty-hint">
+          Location tags are added automatically when your tech uses воркерапп.
+        </div>
+      </div>
+    </div>
+
+    <!-- Worker assign bottom sheet -->
+    <div class="sheet-overlay hidden" id="worker-sheet">
+      <div class="action-sheet">
+        <button class="action-sheet-item" style="flex-direction:column;align-items:flex-start;gap:4px;" onclick="assignTech('James Miller','JM')">
+          <div style="display:flex;align-items:center;gap:12px;width:100%;">
+            <div class="tp-avatar">JM</div>
+            <div style="flex:1;text-align:left;">
+              <div class="action-sheet-title">James Miller</div>
+              <div style="font-size:15px;color:var(--label-secondary);">james.miller@gmail.com</div>
+            </div>
+            <div class="tp-badge">Active</div>
+          </div>
+        </button>
+        <button class="action-sheet-item" style="flex-direction:column;align-items:flex-start;gap:4px;" onclick="assignTech('Sam Torres','ST')">
+          <div style="display:flex;align-items:center;gap:12px;width:100%;">
+            <div class="tp-avatar">ST</div>
+            <div style="flex:1;text-align:left;">
+              <div class="action-sheet-title">Sam Torres</div>
+              <div style="font-size:15px;color:var(--label-secondary);">sam.torres@icloud.com</div>
+            </div>
+            <div class="tp-badge">Active</div>
+          </div>
+        </button>
+      </div>
+      <button class="action-sheet-cancel" onclick="hideWorkerSheet()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN 5: Visit — tech assigned       -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="screen" id="screen-visit-tech">
+    <div class="status-bar">
+      <span class="status-time">2:40</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="1" width="3" height="11" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.4A7.2 7.2 0 0 1 13.6 5l1.4-1.4A9.2 9.2 0 0 0 8 0a9.2 9.2 0 0 0-7 3.6L2.4 5A7.2 7.2 0 0 1 8 2.4z"/><path d="M8 5.6A3.6 3.6 0 0 1 10.8 7l1.4-1.4A5.6 5.6 0 0 0 8 3.2a5.6 5.6 0 0 0-4.2 2.4L5.2 7A3.6 3.6 0 0 1 8 5.6z"/><circle cx="8" cy="10" r="2"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0" y="1" width="22" height="10" rx="3" stroke="currentColor" stroke-width="1"/><rect x="1" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="23" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".4"/></svg>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="toolbar-back" onclick="goTo('job-view')">
+        <svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2L2 8l6 6"/></svg>
+        Job #1
+      </button>
+      <div style="flex:1;"></div>
+      <button class="toolbar-action">Edit</button>
+    </div>
+
+    <div class="large-title-wrap">
+      <div class="large-title" style="font-size:26px;">Jun 15, 10:00 AM</div>
+    </div>
+
+    <div class="screen-content">
+      <div class="visit-status-banner">
+        <div class="visit-status-title">Scheduled</div>
+        <div class="visit-status-btns">
+          <button class="vs-btn-primary">Start visit</button>
+          <button class="vs-btn-outline">Mark complete</button>
+        </div>
+      </div>
+
+      <!-- Worker assigned -->
+      <div class="worker-assigned">
+        <div class="worker-assigned-inner">
+          <div class="worker-avatar" id="assigned-avatar">JM</div>
+          <div style="flex:1;">
+            <div class="worker-name" id="assigned-name">James Miller</div>
+            <div class="worker-email" style="font-size:14px;color:var(--label-secondary);">GPS active · Active</div>
+          </div>
+          <a class="worker-change" onclick="goTo('visit-no-tech')">Change</a>
+        </div>
+      </div>
+
+      <!-- Photos with GPS tags -->
+      <div class="photos-card-filled" onclick="goTo('photos-gallery')">
+        <div class="photos-card-header">
+          <div class="photos-icon-circle">📷</div>
+          <div>
+            <div class="photos-card-title">Photos</div>
+            <div class="photos-card-subtitle">5 photos</div>
+          </div>
+          <div class="chevron-icon" style="margin-left:auto;">›</div>
+        </div>
+        <div class="photos-grid">
+          <div class="photo-thumb">
+            <div class="photo-thumb-bg" style="background:linear-gradient(135deg,#c8e6c9,#81c784);"></div>
+            <div class="photo-location-tag">📍 10848 Wagner St</div>
+          </div>
+          <div class="photo-thumb">
+            <div class="photo-thumb-bg" style="background:linear-gradient(135deg,#bbdefb,#64b5f6);"></div>
+            <div class="photo-tag-before">Before</div>
+            <div class="photo-location-tag">📍 10848 Wagner St</div>
+          </div>
+          <div class="photo-thumb">
+            <div class="photo-thumb-bg" style="background:linear-gradient(135deg,#ffe0b2,#ffb74d);"></div>
+            <div class="photo-tag-after">After</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════ -->
+  <!-- SCREEN 6: Photos gallery              -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="screen" id="screen-photos-gallery">
+    <div class="status-bar">
+      <span class="status-time">2:40</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="1" width="3" height="11" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.4A7.2 7.2 0 0 1 13.6 5l1.4-1.4A9.2 9.2 0 0 0 8 0a9.2 9.2 0 0 0-7 3.6L2.4 5A7.2 7.2 0 0 1 8 2.4z"/><path d="M8 5.6A3.6 3.6 0 0 1 10.8 7l1.4-1.4A5.6 5.6 0 0 0 8 3.2a5.6 5.6 0 0 0-4.2 2.4L5.2 7A3.6 3.6 0 0 1 8 5.6z"/><circle cx="8" cy="10" r="2"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0" y="1" width="22" height="10" rx="3" stroke="currentColor" stroke-width="1"/><rect x="1" y="2" width="18" height="8" rx="2" fill="currentColor"/><rect x="23" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".4"/></svg>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="toolbar-back" onclick="goTo('visit-tech')">
+        <svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2L2 8l6 6"/></svg>
+        Visit
+      </button>
+    </div>
+
+    <div class="large-title-wrap">
+      <div class="large-title">Photos</div>
+    </div>
+
+    <div class="screen-content">
+      <div style="padding: 16px 20px 0;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">
+          <!-- thumb 1 -->
+          <div class="photo-thumb" style="aspect-ratio:1;">
+            <div class="photo-thumb-bg" style="background:linear-gradient(135deg,#c8e6c9,#81c784);"></div>
+            <div class="photo-location-tag">📍 10848 Wagner St</div>
+          </div>
+          <!-- thumb 2 -->
+          <div class="photo-thumb" style="aspect-ratio:1;">
+            <div class="photo-thumb-bg" style="background:linear-gradient(135deg,#bbdefb,#64b5f6);"></div>
+            <div class="photo-tag-before">Before</div>
+            <div class="photo-location-tag">📍 10848 Wagner St</div>
+          </div>
+          <!-- thumb 3 — uploading -->
+          <div class="photo-thumb" style="aspect-ratio:1;position:relative;">
+            <div class="photo-thumb-bg" style="background:linear-gradient(135deg,#ffe0b2,#ffb74d);"></div>
+            <div style="position:absolute;inset:0;background:rgba(31,34,38,.2);backdrop-filter:blur(4px);border-radius:var(--r-thumb);display:flex;align-items:flex-end;justify-content:center;">
+              <div style="background:linear-gradient(180deg,rgba(31,34,38,0) 0%,rgba(31,34,38,1) 100%);position:absolute;inset:0;border-radius:var(--r-thumb);"></div>
+              <span style="font-size:11px;color:#fff;font-weight:590;padding-bottom:8px;position:relative;z-index:2;">Uploading</span>
+            </div>
+          </div>
+          <!-- thumb 4 -->
+          <div class="photo-thumb" style="aspect-ratio:1;">
+            <div class="photo-thumb-bg" style="background:linear-gradient(135deg,#e1bee7,#ba68c8);"></div>
+            <div class="photo-tag-after">After</div>
+            <div class="photo-location-tag">📍 10848 Wagner St</div>
+          </div>
+          <!-- thumb 5 -->
+          <div class="photo-thumb" style="aspect-ratio:1;">
+            <div class="photo-thumb-bg" style="background:linear-gradient(135deg,#f8bbd0,#f48fb1);"></div>
+            <div class="photo-location-tag">📍 10848 Wagner St</div>
+          </div>
+          <!-- Add photo -->
+          <div class="photo-add-cell">
+            <div class="photo-add-cell-icon">＋</div>
+            <div class="photo-add-cell-label">Add photo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+var selectedTech = null;
+var visitCreated = false;
+
+var screenOrder = ['team-empty','job-view','new-visit','visit-no-tech','visit-tech','photos-gallery'];
+var stepKeys    = ['team-empty','job-view','new-visit','visit-no-tech','visit-tech'];
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  var t = document.getElementById('screen-' + id);
+  if (t) { t.classList.add('active'); }
+
+  var idx = stepKeys.indexOf(id);
+  stepKeys.forEach(function(s, i){
+    var el = document.getElementById('jstep-' + s);
+    if (!el) return;
+    el.classList.remove('active','done');
+    if (i < idx) el.classList.add('done');
+    else if (i === idx) el.classList.add('active');
+  });
+
+  document.getElementById('phone').scrollTo(0, 0);
+}
+
+function goBack() {
+  goTo('team-empty');
+}
+
+/* ── New visit form ── */
+var techPickerOpen = false;
+function toggleTechPicker() {
+  var dd = document.getElementById('tech-picker-dd');
+  var hint = document.getElementById('tech-form-hint');
+  techPickerOpen = !techPickerOpen;
+  dd.classList.toggle('open', techPickerOpen);
+  hint.classList.toggle('visible', !selectedTech);
+}
+
+function selectTech(name, initials, email) {
+  selectedTech = { name: name, initials: initials, email: email || '' };
+  document.getElementById('tech-form-value').textContent = name;
+  document.getElementById('tech-form-value').style.color = 'var(--label-primary)';
+  document.getElementById('tech-picker-dd').classList.remove('open');
+  document.getElementById('tech-form-hint').classList.remove('visible');
+  techPickerOpen = false;
+}
+
+function saveVisit() {
+  visitCreated = true;
+
+  /* update job view banners */
+  document.getElementById('job-banner-add-visit').style.display = 'none';
+  document.getElementById('job-banner-scheduled').style.display = '';
+
+  /* update visits card */
+  document.getElementById('visits-card-sub').textContent = 'Jun 15, 10:00 AM';
+  var badge = document.getElementById('visits-card-badge');
+  badge.innerHTML = '<span class="badge">1</span>';
+
+  if (selectedTech) {
+    /* pre-fill assigned screen */
+    document.getElementById('assigned-avatar').textContent = selectedTech.initials;
+    document.getElementById('assigned-name').textContent = selectedTech.name;
+    goTo('visit-tech');
+  } else {
+    goTo('visit-no-tech');
+  }
+}
+
+function handleVisitsCard() {
+  if (!visitCreated) {
+    goTo('new-visit');
+  } else {
+    openVisit();
+  }
+}
+
+function openVisit() {
+  goTo(selectedTech ? 'visit-tech' : 'visit-no-tech');
+}
+
+/* ── Worker sheet on visit-no-tech ── */
+function showWorkerSheet() {
+  document.getElementById('worker-sheet').classList.remove('hidden');
+}
+function hideWorkerSheet() {
+  document.getElementById('worker-sheet').classList.add('hidden');
+}
+function assignTech(name, initials) {
+  hideWorkerSheet();
+  selectedTech = { name: name, initials: initials };
+  document.getElementById('assigned-avatar').textContent = initials;
+  document.getElementById('assigned-name').textContent = name;
+  /* update job view visits card meta */
+  setTimeout(function(){ goTo('visit-tech'); }, 180);
+}
+
+goTo('team-empty');
+</script>
+</body>
+</html>
