@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tofu Worker — Day Loop</title>
+<title>Tofu Worker — Day Loop (R1 photo nudge + R2 reward)</title>
 <style>
   :root {
     --label-primary:   #000000;
@@ -119,6 +119,29 @@
     background: var(--surface-banner);
   }
   .timer-card.inprog { background: var(--surface-inprog); }
+
+  /* ── Photo nudge (R1: in-progress, no photo yet) ── */
+  .photo-nudge {
+    margin: 12px 20px 0; border-radius: var(--r-card);
+    background: var(--surface-banner);
+    border: 0.5px solid rgba(122,90,26,.25);
+    padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px;
+  }
+  .pn-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .pn-text { flex: 1; }
+  .pn-head { font-size: 15px; font-weight: 600; color: #7a5a1a; margin-bottom: 2px; }
+  .pn-desc { font-size: 13.5px; color: var(--label-secondary); line-height: 1.4; }
+  .pn-add {
+    margin-top: 10px; align-self: flex-start;
+    background: #fff; color: #7a5a1a; border: 0.5px solid rgba(122,90,26,.4);
+    border-radius: var(--r-cta); padding: 8px 16px;
+    font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .pn-add:active { opacity: .7; }
+  /* Photos row state */
+  .cicon.has-photo { background: var(--surface-done); }
+  .csub.missing { color: #7a5a1a; font-weight: 500; }
   .tc-over { font-size: 13px; font-weight: 600; color: var(--label-secondary); letter-spacing: .4px; text-transform: uppercase; margin-bottom: 4px; }
   .tc-big  { font-size: 42px; font-weight: 700; color: var(--label-primary); letter-spacing: -1px; line-height: 1; margin-bottom: 4px; }
   .tc-sub  { font-size: 15px; color: var(--label-secondary); margin-bottom: 20px; }
@@ -282,30 +305,60 @@
   .rw-back:active { color: rgba(0,0,0,.6); }
 
   /* ── My Hours ── */
-  .h-sec { font-size: 13px; font-weight: 600; color: var(--label-secondary); text-transform: uppercase; letter-spacing: .5px; padding: 20px 20px 8px; }
-  .h-big {
-    margin: 0 20px; background: #000; border-radius: 20px; padding: 24px;
+  .h-periods {
+    display: flex; gap: 8px; padding: 16px 20px 4px; overflow-x: auto;
   }
-  .h-big-lbl { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
-  .h-big-num { font-size: 56px; font-weight: 800; color: #fff; letter-spacing: -2px; line-height: 1; }
-  .h-big-unit { font-size: 22px; font-weight: 400; color: rgba(255,255,255,.6); }
-  .h-big-sub  { font-size: 14px; color: rgba(255,255,255,.5); margin-top: 8px; }
-  .h-bars { display: flex; gap: 6px; margin-top: 20px; align-items: flex-end; }
-  .h-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-  .h-bar-tr  { width: 100%; background: rgba(255,255,255,.12); border-radius: 4px; height: 40px; position: relative; }
-  .h-bar-fi  { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,.8); border-radius: 4px; }
-  .h-bar-fi.today { background: #fff; }
-  .h-bar-d { font-size: 11px; color: rgba(255,255,255,.45); }
-  .h-bar-d.today { color: #fff; font-weight: 600; }
-  .h-period { margin: 12px 20px 0; background: var(--surface-banner); border-radius: var(--r-card); padding: 18px 20px; }
-  .h-period-lbl { font-size: 13px; color: var(--label-secondary); margin-bottom: 4px; }
-  .h-period-val { font-size: 28px; font-weight: 700; color: var(--label-primary); letter-spacing: -.5px; }
-  .h-period-sub { font-size: 14px; color: var(--label-secondary); margin-top: 4px; }
-  .h-day { display: flex; align-items: center; justify-content: space-between; padding: 13px 20px; border-bottom: 0.5px solid var(--sep); }
-  .h-day:last-child { border-bottom: none; }
-  .h-day-name { font-size: 17px; color: var(--label-primary); }
-  .h-day-jobs { font-size: 14px; color: var(--label-secondary); margin-top: 1px; }
-  .h-day-val  { font-size: 17px; font-weight: 600; color: var(--label-primary); }
+  .h-periods::-webkit-scrollbar { display: none; }
+  .h-pill {
+    padding: 7px 16px; border-radius: 100px; font-size: 14px; font-weight: 500;
+    background: var(--surface-ss); color: var(--label-secondary);
+    border: none; cursor: pointer; font-family: inherit; white-space: nowrap;
+    transition: background .12s, color .12s;
+  }
+  .h-pill.active { background: var(--label-primary); color: #fff; font-weight: 600; }
+
+  .h-summary {
+    margin: 12px 20px 0; padding: 20px 20px 18px;
+    background: var(--surface-ss); border-radius: var(--r-card);
+  }
+  .h-sum-hours { display: flex; align-items: baseline; gap: 3px; }
+  .h-sum-num  { font-size: 48px; font-weight: 800; color: var(--label-primary); letter-spacing: -2px; line-height: 1; }
+  .h-sum-unit { font-size: 20px; font-weight: 400; color: var(--label-secondary); }
+  .h-sum-sub  { font-size: 14px; color: var(--label-secondary); margin-top: 4px; }
+
+  .h-sec { font-size: 13px; font-weight: 600; color: var(--label-secondary); text-transform: uppercase; letter-spacing: .5px; padding: 20px 20px 8px; }
+
+  /* job list */
+  .h-job {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 20px; border-bottom: 0.5px solid var(--sep); cursor: pointer;
+  }
+  .h-job:last-child { border-bottom: none; }
+  .h-job:active { background: var(--surface-ss); }
+  .h-job-left { display: flex; flex-direction: column; gap: 2px; }
+  .h-job-client { font-size: 17px; color: var(--label-primary); }
+  .h-job-meta   { font-size: 14px; color: var(--label-secondary); }
+  .h-job-right  { display: flex; align-items: center; gap: 6px; }
+  .h-job-dur    { font-size: 17px; font-weight: 600; color: var(--label-primary); }
+  .h-job-chev   { color: var(--label-tertiary); font-size: 18px; }
+
+  /* job detail screen */
+  .h-det-hero {
+    margin: 12px 20px 0; padding: 20px;
+    background: var(--surface-ss); border-radius: var(--r-card);
+  }
+  .h-det-client { font-size: 22px; font-weight: 700; color: var(--label-primary); letter-spacing: -.3px; margin-bottom: 4px; }
+  .h-det-date   { font-size: 15px; color: var(--label-secondary); }
+  .h-det-rows   { margin: 12px 20px 0; }
+  .h-det-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 13px 20px; border-bottom: 0.5px solid var(--sep);
+    background: var(--surface);
+  }
+  .h-det-row:first-child { border-radius: var(--r-card) var(--r-card) 0 0; }
+  .h-det-row:last-child  { border-bottom: none; border-radius: 0 0 var(--r-card) var(--r-card); }
+  .h-det-lbl { font-size: 15px; color: var(--label-secondary); }
+  .h-det-val { font-size: 15px; font-weight: 600; color: var(--label-primary); }
 
   .gap { height: 28px; }
 
@@ -493,7 +546,7 @@
       <div class="card">
         <div class="crow"><div class="cicon">📍</div><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">742 Oak St, Brooklyn, NY 11235</div></div><div class="chev">›</div></div>
         <div class="crow"><div class="cicon">📝</div><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Gate code: 1247. Dog inside.</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Add proof photos</div></div><div class="chev">›</div></div>
+        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Take a "before" shot when you start</div></div><div class="chev">›</div></div>
       </div>
       <div class="gap"></div>
     </div>
@@ -513,10 +566,19 @@
         <div class="tc-sub">Started at 8:04 AM · 742 Oak St</div>
         <button class="btn-stop" onclick="showReward('j1-reward')"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><rect width="12" height="12" rx="2"/></svg>Finish</button>
       </div>
+      <!-- R1: photo nudge — shown while in progress with no photos yet. Non-blocking. -->
+      <div class="photo-nudge">
+        <div class="pn-icon">📸</div>
+        <div class="pn-text">
+          <div class="pn-head">No photos yet</div>
+          <div class="pn-desc">Snap a before/after shot before you finish — it's your proof of work and your back-up if anyone asks.</div>
+          <button class="pn-add">＋ Add photos</button>
+        </div>
+      </div>
       <div class="card">
         <div class="crow"><div class="cicon">📍</div><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">742 Oak St, Brooklyn, NY 11235</div></div><div class="chev">›</div></div>
         <div class="crow"><div class="cicon">📝</div><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Gate code: 1247. Dog inside.</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Add proof photos</div></div><div class="chev">›</div></div>
+        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub missing">None yet · tap to add</div></div><div class="chev">›</div></div>
       </div>
       <div class="gap"></div>
     </div>
@@ -564,7 +626,7 @@
       <div class="card">
         <div class="crow"><div class="cicon">📍</div><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">55 Pine Ave, Brooklyn, NY 11215</div></div><div class="chev">›</div></div>
         <div class="crow"><div class="cicon">📝</div><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Ring bell twice. 2nd floor.</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Add proof photos</div></div><div class="chev">›</div></div>
+        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Take a "before" shot when you start</div></div><div class="chev">›</div></div>
       </div>
       <div class="gap"></div>
     </div>
@@ -584,10 +646,11 @@
         <div class="tc-sub">Started at 10:33 AM · 55 Pine Ave</div>
         <button class="btn-stop" onclick="showReward('j2-reward')"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><rect width="12" height="12" rx="2"/></svg>Finish</button>
       </div>
+      <!-- R1: photos already added → no nudge, Photos row shows the captured state. -->
       <div class="card">
         <div class="crow"><div class="cicon">📍</div><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">55 Pine Ave, Brooklyn, NY 11215</div></div><div class="chev">›</div></div>
         <div class="crow"><div class="cicon">📝</div><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Ring bell twice. 2nd floor.</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Add proof photos</div></div><div class="chev">›</div></div>
+        <div class="crow"><div class="cicon has-photo">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">2 added · 1 before · 1 after</div></div><div class="chev">›</div></div>
       </div>
       <div class="gap"></div>
     </div>
@@ -662,7 +725,7 @@
       <div class="card">
         <div class="crow"><div class="cicon">📍</div><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">110 Maple Dr, Brooklyn, NY 11220</div></div><div class="chev">›</div></div>
         <div class="crow"><div class="cicon">📝</div><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Leave equipment in garage.</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Add proof photos</div></div><div class="chev">›</div></div>
+        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Take a "before" shot when you start</div></div><div class="chev">›</div></div>
       </div>
       <div class="gap"></div>
     </div>
@@ -682,10 +745,19 @@
         <div class="tc-sub">Started at 1:03 PM · 110 Maple Dr</div>
         <button class="btn-stop" onclick="showReward('j3-reward')"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><rect width="12" height="12" rx="2"/></svg>Finish</button>
       </div>
+      <!-- R1: photo nudge — last job, still no photos. Reminds while on site, never blocks Finish. -->
+      <div class="photo-nudge">
+        <div class="pn-icon">📸</div>
+        <div class="pn-text">
+          <div class="pn-head">No photos yet</div>
+          <div class="pn-desc">Snap a before/after shot before you finish — it's your proof of work and your back-up if anyone asks.</div>
+          <button class="pn-add">＋ Add photos</button>
+        </div>
+      </div>
       <div class="card">
         <div class="crow"><div class="cicon">📍</div><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">110 Maple Dr, Brooklyn, NY 11220</div></div><div class="chev">›</div></div>
         <div class="crow"><div class="cicon">📝</div><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Leave equipment in garage.</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Add proof photos</div></div><div class="chev">›</div></div>
+        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub missing">None yet · tap to add</div></div><div class="chev">›</div></div>
       </div>
       <div class="gap"></div>
     </div>
@@ -764,35 +836,187 @@
       <div class="tb-title-wrap"><div class="tb-title">My Hours</div></div>
     </div>
     <div class="content">
+      <!-- Period pills -->
+      <div class="h-periods">
+        <button class="h-pill" onclick="showPeriod('today')">Today</button>
+        <button class="h-pill active" onclick="showPeriod('week')">This week</button>
+        <button class="h-pill" onclick="showPeriod('month')">This month</button>
+      </div>
+
+      <!-- Summary block -->
+      <div class="h-summary" id="h-sum-today" style="display:none;">
+        <div class="h-sum-hours"><div class="h-sum-num">4</div><div class="h-sum-unit">h 22m</div></div>
+        <div class="h-sum-sub">3 visits completed · Thu, Jun 12</div>
+      </div>
+      <div class="h-summary" id="h-sum-week">
+        <div class="h-sum-hours"><div class="h-sum-num">21</div><div class="h-sum-unit">h 22m</div></div>
+        <div class="h-sum-sub">18 visits completed · Jun 9–12</div>
+      </div>
+      <div class="h-summary" id="h-sum-month" style="display:none;">
+        <div class="h-sum-hours"><div class="h-sum-num">57</div><div class="h-sum-unit">h 40m</div></div>
+        <div class="h-sum-sub">42 visits completed · Jun 1–12</div>
+      </div>
+
+      <!-- Visit list: Today -->
+      <div id="h-list-today" style="display:none;">
+        <div class="h-sec">Thu, Jun 12</div>
+        <div class="card">
+          <div class="h-job" onclick="go('job-detail-1')">
+            <div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">8:04 – 8:56 AM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div>
+          </div>
+          <div class="h-job" onclick="go('job-detail-2')">
+            <div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">10:33 – 11:41 AM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div>
+          </div>
+          <div class="h-job" onclick="go('job-detail-3')">
+            <div class="h-job-left"><div class="h-job-client">Jamie Rodriguez</div><div class="h-job-meta">1:02 – 2:24 PM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">1h 22m</div><div class="h-job-chev">›</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visit list: This week -->
+      <div id="h-list-week">
+        <div class="h-sec">Thu, Jun 12</div>
+        <div class="card">
+          <div class="h-job" onclick="go('job-detail-1')">
+            <div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">8:04 – 8:56 AM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div>
+          </div>
+          <div class="h-job" onclick="go('job-detail-2')">
+            <div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">10:33 – 11:41 AM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div>
+          </div>
+          <div class="h-job" onclick="go('job-detail-3')">
+            <div class="h-job-left"><div class="h-job-client">Jamie Rodriguez</div><div class="h-job-meta">1:02 – 2:24 PM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">1h 22m</div><div class="h-job-chev">›</div></div>
+          </div>
+        </div>
+        <div class="h-sec">Wed, Jun 11</div>
+        <div class="card">
+          <div class="h-job" onclick="go('job-detail-1')">
+            <div class="h-job-left"><div class="h-job-client">Maria Santos</div><div class="h-job-meta">9:10 – 10:05 AM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">55 min</div><div class="h-job-chev">›</div></div>
+          </div>
+          <div class="h-job" onclick="go('job-detail-1')">
+            <div class="h-job-left"><div class="h-job-client">Robert Chen</div><div class="h-job-meta">11:30 AM – 1:15 PM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">1h 45m</div><div class="h-job-chev">›</div></div>
+          </div>
+          <div class="h-job" onclick="go('job-detail-1')">
+            <div class="h-job-left"><div class="h-job-client">Lisa Park</div><div class="h-job-meta">2:00 – 3:30 PM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">1h 30m</div><div class="h-job-chev">›</div></div>
+          </div>
+        </div>
+        <div class="h-sec">Tue, Jun 10</div>
+        <div class="card">
+          <div class="h-job" onclick="go('job-detail-1')">
+            <div class="h-job-left"><div class="h-job-client">David Kim</div><div class="h-job-meta">8:00 – 9:10 AM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">1h 10m</div><div class="h-job-chev">›</div></div>
+          </div>
+          <div class="h-job" onclick="go('job-detail-1')">
+            <div class="h-job-left"><div class="h-job-client">Anna Brooks</div><div class="h-job-meta">10:15 – 11:40 AM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">1h 25m</div><div class="h-job-chev">›</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visit list: This month -->
+      <div id="h-list-month" style="display:none;">
+        <div class="h-sec">This week · Jun 9–12</div>
+        <div class="card">
+          <div class="h-job" onclick="go('job-detail-1')">
+            <div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">Thu · 8:04 – 8:56 AM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div>
+          </div>
+          <div class="h-job" onclick="go('job-detail-2')">
+            <div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">Thu · 10:33 – 11:41 AM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div>
+          </div>
+          <div class="h-job" onclick="go('job-detail-1')">
+            <div class="h-job-left"><div class="h-job-client">Maria Santos</div><div class="h-job-meta">Wed · 9:10 – 10:05 AM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">55 min</div><div class="h-job-chev">›</div></div>
+          </div>
+        </div>
+        <div class="h-sec">Last week · Jun 2–8</div>
+        <div class="card">
+          <div class="h-job" onclick="go('job-detail-1')">
+            <div class="h-job-left"><div class="h-job-client">Tom Wilson</div><div class="h-job-meta">Mon · 8:30 – 10:00 AM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">1h 30m</div><div class="h-job-chev">›</div></div>
+          </div>
+          <div class="h-job" onclick="go('job-detail-1')">
+            <div class="h-job-left"><div class="h-job-client">Karen Lee</div><div class="h-job-meta">Tue · 11:00 AM – 12:20 PM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">1h 20m</div><div class="h-job-chev">›</div></div>
+          </div>
+          <div class="h-job" onclick="go('job-detail-1')">
+            <div class="h-job-left"><div class="h-job-client">James Ortiz</div><div class="h-job-meta">Fri · 2:00 – 3:45 PM</div></div>
+            <div class="h-job-right"><div class="h-job-dur">1h 45m</div><div class="h-job-chev">›</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gap"></div>
+    </div>
+  </div>
+
+  <!-- ══ JOB DETAIL ══ -->
+  <div class="screen" id="s-job-detail-1">
+    <div class="sb"><span class="sb-time">2:27</span><div class="sb-icons"><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="17" height="9" rx="2.5" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/></svg></div></div>
+    <div class="toolbar">
+      <button class="tb-back" onclick="go('my-hours')"><svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M8 1L1 7.5L8 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> My Hours</button>
+    </div>
+    <div class="content">
+      <div class="h-det-hero">
+        <div class="h-det-client">Emily Taylor</div>
+        <div class="h-det-date">Thursday, Jun 12 · 742 Oak St</div>
+      </div>
       <div style="height:12px;"></div>
-      <div class="h-big">
-        <div class="h-big-lbl">This week</div>
-        <div style="display:flex;align-items:baseline;gap:4px;">
-          <div class="h-big-num">21</div><div class="h-big-unit">h 22m</div>
-        </div>
-        <div class="h-big-sub">3 jobs today add 4h 22m</div>
-        <div class="h-bars">
-          <div class="h-bar-col"><div class="h-bar-tr"><div class="h-bar-fi" style="height:72%;"></div></div><div class="h-bar-d">Mon</div></div>
-          <div class="h-bar-col"><div class="h-bar-tr"><div class="h-bar-fi" style="height:85%;"></div></div><div class="h-bar-d">Tue</div></div>
-          <div class="h-bar-col"><div class="h-bar-tr"><div class="h-bar-fi" style="height:60%;"></div></div><div class="h-bar-d">Wed</div></div>
-          <div class="h-bar-col"><div class="h-bar-tr"><div class="h-bar-fi today" style="height:100%;"></div></div><div class="h-bar-d today">Thu</div></div>
-          <div class="h-bar-col"><div class="h-bar-tr"></div><div class="h-bar-d">Fri</div></div>
-          <div class="h-bar-col"><div class="h-bar-tr"></div><div class="h-bar-d">Sat</div></div>
-          <div class="h-bar-col"><div class="h-bar-tr"></div><div class="h-bar-d">Sun</div></div>
-        </div>
+      <div class="card" style="margin:0 20px;">
+        <div class="h-det-row"><span class="h-det-lbl">Start</span><span class="h-det-val">8:04 AM</span></div>
+        <div class="h-det-row"><span class="h-det-lbl">Finish</span><span class="h-det-val">8:56 AM</span></div>
+        <div class="h-det-row"><span class="h-det-lbl">Duration</span><span class="h-det-val" style="color:var(--green);font-weight:700;">52 min</span></div>
       </div>
-      <div class="h-period">
-        <div class="h-period-lbl">Pay period · Jun 1–15</div>
-        <div class="h-period-val">57h 22m</div>
-        <div class="h-period-sub">Runs through Sunday</div>
+      <div class="gap"></div>
+    </div>
+  </div>
+
+  <!-- ══ JOB DETAIL 2 ══ -->
+  <div class="screen" id="s-job-detail-2">
+    <div class="sb"><span class="sb-time">2:27</span><div class="sb-icons"><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="17" height="9" rx="2.5" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/></svg></div></div>
+    <div class="toolbar">
+      <button class="tb-back" onclick="go('my-hours')"><svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M8 1L1 7.5L8 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> My Hours</button>
+    </div>
+    <div class="content">
+      <div class="h-det-hero">
+        <div class="h-det-client">Carmen Flores</div>
+        <div class="h-det-date">Thursday, Jun 12 · 55 Pine Ave</div>
       </div>
-      <div class="h-sec">This week</div>
-      <div class="card">
-        <div class="h-day"><div><div class="h-day-name">Monday</div><div class="h-day-jobs">5 jobs</div></div><div class="h-day-val">6h 10m</div></div>
-        <div class="h-day"><div><div class="h-day-name">Tuesday</div><div class="h-day-jobs">6 jobs</div></div><div class="h-day-val">7h 20m</div></div>
-        <div class="h-day"><div><div class="h-day-name">Wednesday</div><div class="h-day-jobs">4 jobs</div></div><div class="h-day-val">5h 30m</div></div>
-        <div class="h-day" style="background:rgba(232,239,245,.35);"><div><div class="h-day-name" style="font-weight:700;">Thursday</div><div class="h-day-jobs">3 jobs</div></div><div class="h-day-val" style="font-weight:700;">4h 22m</div></div>
-        <div class="h-day" style="opacity:.35;"><div><div class="h-day-name">Friday</div><div class="h-day-jobs">—</div></div><div class="h-day-val">—</div></div>
+      <div style="height:12px;"></div>
+      <div class="card" style="margin:0 20px;">
+        <div class="h-det-row"><span class="h-det-lbl">Start</span><span class="h-det-val">10:33 AM</span></div>
+        <div class="h-det-row"><span class="h-det-lbl">Finish</span><span class="h-det-val">11:41 AM</span></div>
+        <div class="h-det-row"><span class="h-det-lbl">Duration</span><span class="h-det-val" style="color:var(--green);font-weight:700;">1h 08m</span></div>
+      </div>
+      <div class="gap"></div>
+    </div>
+  </div>
+
+  <!-- ══ JOB DETAIL 3 ══ -->
+  <div class="screen" id="s-job-detail-3">
+    <div class="sb"><span class="sb-time">2:27</span><div class="sb-icons"><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="17" height="9" rx="2.5" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/></svg></div></div>
+    <div class="toolbar">
+      <button class="tb-back" onclick="go('my-hours')"><svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M8 1L1 7.5L8 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> My Hours</button>
+    </div>
+    <div class="content">
+      <div class="h-det-hero">
+        <div class="h-det-client">Jamie Rodriguez</div>
+        <div class="h-det-date">Thursday, Jun 12 · 110 Maple Dr</div>
+      </div>
+      <div style="height:12px;"></div>
+      <div class="card" style="margin:0 20px;">
+        <div class="h-det-row"><span class="h-det-lbl">Start</span><span class="h-det-val">1:02 PM</span></div>
+        <div class="h-det-row"><span class="h-det-lbl">Finish</span><span class="h-det-val">2:24 PM</span></div>
+        <div class="h-det-row"><span class="h-det-lbl">Duration</span><span class="h-det-val" style="color:var(--green);font-weight:700;">1h 22m</span></div>
       </div>
       <div class="gap"></div>
     </div>
@@ -831,7 +1055,19 @@
   }
 
   // ── Screen navigation ──
-  const STEPS = ['onboarding','now','j1-sched','j1-inprog','j1-reward','j2-sched','j2-inprog','j2-reward','j3-sched','j3-inprog','j3-reward','my-hours'];
+  const STEPS = ['onboarding','now','j1-sched','j1-inprog','j1-reward','j2-sched','j2-inprog','j2-reward','j3-sched','j3-inprog','j3-reward','my-hours','job-detail-1','job-detail-2','job-detail-3'];
+
+  function showPeriod(p) {
+    ['today','week','month'].forEach(id => {
+      document.getElementById('h-sum-' + id).style.display = id === p ? '' : 'none';
+      document.getElementById('h-list-' + id).style.display = id === p ? '' : 'none';
+    });
+    document.querySelectorAll('.h-pill').forEach((btn, i) => {
+      btn.classList.toggle('active', ['today','week','month'][i] === p);
+    });
+    const sc = document.getElementById('s-my-hours');
+    if (sc) { const c = sc.querySelector('.content'); if (c) c.scrollTop = 0; }
+  }
 
   function go(id) {
     // hide all screens
