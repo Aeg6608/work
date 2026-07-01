@@ -202,19 +202,24 @@
   }
   .d-status .dot-done { width: 9px; height: 9px; border-radius: 50%; background: var(--green); }
 
-  /* Time block: secondary, quiet. Not the accent — Completed is. */
+  /* Time block: timeline (Start dot / Duration on the line / Finish dot). Quiet, not accented. */
   .d-time {
-    margin: 20px 20px 0; padding: 14px 16px; border-radius: 14px;
+    margin: 20px 20px 0; padding: 18px 18px; border-radius: 16px;
     background: var(--surface-ss);
   }
-  .d-time-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 5px 0;
-  }
-  .d-time-lbl { font-size: 14px; color: var(--label-secondary); }
-  .d-time-val { font-size: 15px; font-weight: 600; color: var(--label-primary); }
-  .d-time-sep { height: 0.5px; background: var(--sep); margin: 3px 0; }
-  .d-time-val.dur { color: var(--label-primary); }
+  .tl-row { display: flex; align-items: center; gap: 14px; }
+  .tl-marker { display: flex; flex-direction: column; align-items: center; width: 13px; flex-shrink: 0; }
+  .tl-dot { width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--label-tertiary); background: #fff; }
+  .tl-dot.filled { background: var(--label-tertiary); }
+  .tl-line { width: 2px; height: 20px; background: var(--label-tertiary); opacity: .5; }
+  .tl-body { flex: 1; display: flex; justify-content: space-between; align-items: baseline; }
+  .tl-lbl { font-size: 15px; color: var(--label-secondary); }
+  .tl-time { font-size: 15px; font-weight: 500; color: var(--label-primary); }
+  /* Duration sits on the connecting line, between the two dots */
+  .tl-mid { display: flex; align-items: center; gap: 14px; }
+  .tl-mid .tl-marker { justify-content: center; }
+  .tl-mid-dur { flex: 1; font-size: 14px; color: var(--label-secondary); }
+  .tl-mid-dur b { font-weight: 600; color: var(--label-primary); }
 
   /* Info cards — plain text rows, no emoji icons */
   .d-card {
@@ -380,13 +385,20 @@
         <div class="d-status"><span class="dot-done"></span>Completed</div>
       </div>
 
-      <!-- Time block: quiet, secondary. Start / Finish / Duration as plain rows -->
+      <!-- Time block: timeline. Start dot / duration on the line / Finish dot. Quiet. -->
       <div class="d-time">
-        <div class="d-time-row"><span class="d-time-lbl">Started</span><span class="d-time-val">8:04 AM</span></div>
-        <div class="d-time-sep"></div>
-        <div class="d-time-row"><span class="d-time-lbl">Finished</span><span class="d-time-val">8:56 AM</span></div>
-        <div class="d-time-sep"></div>
-        <div class="d-time-row"><span class="d-time-lbl">Duration</span><span class="d-time-val dur">52 min</span></div>
+        <div class="tl-row">
+          <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-body"><span class="tl-lbl">Start</span><span class="tl-time">8:04 AM</span></div>
+        </div>
+        <div class="tl-mid">
+          <div class="tl-marker"><div class="tl-line" style="height:8px;"></div></div>
+          <div class="tl-mid-dur">Duration <b>52 min</b></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-marker"><div class="tl-line"></div><div class="tl-dot filled"></div></div>
+          <div class="tl-body"><span class="tl-lbl">Finish</span><span class="tl-time">8:56 AM</span></div>
+        </div>
       </div>
 
       <!-- Photos -->
