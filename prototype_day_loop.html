@@ -459,26 +459,22 @@
     <div class="sb"><span class="sb-time">7:27</span><div class="sb-icons"><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="17" height="9" rx="2.5" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/></svg></div></div>
     <div class="ob-wrap">
       <div class="ob-top">
-        <div class="ob-icon-wrap">📍</div>
         <div class="ob-title">Your time.<br>Your location.<br>Your proof.</div>
         <div class="ob-sub">When a job is done, Tofu saves when and where — so if anyone ever asks "were you there?", the answer is already in your phone.</div>
         <div class="ob-rules">
           <div class="ob-rule">
-            <div class="ob-rule-icon">▶️</div>
             <div class="ob-rule-text">
               <div class="ob-rule-head">Tap Start</div>
               <div class="ob-rule-desc">We save the time and your location. Once.</div>
             </div>
           </div>
           <div class="ob-rule">
-            <div class="ob-rule-icon">✅</div>
             <div class="ob-rule-text">
               <div class="ob-rule-head">Tap Finish</div>
               <div class="ob-rule-desc">We save the time and your location. Once.</div>
             </div>
           </div>
           <div class="ob-rule">
-            <div class="ob-rule-icon">🚫</div>
             <div class="ob-rule-text">
               <div class="ob-rule-head">Between jobs, after work</div>
               <div class="ob-rule-desc">Nothing. We're not watching.</div>
@@ -524,8 +520,8 @@
       <div class="gap"></div>
     </div>
     <div class="tabbar">
-      <div class="tab on"><div class="tab-ic">☀️</div><div class="tab-lb">Now</div></div>
-      <div class="tab"><div class="tab-ic">📋</div><div class="tab-lb">Jobs</div></div>
+      <div class="tab on"><div class="tab-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 10.5L12 3l9 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 9.5V20h14V9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="tab-lb">Now</div></div>
+      <div class="tab"><div class="tab-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 6h11M8 12h11M8 18h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="4" cy="6" r="1.3" fill="currentColor"/><circle cx="4" cy="12" r="1.3" fill="currentColor"/><circle cx="4" cy="18" r="1.3" fill="currentColor"/></svg></div><div class="tab-lb">Jobs</div></div>
     </div>
   </div>
 
@@ -544,9 +540,9 @@
         <button class="btn-p" onclick="go('j1-inprog')"><svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5l9 5.5-9 5.5V1.5z"/></svg>Start</button>
       </div>
       <div class="card">
-        <div class="crow"><div class="cicon">📍</div><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">742 Oak St, Brooklyn, NY 11235</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📝</div><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Gate code: 1247. Dog inside.</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Take a "before" shot when you start</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">742 Oak St, Brooklyn, NY 11235</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Gate code: 1247. Dog inside.</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Take a "before" shot when you start</div></div><div class="chev">›</div></div>
       </div>
       <div class="gap"></div>
     </div>
@@ -568,17 +564,16 @@
       </div>
       <!-- R1: photo nudge — shown while in progress with no photos yet. Non-blocking. -->
       <div class="photo-nudge">
-        <div class="pn-icon">📸</div>
         <div class="pn-text">
           <div class="pn-head">No photos yet</div>
           <div class="pn-desc">Add a photo before you finish. It's your proof of work.</div>
-          <button class="pn-add">＋ Add photos</button>
+          <button class="pn-add">Add photos</button>
         </div>
       </div>
       <div class="card">
-        <div class="crow"><div class="cicon">📍</div><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">742 Oak St, Brooklyn, NY 11235</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📝</div><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Gate code: 1247. Dog inside.</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub missing">None yet · tap to add</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">742 Oak St, Brooklyn, NY 11235</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Gate code: 1247. Dog inside.</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub missing">None yet · tap to add</div></div><div class="chev">›</div></div>
       </div>
       <div class="gap"></div>
     </div>
@@ -623,9 +618,9 @@
         <button class="btn-p" onclick="go('j2-inprog')"><svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5l9 5.5-9 5.5V1.5z"/></svg>Start</button>
       </div>
       <div class="card">
-        <div class="crow"><div class="cicon">📍</div><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">55 Pine Ave, Brooklyn, NY 11215</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📝</div><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Ring bell twice. 2nd floor.</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Take a "before" shot when you start</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">55 Pine Ave, Brooklyn, NY 11215</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Ring bell twice. 2nd floor.</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Take a "before" shot when you start</div></div><div class="chev">›</div></div>
       </div>
       <div class="gap"></div>
     </div>
@@ -647,9 +642,9 @@
       </div>
       <!-- R1: photos already added → no nudge, Photos row shows the captured state. -->
       <div class="card">
-        <div class="crow"><div class="cicon">📍</div><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">55 Pine Ave, Brooklyn, NY 11215</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📝</div><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Ring bell twice. 2nd floor.</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon has-photo">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">2 added · 1 before · 1 after</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">55 Pine Ave, Brooklyn, NY 11215</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Ring bell twice. 2nd floor.</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">2 added · 1 before · 1 after</div></div><div class="chev">›</div></div>
       </div>
       <div class="gap"></div>
     </div>
@@ -694,15 +689,15 @@
         </button>
       </div>
       <div class="card">
-        <div class="jli"><div class="jav done">✓</div><div class="jinfo"><div class="jclient muted">Emily Taylor</div><div class="jmeta">8:04–8:56 AM · 52 min</div></div><span class="badge b-done">Done</span></div>
+        <div class="jli"><div class="jav done">ET</div><div class="jinfo"><div class="jclient muted">Emily Taylor</div><div class="jmeta">8:04–8:56 AM · 52 min</div></div><span class="badge b-done">Done</span></div>
         <div class="jli" onclick="go('j2-sched')"><div class="jav inprog">CF</div><div class="jinfo"><div class="jclient">Carmen Flores</div><div class="jmeta">10:30 AM · 55 Pine Ave</div></div><span class="badge b-next">Next</span></div>
         <div class="jli" onclick="go('j3-sched')"><div class="jav">JR</div><div class="jinfo"><div class="jclient">Jamie Rodriguez</div><div class="jmeta">1:00 PM · 110 Maple Dr</div></div><div class="chev">›</div></div>
       </div>
       <div class="gap"></div>
     </div>
     <div class="tabbar">
-      <div class="tab on"><div class="tab-ic">☀️</div><div class="tab-lb">Now</div></div>
-      <div class="tab"><div class="tab-ic">📋</div><div class="tab-lb">Jobs</div></div>
+      <div class="tab on"><div class="tab-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 10.5L12 3l9 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 9.5V20h14V9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="tab-lb">Now</div></div>
+      <div class="tab"><div class="tab-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 6h11M8 12h11M8 18h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="4" cy="6" r="1.3" fill="currentColor"/><circle cx="4" cy="12" r="1.3" fill="currentColor"/><circle cx="4" cy="18" r="1.3" fill="currentColor"/></svg></div><div class="tab-lb">Jobs</div></div>
     </div>
   </div>
 
@@ -721,9 +716,9 @@
         <button class="btn-p" onclick="go('j3-inprog')"><svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5l9 5.5-9 5.5V1.5z"/></svg>Start</button>
       </div>
       <div class="card">
-        <div class="crow"><div class="cicon">📍</div><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">110 Maple Dr, Brooklyn, NY 11220</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📝</div><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Leave equipment in garage.</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Take a "before" shot when you start</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">110 Maple Dr, Brooklyn, NY 11220</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Leave equipment in garage.</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub">Take a "before" shot when you start</div></div><div class="chev">›</div></div>
       </div>
       <div class="gap"></div>
     </div>
@@ -745,17 +740,16 @@
       </div>
       <!-- R1: photo nudge — last job, still no photos. Reminds while on site, never blocks Finish. -->
       <div class="photo-nudge">
-        <div class="pn-icon">📸</div>
         <div class="pn-text">
           <div class="pn-head">No photos yet</div>
           <div class="pn-desc">Add a photo before you finish. It's your proof of work.</div>
-          <button class="pn-add">＋ Add photos</button>
+          <button class="pn-add">Add photos</button>
         </div>
       </div>
       <div class="card">
-        <div class="crow"><div class="cicon">📍</div><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">110 Maple Dr, Brooklyn, NY 11220</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📝</div><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Leave equipment in garage.</div></div><div class="chev">›</div></div>
-        <div class="crow"><div class="cicon">📸</div><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub missing">None yet · tap to add</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Address</div><div class="csub">110 Maple Dr, Brooklyn, NY 11220</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Notes</div><div class="csub">Leave equipment in garage.</div></div><div class="chev">›</div></div>
+        <div class="crow"><div style="flex:1;"><div class="ctitle">Photos</div><div class="csub missing">None yet · tap to add</div></div><div class="chev">›</div></div>
       </div>
       <div class="gap"></div>
     </div>
@@ -770,7 +764,6 @@
         <div class="rw-total"><span class="rw-tlbl">Today</span><span class="rw-tval">4h 22m</span></div>
         <!-- Wrap-up card instead of next job -->
         <div class="rw-wrap">
-          <div class="rw-wrap-icon">🌙</div>
           <div class="rw-wrap-title">That's a wrap</div>
           <div class="rw-wrap-sub">All 3 jobs done today.<br>You're off — see you tomorrow.</div>
           <button class="rw-hours-btn" onclick="dismissReward('my-hours')">View my hours</button>
@@ -798,15 +791,15 @@
         </button>
       </div>
       <div class="card">
-        <div class="jli"><div class="jav done">✓</div><div class="jinfo"><div class="jclient muted">Emily Taylor</div><div class="jmeta">8:04–8:56 AM · 52 min</div></div><span class="badge b-done">Done</span></div>
-        <div class="jli"><div class="jav done">✓</div><div class="jinfo"><div class="jclient muted">Carmen Flores</div><div class="jmeta">10:33–11:41 AM · 1h 08m</div></div><span class="badge b-done">Done</span></div>
+        <div class="jli"><div class="jav done">ET</div><div class="jinfo"><div class="jclient muted">Emily Taylor</div><div class="jmeta">8:04–8:56 AM · 52 min</div></div><span class="badge b-done">Done</span></div>
+        <div class="jli"><div class="jav done">CF</div><div class="jinfo"><div class="jclient muted">Carmen Flores</div><div class="jmeta">10:33–11:41 AM · 1h 08m</div></div><span class="badge b-done">Done</span></div>
         <div class="jli" onclick="go('j3-sched')"><div class="jav inprog">JR</div><div class="jinfo"><div class="jclient">Jamie Rodriguez</div><div class="jmeta">1:00 PM · 110 Maple Dr</div></div><span class="badge b-next">Next</span></div>
       </div>
       <div class="gap"></div>
     </div>
     <div class="tabbar">
-      <div class="tab on"><div class="tab-ic">☀️</div><div class="tab-lb">Now</div></div>
-      <div class="tab"><div class="tab-ic">📋</div><div class="tab-lb">Jobs</div></div>
+      <div class="tab on"><div class="tab-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 10.5L12 3l9 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 9.5V20h14V9.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="tab-lb">Now</div></div>
+      <div class="tab"><div class="tab-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 6h11M8 12h11M8 18h11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="4" cy="6" r="1.3" fill="currentColor"/><circle cx="4" cy="12" r="1.3" fill="currentColor"/><circle cx="4" cy="18" r="1.3" fill="currentColor"/></svg></div><div class="tab-lb">Jobs</div></div>
     </div>
   </div>
 
@@ -814,7 +807,6 @@
   <div class="screen" id="s-now-done">
     <div class="sb"><span class="sb-time">2:25</span><div class="sb-icons"><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="17" height="9" rx="2.5" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/></svg></div></div>
     <div class="dd-wrap">
-      <div class="dd-icon">🌙</div>
       <div class="dd-title">You're all caught up</div>
       <div class="dd-sub">3 jobs done today.<br>See you tomorrow.</div>
       <div class="dd-stats">
