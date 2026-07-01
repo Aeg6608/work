@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tofu Team App — My Hours</title>
+<style>
+  :root {
+    --label-primary:   #000000;
+    --label-title:     #333333;
+    --label-secondary: rgba(60,60,67,.6);
+    --label-tertiary:  rgba(60,60,67,.3);
+    --label-controls:  #404040;
+    --surface:         #FFFFFF;
+    --surface-ss:      #F5F2EB;
+    --surface-banner:  #F1EDE4;
+    --surface-inprog:  #E8EFF5;
+    --surface-done:    #E9F5EE;
+    --tofu-dark:       #1F2226;
+    --sep:             rgba(60,60,67,.15);
+    --green:           #1a7a4a;
+    --r-card:          16px;
+    --r-cta:           1000px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #e8e8ed;
+    font-family: -apple-system, "SF Pro Text", system-ui, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 48px 24px 60px; min-height: 100vh;
+  }
+
+  /* ── Journey bar ── */
+  .jbar {
+    position: fixed; top: 0; left: 0; right: 0; height: 40px;
+    background: var(--tofu-dark);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9000; overflow-x: auto; gap: 0;
+  }
+  .jbar::-webkit-scrollbar { display: none; }
+  .js {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 11px; height: 40px;
+    font-size: 10.5px; color: rgba(255,255,255,.4);
+    cursor: pointer; user-select: none; white-space: nowrap;
+    transition: color .15s;
+  }
+  .js .dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.22); flex-shrink: 0; }
+  .js.active { color: #fff; font-weight: 600; }
+  .js.active .dot { background: #fff; }
+  .js.done { color: #4e9b7d; }
+  .js.done .dot { background: #4e9b7d; }
+  .jsep { color: rgba(255,255,255,.18); font-size: 10px; flex-shrink: 0; padding: 0 2px; }
+
+  /* ── Phone ── */
+  .phone {
+    width: 393px; min-height: 852px;
+    background: var(--surface); border-radius: 54px; overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.18), 0 0 0 9px #1a1a1a, 0 0 0 11px #2a2a2a, 0 32px 80px rgba(0,0,0,.38);
+  }
+  .di {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    width: 126px; height: 37px; background: #000; border-radius: 20px; z-index: 500;
+  }
+
+  /* ── Status bar ── */
+  .sb {
+    height: 59px; display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 0 28px 10px; position: relative; z-index: 10;
+  }
+  .sb-time { font-size: 17px; font-weight: 590; color: var(--label-primary); letter-spacing: -.3px; }
+  .sb-icons { display: flex; align-items: center; gap: 6px; }
+
+  /* ── Screen ── */
+  .screen { display: none; flex-direction: column; min-height: 852px; }
+  .screen.active { display: flex; }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    display: flex; align-items: center; padding: 8px 16px 0;
+    min-height: 44px; position: relative; z-index: 10;
+  }
+  .tb-back {
+    display: flex; align-items: center; gap: 4px;
+    background: rgba(247,247,247,.9); backdrop-filter: blur(20px);
+    border-radius: 296px; padding: 7px 14px 7px 10px;
+    font-size: 17px; font-weight: 510; color: var(--label-controls);
+    cursor: pointer; border: none; box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  }
+  .tb-title-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 0 8px; }
+  .tb-title { font-size: 17px; font-weight: 590; color: var(--label-primary); letter-spacing: -.2px; }
+
+  /* ── Content ── */
+  .content { flex: 1; overflow-y: auto; padding-bottom: 40px; -webkit-overflow-scrolling: touch; }
+  .content::-webkit-scrollbar { display: none; }
+
+  .ltitle { font-size: 34px; font-weight: 700; color: var(--label-title); letter-spacing: -.5px; line-height: 41px; }
+  .lsub   { font-size: 15px; color: var(--label-secondary); margin-top: 2px; }
+
+  .card { margin: 12px 20px 0; border: 0.5px solid rgba(60,60,67,.3); border-radius: var(--r-card); overflow: hidden; }
+  .gap { height: 28px; }
+
+  .acc-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--surface-ss); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: var(--label-primary); flex-shrink: 0;
+  }
+
+  /* ── Tab bar ── */
+  .tabbar {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 83px;
+    background: rgba(255,255,255,.9); backdrop-filter: blur(20px);
+    border-top: 0.5px solid rgba(60,60,67,.2);
+    display: flex; align-items: flex-start; padding-top: 10px; z-index: 300;
+  }
+  .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding-top: 4px; }
+  .tab-ic { font-size: 22px; color: var(--label-secondary); }
+  .tab-lb { font-size: 10px; color: var(--label-secondary); }
+  .tab.on .tab-ic { color: var(--label-primary); }
+  .tab.on .tab-lb { color: var(--label-primary); font-weight: 600; }
+
+  /* ── Now: today's completed visits (visit card shows Start/Finish/Duration) ── */
+  .jli {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 20px; border-bottom: 0.5px solid var(--sep);
+    cursor: pointer; background: var(--surface);
+  }
+  .jli:active { background: #f5f5f5; }
+  .jli:last-child { border-bottom: none; }
+  .jav {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--surface-done); color: var(--green);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; flex-shrink: 0;
+  }
+  .jinfo { flex: 1; min-width: 0; }
+  .jclient { font-size: 17px; font-weight: 590; color: var(--label-primary); }
+  .jmeta  { font-size: 14px; color: var(--label-secondary); margin-top: 1px; }
+  /* the three-line visit block on completed visit card */
+  .visit-times {
+    display: flex; gap: 18px; margin-top: 6px;
+  }
+  .vt { display: flex; flex-direction: column; }
+  .vt-lbl { font-size: 11px; font-weight: 600; color: var(--label-tertiary); text-transform: uppercase; letter-spacing: .4px; }
+  .vt-val { font-size: 14px; font-weight: 600; color: var(--label-primary); margin-top: 1px; }
+  .vt-val.dur { color: var(--green); }
+  .chev  { color: var(--label-tertiary); font-size: 14px; flex-shrink: 0; }
+
+  /* ── My Hours ── */
+  .h-periods { display: flex; gap: 8px; padding: 16px 20px 4px; overflow-x: auto; }
+  .h-periods::-webkit-scrollbar { display: none; }
+  .h-pill {
+    padding: 7px 16px; border-radius: 100px; font-size: 14px; font-weight: 500;
+    background: var(--surface-ss); color: var(--label-secondary);
+    border: none; cursor: pointer; font-family: inherit; white-space: nowrap;
+    transition: background .12s, color .12s;
+  }
+  .h-pill.active { background: var(--label-primary); color: #fff; font-weight: 600; }
+
+  .h-summary {
+    margin: 12px 20px 0; padding: 20px 20px 18px;
+    background: var(--surface-ss); border-radius: var(--r-card);
+  }
+  .h-sum-hours { display: flex; align-items: baseline; gap: 3px; }
+  .h-sum-num  { font-size: 48px; font-weight: 800; color: var(--label-primary); letter-spacing: -2px; line-height: 1; }
+  .h-sum-unit { font-size: 20px; font-weight: 400; color: var(--label-secondary); }
+  .h-sum-sub  { font-size: 14px; color: var(--label-secondary); margin-top: 4px; }
+
+  .h-sec { font-size: 13px; font-weight: 600; color: var(--label-secondary); text-transform: uppercase; letter-spacing: .5px; padding: 20px 20px 8px; }
+
+  .h-job {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 20px; border-bottom: 0.5px solid var(--sep); cursor: pointer; background: var(--surface);
+  }
+  .h-job:last-child { border-bottom: none; }
+  .h-job:active { background: var(--surface-ss); }
+  .h-job-left { display: flex; flex-direction: column; gap: 2px; }
+  .h-job-client { font-size: 17px; color: var(--label-primary); }
+  .h-job-meta   { font-size: 14px; color: var(--label-secondary); }
+  .h-job-right  { display: flex; align-items: center; gap: 6px; }
+  .h-job-dur    { font-size: 17px; font-weight: 600; color: var(--label-primary); }
+  .h-job-chev   { color: var(--label-tertiary); font-size: 18px; }
+
+  /* ── Visit detail ── */
+  .h-det-hero { margin: 12px 20px 0; padding: 20px; background: var(--surface-ss); border-radius: var(--r-card); }
+  .h-det-client { font-size: 22px; font-weight: 700; color: var(--label-primary); letter-spacing: -.3px; margin-bottom: 4px; }
+  .h-det-date   { font-size: 15px; color: var(--label-secondary); }
+  .h-det-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 16px; border-bottom: 0.5px solid var(--sep); background: var(--surface);
+  }
+  .h-det-row:last-child  { border-bottom: none; }
+  .h-det-lbl { font-size: 15px; color: var(--label-secondary); }
+  .h-det-val { font-size: 15px; font-weight: 600; color: var(--label-primary); }
+  .h-det-val.dur { color: var(--green); font-weight: 700; }
+  .h-det-note {
+    margin: 16px 20px 0; font-size: 13px; color: var(--label-secondary); line-height: 1.5;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+</style>
+</head>
+<body>
+
+<!-- Journey bar -->
+<div class="jbar">
+  <div class="js" data-s="now"><div class="dot"></div>Day done</div>
+  <div class="jsep">›</div>
+  <div class="js" data-s="my-hours"><div class="dot"></div>My Hours</div>
+  <div class="jsep">›</div>
+  <div class="js" data-s="detail"><div class="dot"></div>Visit detail</div>
+</div>
+
+<div class="phone">
+  <div class="di"></div>
+
+  <!-- ══ NOW — end of day, completed visits show Start/Finish/Duration on the card ══ -->
+  <div class="screen active" id="s-now">
+    <div class="sb"><span class="sb-time">2:26</span><div class="sb-icons"><svg width="17" height="12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="17" height="9" rx="2.5" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/></svg></div></div>
+    <div class="content">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 20px 0;">
+        <div><div class="ltitle">Today</div><div class="lsub">Thu, Jun 12 · 3 visits done</div></div>
+        <button class="acc-btn" onclick="go('my-hours')">JR</button>
+      </div>
+
+      <!-- Each completed visit now shows Start / Finish / Duration right on the card (vision: info on the visit itself) -->
+      <div class="card">
+        <div class="jli" onclick="go('detail')">
+          <div class="jav">✓</div>
+          <div class="jinfo">
+            <div class="jclient">Emily Taylor</div>
+            <div class="jmeta">742 Oak St</div>
+            <div class="visit-times">
+              <div class="vt"><span class="vt-lbl">Start</span><span class="vt-val">8:04</span></div>
+              <div class="vt"><span class="vt-lbl">Finish</span><span class="vt-val">8:56</span></div>
+              <div class="vt"><span class="vt-lbl">Duration</span><span class="vt-val dur">52 min</span></div>
+            </div>
+          </div>
+          <div class="chev">›</div>
+        </div>
+        <div class="jli" onclick="go('detail')">
+          <div class="jav">✓</div>
+          <div class="jinfo">
+            <div class="jclient">Carmen Flores</div>
+            <div class="jmeta">55 Pine Ave</div>
+            <div class="visit-times">
+              <div class="vt"><span class="vt-lbl">Start</span><span class="vt-val">10:33</span></div>
+              <div class="vt"><span class="vt-lbl">Finish</span><span class="vt-val">11:41</span></div>
+              <div class="vt"><span class="vt-lbl">Duration</span><span class="vt-val dur">1h 08m</span></div>
+            </div>
+          </div>
+          <div class="chev">›</div>
+        </div>
+        <div class="jli" onclick="go('detail')">
+          <div class="jav">✓</div>
+          <div class="jinfo">
+            <div class="jclient">Jamie Rodriguez</div>
+            <div class="jmeta">110 Maple Dr</div>
+            <div class="visit-times">
+              <div class="vt"><span class="vt-lbl">Start</span><span class="vt-val">1:02</span></div>
+              <div class="vt"><span class="vt-lbl">Finish</span><span class="vt-val">2:24</span></div>
+              <div class="vt"><span class="vt-lbl">Duration</span><span class="vt-val dur">1h 22m</span></div>
+            </div>
+          </div>
+          <div class="chev">›</div>
+        </div>
+      </div>
+
+      <div style="margin:20px 20px 0;background:var(--surface-banner);border-radius:var(--r-card);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="go('my-hours')">
+        <div>
+          <div style="font-size:13px;color:var(--label-secondary);margin-bottom:2px;">Your hours</div>
+          <div style="font-size:17px;font-weight:600;color:var(--label-primary);">See your week and month</div>
+        </div>
+        <div class="chev" style="font-size:18px;">›</div>
+      </div>
+      <div class="gap"></div>
+    </div>
+    <div class="tabbar">
+      <div class="tab on"><div class="tab-ic">☀️</div><div class="tab-lb">Now</div></div>
+      <div class="tab" onclick="go('my-hours')"><div class="tab-ic">⏱️</div><div class="tab-lb">My Hours</div></div>
+    </div>
+  </div>
+
+  <!-- ══ MY HOURS ══ -->
+  <div class="screen" id="s-my-hours">
+    <div class="sb"><span class="sb-time">2:27</span><div class="sb-icons"><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="17" height="9" rx="2.5" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/></svg></div></div>
+    <div class="toolbar">
+      <button class="tb-back" onclick="go('now')"><svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M8 1L1 7.5L8 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Now</button>
+      <div class="tb-title-wrap"><div class="tb-title">My Hours</div></div>
+    </div>
+    <div class="content">
+      <div class="h-periods">
+        <button class="h-pill" onclick="showPeriod('today')">Today</button>
+        <button class="h-pill active" onclick="showPeriod('week')">This week</button>
+        <button class="h-pill" onclick="showPeriod('month')">This month</button>
+      </div>
+
+      <!-- Summary -->
+      <div class="h-summary" id="h-sum-today" style="display:none;">
+        <div class="h-sum-hours"><div class="h-sum-num">3</div><div class="h-sum-unit">h 22m</div></div>
+        <div class="h-sum-sub">3 visits · Thu, Jun 12</div>
+      </div>
+      <div class="h-summary" id="h-sum-week">
+        <div class="h-sum-hours"><div class="h-sum-num">21</div><div class="h-sum-unit">h 22m</div></div>
+        <div class="h-sum-sub">18 visits · Jun 9–12</div>
+      </div>
+      <div class="h-summary" id="h-sum-month" style="display:none;">
+        <div class="h-sum-hours"><div class="h-sum-num">57</div><div class="h-sum-unit">h 40m</div></div>
+        <div class="h-sum-sub">42 visits · Jun 1–12</div>
+      </div>
+
+      <!-- Today -->
+      <div id="h-list-today" style="display:none;">
+        <div class="h-sec">Thu, Jun 12</div>
+        <div class="card">
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">8:04 – 8:56 AM</div></div><div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">10:33 – 11:41 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Jamie Rodriguez</div><div class="h-job-meta">1:02 – 2:24 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 22m</div><div class="h-job-chev">›</div></div></div>
+        </div>
+      </div>
+
+      <!-- This week -->
+      <div id="h-list-week">
+        <div class="h-sec">Thu, Jun 12</div>
+        <div class="card">
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">8:04 – 8:56 AM</div></div><div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">10:33 – 11:41 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Jamie Rodriguez</div><div class="h-job-meta">1:02 – 2:24 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 22m</div><div class="h-job-chev">›</div></div></div>
+        </div>
+        <div class="h-sec">Wed, Jun 11</div>
+        <div class="card">
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Maria Santos</div><div class="h-job-meta">9:10 – 10:05 AM</div></div><div class="h-job-right"><div class="h-job-dur">55 min</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Robert Chen</div><div class="h-job-meta">11:30 AM – 1:15 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 45m</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Lisa Park</div><div class="h-job-meta">2:00 – 3:30 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 30m</div><div class="h-job-chev">›</div></div></div>
+        </div>
+        <div class="h-sec">Tue, Jun 10</div>
+        <div class="card">
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">David Kim</div><div class="h-job-meta">8:00 – 9:10 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 10m</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Anna Brooks</div><div class="h-job-meta">10:15 – 11:40 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 25m</div><div class="h-job-chev">›</div></div></div>
+        </div>
+      </div>
+
+      <!-- This month -->
+      <div id="h-list-month" style="display:none;">
+        <div class="h-sec">This week · Jun 9–12</div>
+        <div class="card">
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">Thu · 8:04 – 8:56 AM</div></div><div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">Thu · 10:33 – 11:41 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Maria Santos</div><div class="h-job-meta">Wed · 9:10 – 10:05 AM</div></div><div class="h-job-right"><div class="h-job-dur">55 min</div><div class="h-job-chev">›</div></div></div>
+        </div>
+        <div class="h-sec">Last week · Jun 2–8</div>
+        <div class="card">
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Tom Wilson</div><div class="h-job-meta">Mon · 8:30 – 10:00 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 30m</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Karen Lee</div><div class="h-job-meta">Tue · 11:00 AM – 12:20 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 20m</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">James Ortiz</div><div class="h-job-meta">Fri · 2:00 – 3:45 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 45m</div><div class="h-job-chev">›</div></div></div>
+        </div>
+      </div>
+
+      <div class="gap"></div>
+    </div>
+    <div class="tabbar">
+      <div class="tab" onclick="go('now')"><div class="tab-ic">☀️</div><div class="tab-lb">Now</div></div>
+      <div class="tab on"><div class="tab-ic">⏱️</div><div class="tab-lb">My Hours</div></div>
+    </div>
+  </div>
+
+  <!-- ══ VISIT DETAIL ══ -->
+  <div class="screen" id="s-detail">
+    <div class="sb"><span class="sb-time">2:27</span><div class="sb-icons"><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="17" height="9" rx="2.5" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/></svg></div></div>
+    <div class="toolbar">
+      <button class="tb-back" onclick="go('my-hours')"><svg width="9" height="15" viewBox="0 0 9 15" fill="none"><path d="M8 1L1 7.5L8 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> My Hours</button>
+      <div class="tb-title-wrap"><div class="tb-title">Visit</div></div>
+    </div>
+    <div class="content">
+      <div class="h-det-hero">
+        <div class="h-det-client">Emily Taylor</div>
+        <div class="h-det-date">Thursday, Jun 12 · 742 Oak St, Brooklyn</div>
+      </div>
+      <div style="height:12px;"></div>
+      <div class="card" style="margin:0 20px;">
+        <div class="h-det-row"><span class="h-det-lbl">Start</span><span class="h-det-val">8:04 AM</span></div>
+        <div class="h-det-row"><span class="h-det-lbl">Finish</span><span class="h-det-val">8:56 AM</span></div>
+        <div class="h-det-row"><span class="h-det-lbl">Duration</span><span class="h-det-val dur">52 min</span></div>
+      </div>
+      <div class="h-det-note">
+        <span>🔒</span>
+        <span>These are the same hours your company sees. Straight from your Start and Finish taps.</span>
+      </div>
+      <div class="gap"></div>
+    </div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+  function showPeriod(p) {
+    ['today','week','month'].forEach(id => {
+      document.getElementById('h-sum-' + id).style.display = id === p ? '' : 'none';
+      document.getElementById('h-list-' + id).style.display = id === p ? '' : 'none';
+    });
+    document.querySelectorAll('.h-pill').forEach((btn, i) => {
+      btn.classList.toggle('active', ['today','week','month'][i] === p);
+    });
+    const sc = document.getElementById('s-my-hours');
+    if (sc) { const c = sc.querySelector('.content'); if (c) c.scrollTop = 0; }
+  }
+
+  const STEPS = ['now','my-hours','detail'];
+  function go(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById('s-' + id);
+    if (el) { el.classList.add('active'); const c = el.querySelector('.content'); if (c) c.scrollTop = 0; }
+    const curIdx = STEPS.indexOf(id);
+    document.querySelectorAll('.js').forEach(j => {
+      const s = j.getAttribute('data-s'); const i = STEPS.indexOf(s);
+      j.classList.remove('active','done');
+      if (i === curIdx) j.classList.add('active');
+      else if (i < curIdx) j.classList.add('done');
+    });
+  }
+  document.querySelectorAll('.js').forEach(j => j.addEventListener('click', () => go(j.getAttribute('data-s'))));
+  go('now');
+</script>
+</body>
+</html>
