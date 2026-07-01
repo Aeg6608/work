@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tofu Team App — My Hours</title>
+<title>Tofu Team App · My Hours</title>
 <style>
   :root {
     --label-primary:   #000000;
@@ -121,32 +121,35 @@
   .tab.on .tab-ic { color: var(--label-primary); }
   .tab.on .tab-lb { color: var(--label-primary); font-weight: 600; }
 
-  /* ── Now: today's completed visits (visit card shows Start/Finish/Duration) ── */
+  /* ── Section header on Now ── */
+  .sec-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 22px 20px 6px;
+  }
+  .sec-title { font-size: 13px; font-weight: 700; color: var(--label-secondary); text-transform: uppercase; letter-spacing: .6px; }
+  .sec-count { font-size: 13px; color: var(--label-tertiary); font-weight: 500; }
+
+  /* ── Now: visit rows (clean: client + time + duration) ── */
   .jli {
     display: flex; align-items: center; gap: 14px;
-    padding: 13px 20px; border-bottom: 0.5px solid var(--sep);
+    padding: 14px 20px; border-bottom: 0.5px solid var(--sep);
     cursor: pointer; background: var(--surface);
   }
   .jli:active { background: #f5f5f5; }
   .jli:last-child { border-bottom: none; }
   .jav {
-    width: 40px; height: 40px; border-radius: 50%;
+    width: 38px; height: 38px; border-radius: 50%;
     background: var(--surface-done); color: var(--green);
     display: flex; align-items: center; justify-content: center;
-    font-size: 15px; font-weight: 700; flex-shrink: 0;
+    font-size: 14px; font-weight: 700; flex-shrink: 0;
   }
+  .jav.soon { background: var(--surface-banner); color: #7a5a1a; font-size: 13px; }
   .jinfo { flex: 1; min-width: 0; }
   .jclient { font-size: 17px; font-weight: 590; color: var(--label-primary); }
   .jmeta  { font-size: 14px; color: var(--label-secondary); margin-top: 1px; }
-  /* the three-line visit block on completed visit card */
-  .visit-times {
-    display: flex; gap: 18px; margin-top: 6px;
-  }
-  .vt { display: flex; flex-direction: column; }
-  .vt-lbl { font-size: 11px; font-weight: 600; color: var(--label-tertiary); text-transform: uppercase; letter-spacing: .4px; }
-  .vt-val { font-size: 14px; font-weight: 600; color: var(--label-primary); margin-top: 1px; }
-  .vt-val.dur { color: var(--green); }
-  .chev  { color: var(--label-tertiary); font-size: 14px; flex-shrink: 0; }
+  .jright { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .jdur   { font-size: 16px; font-weight: 600; color: var(--label-primary); }
+  .chev  { color: var(--label-tertiary); font-size: 16px; flex-shrink: 0; }
 
   /* ── My Hours ── */
   .h-periods { display: flex; gap: 8px; padding: 16px 20px 4px; overflow-x: auto; }
@@ -187,14 +190,33 @@
   .h-det-hero { margin: 12px 20px 0; padding: 20px; background: var(--surface-ss); border-radius: var(--r-card); }
   .h-det-client { font-size: 22px; font-weight: 700; color: var(--label-primary); letter-spacing: -.3px; margin-bottom: 4px; }
   .h-det-date   { font-size: 15px; color: var(--label-secondary); }
-  .h-det-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 16px; border-bottom: 0.5px solid var(--sep); background: var(--surface);
+
+  /* Duration hero: the headline number */
+  .dur-hero {
+    margin: 16px 20px 0; padding: 22px 20px; text-align: center;
+    background: var(--surface-done); border-radius: var(--r-card);
   }
-  .h-det-row:last-child  { border-bottom: none; }
-  .h-det-lbl { font-size: 15px; color: var(--label-secondary); }
-  .h-det-val { font-size: 15px; font-weight: 600; color: var(--label-primary); }
-  .h-det-val.dur { color: var(--green); font-weight: 700; }
+  .dur-hero-num { font-size: 40px; font-weight: 800; color: var(--green); letter-spacing: -1.5px; line-height: 1; }
+  .dur-hero-lbl { font-size: 13px; font-weight: 600; color: var(--green); text-transform: uppercase; letter-spacing: .5px; margin-top: 6px; opacity: .85; }
+
+  /* Start → Finish timeline */
+  .timeline { margin: 16px 20px 0; }
+  .tl-row { display: flex; align-items: center; gap: 14px; padding: 4px 0; }
+  .tl-marker { display: flex; flex-direction: column; align-items: center; width: 14px; flex-shrink: 0; }
+  .tl-dot { width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--green); background: #fff; }
+  .tl-dot.filled { background: var(--green); }
+  .tl-line { width: 2px; height: 26px; background: var(--green); opacity: .3; }
+  .tl-body { flex: 1; display: flex; justify-content: space-between; align-items: baseline; }
+  .tl-lbl { font-size: 15px; color: var(--label-secondary); }
+  .tl-time { font-size: 17px; font-weight: 700; color: var(--label-primary); }
+
+  .h-det-addr {
+    margin: 20px 20px 0; padding: 14px 16px; background: var(--surface); border: 0.5px solid var(--sep);
+    border-radius: var(--r-card); display: flex; align-items: center; gap: 12px;
+  }
+  .h-det-addr-ic { font-size: 18px; }
+  .h-det-addr-txt { font-size: 15px; color: var(--label-primary); }
+
   .h-det-note {
     margin: 16px 20px 0; font-size: 13px; color: var(--label-secondary); line-height: 1.5;
     display: flex; gap: 8px; align-items: flex-start;
@@ -215,65 +237,55 @@
 <div class="phone">
   <div class="di"></div>
 
-  <!-- ══ NOW — end of day, completed visits show Start/Finish/Duration on the card ══ -->
+  <!-- ══ NOW: two sections, Up next + Completed today (clean rows) ══ -->
   <div class="screen active" id="s-now">
-    <div class="sb"><span class="sb-time">2:26</span><div class="sb-icons"><svg width="17" height="12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="17" height="9" rx="2.5" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/></svg></div></div>
+    <div class="sb"><span class="sb-time">12:40</span><div class="sb-icons"><svg width="17" height="12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="17" height="9" rx="2.5" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/></svg></div></div>
     <div class="content">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 20px 0;">
-        <div><div class="ltitle">Today</div><div class="lsub">Thu, Jun 12 · 3 visits done</div></div>
+        <div><div class="ltitle">Today</div><div class="lsub">Thu, Jun 12</div></div>
         <button class="acc-btn" onclick="go('my-hours')">JR</button>
       </div>
 
-      <!-- Each completed visit now shows Start / Finish / Duration right on the card (vision: info on the visit itself) -->
+      <!-- Up next: future work -->
+      <div class="sec-head">
+        <div class="sec-title">Up next</div>
+        <div class="sec-count">1 left</div>
+      </div>
+      <div class="card">
+        <div class="jli">
+          <div class="jav soon">JR</div>
+          <div class="jinfo">
+            <div class="jclient">Jamie Rodriguez</div>
+            <div class="jmeta">1:00 PM · 110 Maple Dr</div>
+          </div>
+          <div class="jright"><div class="chev">›</div></div>
+        </div>
+      </div>
+
+      <!-- Completed today: clean rows (client + start time + duration). Start/Finish live inside the visit. -->
+      <div class="sec-head">
+        <div class="sec-title">Completed today</div>
+        <div class="sec-count">2 · 2h 00m</div>
+      </div>
       <div class="card">
         <div class="jli" onclick="go('detail')">
           <div class="jav">✓</div>
           <div class="jinfo">
             <div class="jclient">Emily Taylor</div>
-            <div class="jmeta">742 Oak St</div>
-            <div class="visit-times">
-              <div class="vt"><span class="vt-lbl">Start</span><span class="vt-val">8:04</span></div>
-              <div class="vt"><span class="vt-lbl">Finish</span><span class="vt-val">8:56</span></div>
-              <div class="vt"><span class="vt-lbl">Duration</span><span class="vt-val dur">52 min</span></div>
-            </div>
+            <div class="jmeta">8:04 AM</div>
           </div>
-          <div class="chev">›</div>
+          <div class="jright"><div class="jdur">52 min</div><div class="chev">›</div></div>
         </div>
         <div class="jli" onclick="go('detail')">
           <div class="jav">✓</div>
           <div class="jinfo">
             <div class="jclient">Carmen Flores</div>
-            <div class="jmeta">55 Pine Ave</div>
-            <div class="visit-times">
-              <div class="vt"><span class="vt-lbl">Start</span><span class="vt-val">10:33</span></div>
-              <div class="vt"><span class="vt-lbl">Finish</span><span class="vt-val">11:41</span></div>
-              <div class="vt"><span class="vt-lbl">Duration</span><span class="vt-val dur">1h 08m</span></div>
-            </div>
+            <div class="jmeta">10:33 AM</div>
           </div>
-          <div class="chev">›</div>
-        </div>
-        <div class="jli" onclick="go('detail')">
-          <div class="jav">✓</div>
-          <div class="jinfo">
-            <div class="jclient">Jamie Rodriguez</div>
-            <div class="jmeta">110 Maple Dr</div>
-            <div class="visit-times">
-              <div class="vt"><span class="vt-lbl">Start</span><span class="vt-val">1:02</span></div>
-              <div class="vt"><span class="vt-lbl">Finish</span><span class="vt-val">2:24</span></div>
-              <div class="vt"><span class="vt-lbl">Duration</span><span class="vt-val dur">1h 22m</span></div>
-            </div>
-          </div>
-          <div class="chev">›</div>
+          <div class="jright"><div class="jdur">1h 08m</div><div class="chev">›</div></div>
         </div>
       </div>
 
-      <div style="margin:20px 20px 0;background:var(--surface-banner);border-radius:var(--r-card);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="go('my-hours')">
-        <div>
-          <div style="font-size:13px;color:var(--label-secondary);margin-bottom:2px;">Your hours</div>
-          <div style="font-size:17px;font-weight:600;color:var(--label-primary);">See your week and month</div>
-        </div>
-        <div class="chev" style="font-size:18px;">›</div>
-      </div>
       <div class="gap"></div>
     </div>
     <div class="tabbar">
@@ -375,14 +387,32 @@
     <div class="content">
       <div class="h-det-hero">
         <div class="h-det-client">Emily Taylor</div>
-        <div class="h-det-date">Thursday, Jun 12 · 742 Oak St, Brooklyn</div>
+        <div class="h-det-date">Thursday, Jun 12</div>
       </div>
-      <div style="height:12px;"></div>
-      <div class="card" style="margin:0 20px;">
-        <div class="h-det-row"><span class="h-det-lbl">Start</span><span class="h-det-val">8:04 AM</span></div>
-        <div class="h-det-row"><span class="h-det-lbl">Finish</span><span class="h-det-val">8:56 AM</span></div>
-        <div class="h-det-row"><span class="h-det-lbl">Duration</span><span class="h-det-val dur">52 min</span></div>
+
+      <!-- Duration as the headline -->
+      <div class="dur-hero">
+        <div class="dur-hero-num">52 min</div>
+        <div class="dur-hero-lbl">Time on this visit</div>
       </div>
+
+      <!-- Start → Finish as a small timeline -->
+      <div class="timeline">
+        <div class="tl-row">
+          <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-body"><span class="tl-lbl">Started</span><span class="tl-time">8:04 AM</span></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-marker"><div class="tl-dot filled"></div></div>
+          <div class="tl-body"><span class="tl-lbl">Finished</span><span class="tl-time">8:56 AM</span></div>
+        </div>
+      </div>
+
+      <div class="h-det-addr">
+        <span class="h-det-addr-ic">📍</span>
+        <span class="h-det-addr-txt">742 Oak St, Brooklyn, NY</span>
+      </div>
+
       <div class="h-det-note">
         <span>🔒</span>
         <span>These are the same hours your company sees. Straight from your Start and Finish taps.</span>
