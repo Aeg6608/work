@@ -340,18 +340,8 @@
       <div class="tb-title-wrap"><div class="tb-title">My Hours</div></div>
     </div>
     <div class="content">
-      <div class="h-periods">
-        <button class="h-pill active" onclick="showPeriod('today')">Today</button>
-        <button class="h-pill" onclick="showPeriod('month')">This month</button>
-      </div>
-
-      <!-- Summary -->
-      <div class="h-summary" id="h-sum-today">
-        <div class="h-sum-hours"><div class="h-sum-num">3</div><div class="h-sum-unit">h 22m</div></div>
-        <div class="h-sum-sub">3 visits · Thu, Jun 12</div>
-      </div>
-      <!-- Month stepper (only in Month mode) -->
-      <div class="h-month-nav" id="h-month-nav" style="display:none;">
+      <!-- Month stepper: the only mode. Browse month by month. -->
+      <div class="h-month-nav" id="h-month-nav">
         <button class="h-month-btn" id="m-prev" onclick="stepMonth(-1)">
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 2L4 8l6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -361,20 +351,10 @@
         </button>
       </div>
 
-      <!-- Month summary (swaps with stepper) -->
-      <div class="h-summary" id="h-sum-month" style="display:none;">
+      <!-- Month summary -->
+      <div class="h-summary" id="h-sum-month">
         <div class="h-sum-hours"><div class="h-sum-num" id="m-sum-num">57</div><div class="h-sum-unit" id="m-sum-unit">h 40m</div></div>
         <div class="h-sum-sub" id="m-sum-sub">42 visits</div>
-      </div>
-
-      <!-- Today -->
-      <div id="h-list-today">
-        <div class="h-sec">Thu, Jun 12</div>
-        <div class="card">
-          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">8:04 – 8:56 AM</div></div><div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div></div>
-          <div class="h-job" onclick="go('detail2')"><div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">10:33 – 11:41 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div></div>
-          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Jamie Rodriguez</div><div class="h-job-meta">1:02 – 2:24 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 22m</div><div class="h-job-chev">›</div></div></div>
-        </div>
       </div>
 
       <!-- Month lists: one per month, JS swaps them -->
@@ -567,25 +547,7 @@
     renderMonth();
   }
 
-  function showPeriod(p) {
-    const isToday = p === 'today';
-    // Today block
-    document.getElementById('h-sum-today').style.display = isToday ? '' : 'none';
-    document.getElementById('h-list-today').style.display = isToday ? '' : 'none';
-    // Month block: stepper + month summary + one month list
-    document.getElementById('h-month-nav').style.display = isToday ? 'none' : '';
-    document.getElementById('h-sum-month').style.display = isToday ? 'none' : '';
-    if (isToday) {
-      [0,1,2].forEach(i => document.getElementById('h-month-' + i).style.display = 'none');
-    } else {
-      renderMonth();
-    }
-    document.querySelectorAll('.h-pill').forEach((btn, i) => {
-      btn.classList.toggle('active', ['today','month'][i] === p);
-    });
-    const sc = document.getElementById('s-my-hours');
-    if (sc) { const c = sc.querySelector('.content'); if (c) c.scrollTop = 0; }
-  }
+  renderMonth();
 
   const STEPS = ['now','my-hours','detail','detail2'];
   function go(id) {
