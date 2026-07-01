@@ -426,8 +426,6 @@
 
 <!-- Journey bar -->
 <div class="jbar">
-  <div class="js" data-s="onboarding"><div class="dot"></div>Install</div>
-  <div class="jsep">›</div>
   <div class="js" data-s="now"><div class="dot"></div>Morning</div>
   <div class="jsep">›</div>
   <div class="js" data-s="j1-sched"><div class="dot"></div>Job 1</div>
@@ -454,39 +452,6 @@
 <div class="phone">
   <div class="di"></div>
 
-  <!-- ══ ONBOARDING — GPS boundary ══ -->
-  <div class="screen" id="s-onboarding">
-    <div class="sb"><span class="sb-time">7:27</span><div class="sb-icons"><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="17" height="9" rx="2.5" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/></svg></div></div>
-    <div class="ob-wrap">
-      <div class="ob-top">
-        <div class="ob-title">Your time.<br>Your location.<br>Your proof.</div>
-        <div class="ob-sub">When a job is done, Tofu saves when and where — so if anyone ever asks "were you there?", the answer is already in your phone.</div>
-        <div class="ob-rules">
-          <div class="ob-rule">
-            <div class="ob-rule-text">
-              <div class="ob-rule-head">Tap Start</div>
-              <div class="ob-rule-desc">We save the time and your location. Once.</div>
-            </div>
-          </div>
-          <div class="ob-rule">
-            <div class="ob-rule-text">
-              <div class="ob-rule-head">Tap Finish</div>
-              <div class="ob-rule-desc">We save the time and your location. Once.</div>
-            </div>
-          </div>
-          <div class="ob-rule">
-            <div class="ob-rule-text">
-              <div class="ob-rule-head">Between jobs, after work</div>
-              <div class="ob-rule-desc">Nothing. We're not watching.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="ob-bottom">
-        <button class="ob-cta" onclick="go('now')">Got it — let's start</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ══ NOW — MORNING ══ -->
   <div class="screen" id="s-now" >
@@ -1044,7 +1009,7 @@
   }
 
   // ── Screen navigation ──
-  const STEPS = ['onboarding','now','j1-sched','j1-inprog','j1-reward','j2-sched','j2-inprog','j2-reward','j3-sched','j3-inprog','j3-reward','my-hours','job-detail-1','job-detail-2','job-detail-3'];
+  const STEPS = ['now','j1-sched','j1-inprog','j1-reward','j2-sched','j2-inprog','j2-reward','j3-sched','j3-inprog','j3-reward','my-hours','job-detail-1','job-detail-2','job-detail-3'];
 
   function showPeriod(p) {
     ['today','week','month'].forEach(id => {
@@ -1091,7 +1056,7 @@
     if (oc) { const m = oc.match(/go\('([^']+)'\)/); if (m) el.setAttribute('data-s', m[1]); }
   });
 
-  go('onboarding');
+  go('now');
 </script>
 </body>
 </html>
