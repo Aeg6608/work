@@ -319,19 +319,14 @@
     </div>
     <div class="content">
       <div class="h-periods">
-        <button class="h-pill" onclick="showPeriod('today')">Today</button>
-        <button class="h-pill active" onclick="showPeriod('week')">This week</button>
+        <button class="h-pill active" onclick="showPeriod('today')">Today</button>
         <button class="h-pill" onclick="showPeriod('month')">This month</button>
       </div>
 
       <!-- Summary -->
-      <div class="h-summary" id="h-sum-today" style="display:none;">
+      <div class="h-summary" id="h-sum-today">
         <div class="h-sum-hours"><div class="h-sum-num">3</div><div class="h-sum-unit">h 22m</div></div>
         <div class="h-sum-sub">3 visits · Thu, Jun 12</div>
-      </div>
-      <div class="h-summary" id="h-sum-week">
-        <div class="h-sum-hours"><div class="h-sum-num">21</div><div class="h-sum-unit">h 22m</div></div>
-        <div class="h-sum-sub">18 visits · Jun 9–12</div>
       </div>
       <div class="h-summary" id="h-sum-month" style="display:none;">
         <div class="h-sum-hours"><div class="h-sum-num">57</div><div class="h-sum-unit">h 40m</div></div>
@@ -339,33 +334,12 @@
       </div>
 
       <!-- Today -->
-      <div id="h-list-today" style="display:none;">
+      <div id="h-list-today">
         <div class="h-sec">Thu, Jun 12</div>
         <div class="card">
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">8:04 – 8:56 AM</div></div><div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div></div>
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">10:33 – 11:41 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div></div>
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Jamie Rodriguez</div><div class="h-job-meta">1:02 – 2:24 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 22m</div><div class="h-job-chev">›</div></div></div>
-        </div>
-      </div>
-
-      <!-- This week -->
-      <div id="h-list-week">
-        <div class="h-sec">Thu, Jun 12</div>
-        <div class="card">
-          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">8:04 – 8:56 AM</div></div><div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div></div>
-          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">10:33 – 11:41 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div></div>
-          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Jamie Rodriguez</div><div class="h-job-meta">1:02 – 2:24 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 22m</div><div class="h-job-chev">›</div></div></div>
-        </div>
-        <div class="h-sec">Wed, Jun 11</div>
-        <div class="card">
-          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Maria Santos</div><div class="h-job-meta">9:10 – 10:05 AM</div></div><div class="h-job-right"><div class="h-job-dur">55 min</div><div class="h-job-chev">›</div></div></div>
-          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Robert Chen</div><div class="h-job-meta">11:30 AM – 1:15 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 45m</div><div class="h-job-chev">›</div></div></div>
-          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Lisa Park</div><div class="h-job-meta">2:00 – 3:30 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 30m</div><div class="h-job-chev">›</div></div></div>
-        </div>
-        <div class="h-sec">Tue, Jun 10</div>
-        <div class="card">
-          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">David Kim</div><div class="h-job-meta">8:00 – 9:10 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 10m</div><div class="h-job-chev">›</div></div></div>
-          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Anna Brooks</div><div class="h-job-meta">10:15 – 11:40 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 25m</div><div class="h-job-chev">›</div></div></div>
         </div>
       </div>
 
@@ -469,12 +443,12 @@
 
 <script>
   function showPeriod(p) {
-    ['today','week','month'].forEach(id => {
+    ['today','month'].forEach(id => {
       document.getElementById('h-sum-' + id).style.display = id === p ? '' : 'none';
       document.getElementById('h-list-' + id).style.display = id === p ? '' : 'none';
     });
     document.querySelectorAll('.h-pill').forEach((btn, i) => {
-      btn.classList.toggle('active', ['today','week','month'][i] === p);
+      btn.classList.toggle('active', ['today','month'][i] === p);
     });
     const sc = document.getElementById('s-my-hours');
     if (sc) { const c = sc.querySelector('.content'); if (c) c.scrollTop = 0; }
