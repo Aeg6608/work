@@ -168,6 +168,8 @@
   }
   .h-pill.active { background: var(--tofu-dark); color: #fff; }
 
+  .h-divider { height: 1px; background: var(--sep); margin: 26px 20px 4px; }
+
   /* Month stepper: ‹ June › */
   .h-month-nav {
     display: flex; align-items: center; justify-content: space-between;
@@ -340,7 +342,21 @@
       <div class="tb-title-wrap"><div class="tb-title">My Hours</div></div>
     </div>
     <div class="content">
-      <!-- Month stepper: the only mode. Browse month by month. -->
+      <!-- TODAY at the top: what you did today -->
+      <div class="h-sec">Today · Thu, Jun 12</div>
+      <div class="h-summary">
+        <div class="h-sum-hours"><div class="h-sum-num">3</div><div class="h-sum-unit">h 22m</div></div>
+        <div class="h-sum-sub">3 visits</div>
+      </div>
+      <div class="card">
+        <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">8:04 – 8:56 AM</div></div><div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div></div>
+        <div class="h-job" onclick="go('detail2')"><div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">10:33 – 11:41 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div></div>
+        <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Jamie Rodriguez</div><div class="h-job-meta">1:02 – 2:24 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 22m</div><div class="h-job-chev">›</div></div></div>
+      </div>
+
+      <div class="h-divider"></div>
+
+      <!-- EARLIER: month by month, below Today. Stepper to browse past months. -->
       <div class="h-month-nav" id="h-month-nav">
         <button class="h-month-btn" id="m-prev" onclick="stepMonth(-1)">
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 2L4 8l6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -359,13 +375,12 @@
 
       <!-- Month lists: one per month, JS swaps them -->
       <div class="h-list-month" id="h-month-0" style="display:none;">
-        <div class="h-sec">This week · Jun 9–12</div>
+        <div class="h-sec">Week of Jun 9</div>
         <div class="card">
-          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">Thu · 8:04 – 8:56 AM</div></div><div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div></div>
-          <div class="h-job" onclick="go('detail2')"><div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">Thu · 10:33 – 11:41 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div></div>
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Maria Santos</div><div class="h-job-meta">Wed · 9:10 – 10:05 AM</div></div><div class="h-job-right"><div class="h-job-dur">55 min</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Leo Barnes</div><div class="h-job-meta">Tue · 11:20 AM – 12:40 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 20m</div><div class="h-job-chev">›</div></div></div>
         </div>
-        <div class="h-sec">Last week · Jun 2–8</div>
+        <div class="h-sec">Week of Jun 2</div>
         <div class="card">
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Tom Wilson</div><div class="h-job-meta">Mon · 8:30 – 10:00 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 30m</div><div class="h-job-chev">›</div></div></div>
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Karen Lee</div><div class="h-job-meta">Tue · 11:00 AM – 12:20 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 20m</div><div class="h-job-chev">›</div></div></div>
