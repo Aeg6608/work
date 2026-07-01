@@ -221,7 +221,7 @@
   .tl-mid-dur { flex: 1; font-size: 14px; color: var(--label-secondary); }
   .tl-mid-dur b { font-weight: 600; color: var(--label-primary); }
 
-  /* Info cards — plain text rows, no emoji icons */
+  /* Info cards: plain text rows, no emoji icons */
   .d-card {
     margin: 12px 20px 0; padding: 16px 18px; border-radius: 16px;
     background: #fff; border: 0.5px solid rgba(60,60,67,.18);
@@ -232,6 +232,11 @@
   .d-card-title { font-size: 17px; font-weight: 700; color: var(--label-primary); }
   .d-card-sub { font-size: 14px; color: var(--label-secondary); margin-top: 2px; }
   .d-card-chev { color: var(--label-tertiary); font-size: 18px; flex-shrink: 0; }
+
+  /* Empty state: an invitation to add, not a "Not provided" scold */
+  .d-card.add { border-style: dashed; border-color: rgba(60,60,67,.28); background: transparent; }
+  .d-card.add .d-card-title { color: var(--label-secondary); font-weight: 600; }
+  .d-card.add .d-card-plus { color: var(--label-tertiary); font-size: 20px; font-weight: 400; flex-shrink: 0; }
 
   .d-note {
     margin: 18px 20px 0; font-size: 13px; color: var(--label-secondary); line-height: 1.5;
@@ -292,7 +297,7 @@
           </div>
           <div class="jright"><div class="jdur">52 min</div><div class="chev">›</div></div>
         </div>
-        <div class="jli" onclick="go('detail')">
+        <div class="jli" onclick="go('detail2')">
           <div class="jav">✓</div>
           <div class="jinfo">
             <div class="jclient">Carmen Flores</div>
@@ -338,7 +343,7 @@
         <div class="h-sec">Thu, Jun 12</div>
         <div class="card">
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">8:04 – 8:56 AM</div></div><div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div></div>
-          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">10:33 – 11:41 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail2')"><div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">10:33 – 11:41 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div></div>
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Jamie Rodriguez</div><div class="h-job-meta">1:02 – 2:24 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 22m</div><div class="h-job-chev">›</div></div></div>
         </div>
       </div>
@@ -348,7 +353,7 @@
         <div class="h-sec">This week · Jun 9–12</div>
         <div class="card">
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">Thu · 8:04 – 8:56 AM</div></div><div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div></div>
-          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">Thu · 10:33 – 11:41 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail2')"><div class="h-job-left"><div class="h-job-client">Carmen Flores</div><div class="h-job-meta">Thu · 10:33 – 11:41 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 08m</div><div class="h-job-chev">›</div></div></div>
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Maria Santos</div><div class="h-job-meta">Wed · 9:10 – 10:05 AM</div></div><div class="h-job-right"><div class="h-job-dur">55 min</div><div class="h-job-chev">›</div></div></div>
         </div>
         <div class="h-sec">Last week · Jun 2–8</div>
@@ -428,6 +433,57 @@
     </div>
   </div>
 
+  <!-- ══ VISIT DETAIL 2: completed visit with empty Photos / Notes / no Address ══ -->
+  <div class="screen" id="s-detail2">
+    <div class="sb"><span class="sb-time">12:41</span><div class="sb-icons"><svg width="17" height="12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="17" height="9" rx="2.5" fill="currentColor"/><path d="M23 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/></svg></div></div>
+    <div class="content">
+      <div class="d-head">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <button class="d-round-btn" onclick="go('my-hours')">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 2L4 8l6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="d-round-btn">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><circle cx="4" cy="10" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="16" cy="10" r="1.6"/></svg>
+          </button>
+        </div>
+        <div class="d-title">Carmen Flores</div>
+        <div class="d-status"><span class="dot-done"></span>Completed</div>
+      </div>
+
+      <!-- Time block: Start → Finish (always present, from the taps) -->
+      <div class="d-time">
+        <div class="tl-row">
+          <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
+          <div class="tl-body"><span class="tl-lbl">Start</span><span class="tl-time">10:33 AM</span></div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-marker"><div class="tl-dot filled"></div></div>
+          <div class="tl-body"><span class="tl-lbl">Finish</span><span class="tl-time">11:41 AM</span></div>
+        </div>
+      </div>
+
+      <!-- Photos: empty → invitation to add, not "Not provided" -->
+      <div class="d-card add">
+        <div class="d-card-body">
+          <div class="d-card-title">Add photos</div>
+        </div>
+        <div class="d-card-plus">+</div>
+      </div>
+
+      <!-- Notes: empty → invitation to add -->
+      <div class="d-card add">
+        <div class="d-card-body">
+          <div class="d-card-title">Add a note</div>
+        </div>
+        <div class="d-card-plus">+</div>
+      </div>
+
+      <!-- Address: not set by the worker → hidden entirely, not shown as empty -->
+
+      <div class="gap"></div>
+    </div>
+  </div>
+
 </div><!-- /phone -->
 
 <script>
@@ -443,7 +499,7 @@
     if (sc) { const c = sc.querySelector('.content'); if (c) c.scrollTop = 0; }
   }
 
-  const STEPS = ['now','my-hours','detail'];
+  const STEPS = ['now','my-hours','detail','detail2'];
   function go(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const el = document.getElementById('s-' + id);
