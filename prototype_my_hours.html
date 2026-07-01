@@ -168,6 +168,21 @@
   }
   .h-pill.active { background: var(--tofu-dark); color: #fff; }
 
+  /* Month stepper: ‹ June › */
+  .h-month-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 16px 20px 0; padding: 6px 6px;
+  }
+  .h-month-name { font-size: 18px; font-weight: 700; color: var(--label-primary); letter-spacing: -.3px; }
+  .h-month-btn {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    background: var(--surface-ss); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; color: var(--label-primary);
+    transition: background .18s;
+  }
+  .h-month-btn:active { background: #ECE8DF; }
+  .h-month-btn:disabled { opacity: .35; cursor: default; }
+
   .h-summary {
     margin: 14px 20px 0; padding: 22px 22px 20px;
     background: var(--surface-ss); border-radius: var(--r-card);
@@ -335,9 +350,21 @@
         <div class="h-sum-hours"><div class="h-sum-num">3</div><div class="h-sum-unit">h 22m</div></div>
         <div class="h-sum-sub">3 visits · Thu, Jun 12</div>
       </div>
+      <!-- Month stepper (only in Month mode) -->
+      <div class="h-month-nav" id="h-month-nav" style="display:none;">
+        <button class="h-month-btn" id="m-prev" onclick="stepMonth(-1)">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M10 2L4 8l6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="h-month-name" id="m-name">June 2026</div>
+        <button class="h-month-btn" id="m-next" onclick="stepMonth(1)">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M6 2l6 6-6 6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <!-- Month summary (swaps with stepper) -->
       <div class="h-summary" id="h-sum-month" style="display:none;">
-        <div class="h-sum-hours"><div class="h-sum-num">57</div><div class="h-sum-unit">h 40m</div></div>
-        <div class="h-sum-sub">42 visits · Jun 1–12</div>
+        <div class="h-sum-hours"><div class="h-sum-num" id="m-sum-num">57</div><div class="h-sum-unit" id="m-sum-unit">h 40m</div></div>
+        <div class="h-sum-sub" id="m-sum-sub">42 visits · June 2026</div>
       </div>
 
       <!-- Today -->
@@ -350,8 +377,8 @@
         </div>
       </div>
 
-      <!-- This month -->
-      <div id="h-list-month" style="display:none;">
+      <!-- Month lists: one per month, JS swaps them -->
+      <div class="h-list-month" id="h-month-0" style="display:none;">
         <div class="h-sec">This week · Jun 9–12</div>
         <div class="card">
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Emily Taylor</div><div class="h-job-meta">Thu · 8:04 – 8:56 AM</div></div><div class="h-job-right"><div class="h-job-dur">52 min</div><div class="h-job-chev">›</div></div></div>
@@ -363,6 +390,27 @@
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Tom Wilson</div><div class="h-job-meta">Mon · 8:30 – 10:00 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 30m</div><div class="h-job-chev">›</div></div></div>
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Karen Lee</div><div class="h-job-meta">Tue · 11:00 AM – 12:20 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 20m</div><div class="h-job-chev">›</div></div></div>
           <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">James Ortiz</div><div class="h-job-meta">Fri · 2:00 – 3:45 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 45m</div><div class="h-job-chev">›</div></div></div>
+        </div>
+      </div>
+
+      <div class="h-list-month" id="h-month-1" style="display:none;">
+        <div class="h-sec">Week of May 26</div>
+        <div class="card">
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Diana Cruz</div><div class="h-job-meta">Fri · 9:00 – 10:40 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 40m</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Greg Palmer</div><div class="h-job-meta">Wed · 1:00 – 2:15 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 15m</div><div class="h-job-chev">›</div></div></div>
+        </div>
+        <div class="h-sec">Week of May 19</div>
+        <div class="card">
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Nina Foster</div><div class="h-job-meta">Mon · 8:15 – 9:50 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 35m</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Oscar Reed</div><div class="h-job-meta">Thu · 11:00 AM – 12:30 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 30m</div><div class="h-job-chev">›</div></div></div>
+        </div>
+      </div>
+
+      <div class="h-list-month" id="h-month-2" style="display:none;">
+        <div class="h-sec">Week of Apr 21</div>
+        <div class="card">
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Paula Simms</div><div class="h-job-meta">Tue · 9:30 – 11:00 AM</div></div><div class="h-job-right"><div class="h-job-dur">1h 30m</div><div class="h-job-chev">›</div></div></div>
+          <div class="h-job" onclick="go('detail')"><div class="h-job-left"><div class="h-job-client">Rick Torres</div><div class="h-job-meta">Fri · 2:00 – 3:10 PM</div></div><div class="h-job-right"><div class="h-job-dur">1h 10m</div><div class="h-job-chev">›</div></div></div>
         </div>
       </div>
 
@@ -489,11 +537,49 @@
 </div><!-- /phone -->
 
 <script>
-  function showPeriod(p) {
-    ['today','month'].forEach(id => {
-      document.getElementById('h-sum-' + id).style.display = id === p ? '' : 'none';
-      document.getElementById('h-list-' + id).style.display = id === p ? '' : 'none';
+  // Month data (index 0 = current June, 1 = May, 2 = April). Oldest we keep = April.
+  const MONTHS = [
+    { name: 'June 2026',  num: '57', unit: 'h 40m', sub: '42 visits · June 2026' },
+    { name: 'May 2026',   num: '61', unit: 'h 10m', sub: '46 visits · May 2026' },
+    { name: 'April 2026', num: '38', unit: 'h 05m', sub: '29 visits · April 2026' },
+  ];
+  let monthIdx = 0;
+
+  function renderMonth() {
+    const m = MONTHS[monthIdx];
+    document.getElementById('m-name').textContent = m.name;
+    document.getElementById('m-sum-num').textContent = m.num;
+    document.getElementById('m-sum-unit').textContent = m.unit;
+    document.getElementById('m-sum-sub').textContent = m.sub;
+    // show the matching month list
+    [0,1,2].forEach(i => {
+      document.getElementById('h-month-' + i).style.display = i === monthIdx ? '' : 'none';
     });
+    // newest month = can't go to "next" (future); oldest = can't go further back
+    document.getElementById('m-next').disabled = monthIdx === 0;
+    document.getElementById('m-prev').disabled = monthIdx === MONTHS.length - 1;
+  }
+  function stepMonth(dir) {
+    // prev (‹) goes older = idx+1; next (›) goes newer = idx-1
+    const nextIdx = monthIdx + (dir === -1 ? 1 : -1);
+    if (nextIdx < 0 || nextIdx >= MONTHS.length) return;
+    monthIdx = nextIdx;
+    renderMonth();
+  }
+
+  function showPeriod(p) {
+    const isToday = p === 'today';
+    // Today block
+    document.getElementById('h-sum-today').style.display = isToday ? '' : 'none';
+    document.getElementById('h-list-today').style.display = isToday ? '' : 'none';
+    // Month block: stepper + month summary + one month list
+    document.getElementById('h-month-nav').style.display = isToday ? 'none' : '';
+    document.getElementById('h-sum-month').style.display = isToday ? 'none' : '';
+    if (isToday) {
+      [0,1,2].forEach(i => document.getElementById('h-month-' + i).style.display = 'none');
+    } else {
+      renderMonth();
+    }
     document.querySelectorAll('.h-pill').forEach((btn, i) => {
       btn.classList.toggle('active', ['today','month'][i] === p);
     });
