@@ -202,32 +202,27 @@
   }
   .d-status .dot-done { width: 9px; height: 9px; border-radius: 50%; background: var(--green); }
 
-  /* Time block: the hero of a completed visit */
+  /* Time block: secondary, quiet. Not the accent — Completed is. */
   .d-time {
-    margin: 22px 20px 0; padding: 20px; border-radius: 20px;
-    background: var(--surface-done);
+    margin: 20px 20px 0; padding: 14px 16px; border-radius: 14px;
+    background: var(--surface-ss);
   }
-  .d-time-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
-  .d-time-dur { font-size: 34px; font-weight: 800; color: var(--green); letter-spacing: -1px; line-height: 1; }
-  .d-time-lbl { font-size: 13px; font-weight: 600; color: var(--green); opacity: .8; text-transform: uppercase; letter-spacing: .5px; }
-  .tl-row { display: flex; align-items: center; gap: 14px; }
-  .tl-marker { display: flex; flex-direction: column; align-items: center; width: 14px; flex-shrink: 0; }
-  .tl-dot { width: 13px; height: 13px; border-radius: 50%; border: 2.5px solid var(--green); background: #fff; }
-  .tl-dot.filled { background: var(--green); }
-  .tl-line { width: 2px; height: 22px; background: var(--green); opacity: .35; }
-  .tl-body { flex: 1; display: flex; justify-content: space-between; align-items: baseline; }
-  .tl-lbl { font-size: 15px; color: var(--label-secondary); }
-  .tl-time { font-size: 17px; font-weight: 700; color: var(--label-primary); }
+  .d-time-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 5px 0;
+  }
+  .d-time-lbl { font-size: 14px; color: var(--label-secondary); }
+  .d-time-val { font-size: 15px; font-weight: 600; color: var(--label-primary); }
+  .d-time-sep { height: 0.5px; background: var(--sep); margin: 3px 0; }
+  .d-time-val.dur { color: var(--label-primary); }
 
-  /* Info cards (solid, not empty dashed placeholders) */
+  /* Info cards — plain text rows, no emoji icons */
   .d-card {
     margin: 12px 20px 0; padding: 16px 18px; border-radius: 16px;
     background: #fff; border: 0.5px solid rgba(60,60,67,.18);
     display: flex; align-items: center; gap: 14px; cursor: pointer;
   }
   .d-card:active { background: #fafafa; }
-  .d-card-ic { width: 40px; height: 40px; border-radius: 10px; background: var(--surface-ss); display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
-  .d-card-ic.done { background: var(--surface-done); }
   .d-card-body { flex: 1; min-width: 0; }
   .d-card-title { font-size: 17px; font-weight: 700; color: var(--label-primary); }
   .d-card-sub { font-size: 14px; color: var(--label-secondary); margin-top: 2px; }
@@ -385,25 +380,17 @@
         <div class="d-status"><span class="dot-done"></span>Completed</div>
       </div>
 
-      <!-- Time block: the hero of a completed visit -->
+      <!-- Time block: quiet, secondary. Start / Finish / Duration as plain rows -->
       <div class="d-time">
-        <div class="d-time-top">
-          <div class="d-time-dur">52 min</div>
-          <div class="d-time-lbl">Time on site</div>
-        </div>
-        <div class="tl-row">
-          <div class="tl-marker"><div class="tl-dot"></div><div class="tl-line"></div></div>
-          <div class="tl-body"><span class="tl-lbl">Started</span><span class="tl-time">8:04 AM</span></div>
-        </div>
-        <div class="tl-row">
-          <div class="tl-marker"><div class="tl-dot filled"></div></div>
-          <div class="tl-body"><span class="tl-lbl">Finished</span><span class="tl-time">8:56 AM</span></div>
-        </div>
+        <div class="d-time-row"><span class="d-time-lbl">Started</span><span class="d-time-val">8:04 AM</span></div>
+        <div class="d-time-sep"></div>
+        <div class="d-time-row"><span class="d-time-lbl">Finished</span><span class="d-time-val">8:56 AM</span></div>
+        <div class="d-time-sep"></div>
+        <div class="d-time-row"><span class="d-time-lbl">Duration</span><span class="d-time-val dur">52 min</span></div>
       </div>
 
-      <!-- Photos: proof of work -->
+      <!-- Photos -->
       <div class="d-card">
-        <div class="d-card-ic done">📸</div>
         <div class="d-card-body">
           <div class="d-card-title">Photos</div>
           <div class="d-card-sub">2 added · 1 before · 1 after</div>
@@ -411,9 +398,8 @@
         <div class="d-card-chev">›</div>
       </div>
 
-      <!-- Notes: only shown when filled -->
+      <!-- Notes -->
       <div class="d-card">
-        <div class="d-card-ic">📝</div>
         <div class="d-card-body">
           <div class="d-card-title">Notes</div>
           <div class="d-card-sub">Gate code 1247. Dog inside.</div>
@@ -421,9 +407,8 @@
         <div class="d-card-chev">›</div>
       </div>
 
-      <!-- Address: plain row, no "Not provided" empty state -->
+      <!-- Address -->
       <div class="d-card">
-        <div class="d-card-ic">📍</div>
         <div class="d-card-body">
           <div class="d-card-title">Address</div>
           <div class="d-card-sub">742 Oak St, Brooklyn, NY</div>
@@ -431,10 +416,6 @@
         <div class="d-card-chev">›</div>
       </div>
 
-      <div class="d-note">
-        <span>🔒</span>
-        <span>These are the same hours your company sees. Straight from your Start and Finish taps.</span>
-      </div>
       <div class="gap"></div>
     </div>
   </div>
